@@ -1,0 +1,66 @@
+{
+  "Sequencing": {
+    "Number of Read Pairs": "Total number of read pairs",
+    "Valid Barcodes": "Fraction of reads with valid barcodes",
+    "Too Short": "Number of reads that are shorter than 60bps after trimming",
+    "Q30 Bases in Barcode": "Fraction of reads with valid barcodes in which the barcode has a base quality score greater than 30",
+    "Q30 Bases in UMI": "Fraction of reads with valid barcodes in which the UMI has a base quality score greater than 30",
+    "Q30 Bases in R2 Read": "Fraction of RNA read 2 bases with Q-score >= 30"
+  },
+  "Enrichment": {
+    "Reads Mapped to Any V(D)J Gene": "Fraction of reads that partially or wholly map to any germline V(D)J gene segment",
+    "Reads Mapped to TRA": "Fraction of reads that map partially or wholly to a germline TRA gene segment",
+    "Reads Mapped to TRB": "Fraction of reads that map partially or wholly to a germline TRB gene segment",
+    "Reads Mapped to IGH": "Fraction of reads that map partially or wholly to a germline IGH gene segment",
+    "Reads Mapped to IGK": "Fraction of reads that map partially or wholly to a germline IGK gene segment",
+    "Reads Mapped to IGL": "Fraction of reads that map partially or wholly to a germline IGL gene segment"
+  },
+  "V(D)J Expression": {
+    "Median TRA UMIs per Cell": "Median number of UMIs assigned to a TRA contig per cell. For B cells, only the maximum of [IGK, IGL] is counted",
+    "Median TRB UMIs per Cell": "Median number of UMIs assigned to a TRB contig per cell. For B cells, only the maximum of [IGK, IGL] is counted",    
+    "Median IGH UMIs per Cell": "Median number of UMIs assigned to an IGH contig per cell. For B cells, only the maximum of [IGK, IGL] is counted",
+    "Median IGK UMIs per Cell": "Median number of UMIs assigned to an IGK contig per cell. For B cells, only the maximum of [IGK, IGL] is counted",
+    "Median IGL UMIs per Cell": "Median number of UMIs assigned to an IGL contig per cell. For B cells, only the maximum of [IGK, IGL] is counted"
+  },
+
+  "V(D)J Annotation": {
+    "Cells with Productive V-J Spanning Pair": "Fraction of cell-associated barcodes with at least one productive contig for each chain of the receptor pair. A productive contig satisfies specific conditions related to V and J regions, start codon, in-frame CDR3 motif, and stop codons",
+    "Cells with Productive V-J Spanning (TRA, TRB) Pair": "Fraction of cell-associated barcodes with at least one productive contig for each chain of the (TRA, TRB) receptor pair. A productive contig satisfies specific conditions related to V and J regions, start codon, in-frame CDR3 motif, and stop codons",
+    "Paired Clonotype Diversity": "Effective diversity of the paired clonotypes, computed as the Inverse Simpson Index of the clonotype frequencies. A value of 1 indicates a minimally diverse sample - only one distinct clonotype was detected. A value equal to the estimated number of cells indicates a maximally diverse sample",
+    "Cells with TRA Contig": "Fraction of cell-associated barcodes with at least one TRA contig annotated as a full or partial V(D)J gene",
+    "Cells with TRB Contig": "Fraction of cell-associated barcodes with at least one TRB contig annotated as a full or partial V(D)J gene",
+    "Cells with CDR3-annotated TRA Contig": "Fraction of cell-associated barcodes with at least one TRA contig where a CDR3 was detected",
+    "Cells with CDR3-annotated TRB Contig": "Fraction of cell-associated barcodes with at least one TRB contig where a CDR3 was detected",
+    "Cells with V-J Spanning TRA Contig": "Fraction of cell-associated barcodes with at least one contig spanning the 5' end of the V region to the 3' end of the J region for TRA",
+    "Cells with V-J Spanning TRB Contig": "Fraction of cell-associated barcodes with at least one contig spanning the 5' end of the V region to the 3' end of the J region for TRB",
+    "Cells with Productive TRA Contig": "Fraction of cell-associated barcodes with at least one contig that spans the 5' end of the V region to the 3' end of the J region for TRA, has a start codon in the expected part of the V sequence, has an in-frame CDR3, and has no stop codons in the aligned V-J region",
+    "Cells with Productive TRB Contig": "Fraction of cell-associated barcodes with at least one contig that spans the 5' end of the V region to the 3' end of the J region for TRB, has a start codon in the expected part of the V sequence, has an in-frame CDR3, and has no stop codons in the aligned V-J region",
+    "Cells with Productive V-J Spanning (IGK, IGH) Pair": "Fraction of cell-associated barcodes with at least one productive contig for each chain of the (IGK, IGH) receptor pair. A productive contig satisfies specific conditions related to V and J regions, start codon, in-frame CDR3 motif, and stop codons",
+    "Cells with Productive V-J Spanning (IGL, IGH) Pair": "Fraction of cell-associated barcodes with at least one productive contig for each chain of the (IGL, IGH) receptor pair. A productive contig satisfies specific conditions related to V and J regions, start codon, in-frame CDR3 motif, and stop codons",
+    "Cells with IGH Contig": "Fraction of cell-associated barcodes with at least one IGH contig annotated as a full or partial V(D)J gene",
+    "Cells with IGK Contig": "Fraction of cell-associated barcodes with at least one IGK contig annotated as a full or partial V(D)J gene",
+    "Cells with IGL Contig": "Fraction of cell-associated barcodes with at least one IGL contig annotated as a full or partial V(D)J gene",
+    "Cells with CDR3-annotated IGH Contig": "Fraction of cell-associated barcodes with at least one IGH contig where a CDR3 was detected",
+    "Cells with CDR3-annotated IGK Contig": "Fraction of cell-associated barcodes with at least one IGK contig where a CDR3 was detected",
+    "Cells with CDR3-annotated IGL Contig": "Fraction of cell-associated barcodes with at least one IGL contig where a CDR3 was detected",
+    "Cells with V-J Spanning IGH Contig": "Fraction of cell-associated barcodes with at least one contig spanning the 5' end of the V region to the 3' end of the J region for IGH",
+    "Cells with V-J Spanning IGK Contig": "Fraction of cell-associated barcodes with at least one contig spanning the 5' end of the V region to the 3' end of the J region for IGK",
+    "Cells with V-J Spanning IGL Contig": "Fraction of cell-associated barcodes with at least one contig spanning the 5' end of the V region to the 3' end of the J region for IGL",
+    "Cells with Productive IGH Contig": "Fraction of cell-associated barcodes with at least one contig that spans the 5' end of the V region to the 3' end of the J region for IGH, has a start codon in the expected part of the V sequence, has an in-frame CDR3, and has no stop codons in the aligned V-J region",
+    "Cells with Productive IGK Contig": "Fraction of cell-associated barcodes with at least one contig that spans the 5' end of the V region to the 3' end of the J region for IGK, has a start codon in the expected part of the V sequence, has an in-frame CDR3, and has no stop codons in the aligned V-J region",
+    "Cells with Productive IGL Contig": "Fraction of cell-associated barcodes with at least one contig that spans the 5' end of the V region to the 3' end of the J region for IGL, has a start codon in the expected part of the V sequence, has an in-frame CDR3, and has no stop codons in the aligned V-J region"
+  },
+  "Cells": {
+    "Barcode Rank Plot": "The plot shows the count of filtered UMIs mapped to each barcode. A barcode must have a contig that aligns to a V segment to be identified as a targeted cell. (In the denovo case, the only requirement is a contig's presence.) There must also be at least three filtered UMIs with at least two read pairs each. It is possible that a barcode with at least as many filtered UMIs as another cell-associated barcode is not identified as a targeted cell. The color of the graph is based on the local density of cell-associated barcodes",
+    "Estimated Number of Cells": "The number of barcodes estimated to be associated with cells that express targeted V(D)J transcripts",
+    "Mean Read Pairs per Cell": "Number of input read pairs divided by the estimated number of cells",
+    "Mean Used Read Pairs per Cell": "The average number of reads that can be aligned to VDJ reference sequences per cell for assembly",
+    "Fraction Reads in Cells": "The proportion of reads used for assembling productive contigs in a filtered cell, out of all the reads used for assembly"
+  },
+  "Sample": {
+    "Name": "Samplename",
+    "Description": "Sample descriptions",
+    "Transcriptome": "Transcriptome reference version",
+    "Include introns": "including intron reads for quantification"
+  }
+}

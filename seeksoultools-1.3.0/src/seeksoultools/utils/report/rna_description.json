@@ -1,0 +1,44 @@
+
+{
+  "Sequencing": {
+    "Number of Reads": "Total reads",
+    "Valid Barcodes": "Fraction of reads with valid barcodes",
+    "Sequencing Saturation": "The proportion of reads derived from previously observed UMIs. This is influenced by the complexity of the library and the depth of sequencing",
+    "Too Short": "Number of reads that are shorter than 60bps after trimming",
+    "Q30 Bases in Barcode": "Fraction of reads with valid barcodes in which the barcode has a base quality score greater than 30",
+    "Q30 Bases in UMI": "Fraction of reads with valid barcodes in which the UMI has a base quality score greater than 30"
+  },
+  "Mapping": {
+    "Reads Mapped to Genome": "Fraction of reads that aligned to the genome (including both uniquely mapped reads and multi-mapped reads)",
+    "Reads Mapped Confidently to Genome": "Fraction of reads that uniquely mapped to the genome",
+    "Reads Mapped to Intergenic Regions": "Fraction of reads that mapped to intergenic regions",
+    "Reads Mapped to Intronic Regions": "Fraction of reads that mapped to intronic regions",
+    "Reads Mapped to Exonic Regions": "Fraction of reads that mapped to exonic regions",
+    "Reads Mapped to Middle Genebody": "Fraction of reads with valid barcodes that align within the range of 25% to 75% of a transcript, This value is generally greater than 55%",
+    "Fraction over 0.2 mean coverage depth of ACTB gene": "Fraction of reads with valid barcodes that align to the ACTB gene and have a depth greater than 0.2 times the average depth, This value is generally greater than 70%",
+    "rRNA% in Mapped": "Fraction of reads with valid barcodes that align to the ribosomal genes",
+    "Mt_rRNA% in Mapped": "Fraction of reads with valid barcodes that align to the ribosomal genes of the mitochondria"
+  },
+  "Cells": {
+    "Estimated Number of Cells": "Total number of cells by cell calling",
+    "Fraction Reads in Cells": "Fraction of reads after cell calling among all reads used for counting",
+    "Mean Reads per Cell": "Average number of reads per cell, Total number of reads/Number of cells after cell calling",
+    "Median Genes per Cell": "Median gene count in barcodes after cell calling",
+    "Median UMI Counts per Cell": "Median UMI count in barcodes after cell calling",
+    "Total Genes Detected": "Number of genes detected in all cells",
+    "Median lnc Genes per Cell": "Median lnc gene count in barcodes after cell calling"
+  },
+  "Sample": {
+    "Name": "Samplename",
+    "Description": "Sample descriptions",
+    "Transcriptome": "Transcriptome reference version",
+    "Chemistry": "Reagent type",
+    "SeekSoul tools Version": "SeekSoul tools Version",
+    "Include introns": "including intron reads for quantification"
+  },
+  "diff_description": {
+    "All": "The top 50 differentially expressed genes in each cluster of the dataset",
+    "Marker": "Filter with some commonly used markers for human and mouse",
+    "Search": "Global keyword search in the table"
+  }  
+}

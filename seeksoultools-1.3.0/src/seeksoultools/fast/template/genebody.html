@@ -1,0 +1,20 @@
+<div class="card">
+    <div style="display: inline">
+        <div class="has_desc" onclick="show_description(event)">
+            <div class="summary_description" style="display: none;">
+                <p lang="en" class="translation">Gene coverage distribution</p>
+                <p lang="zh" class="translation" style="display: none;">基因覆盖分布</p>
+            </div>
+        </div>
+        <h1>Gene body</h1>
+    </div>
+
+    <div class="plot" id="Gene body"></div>
+    <script>
+        Plotly.newPlot("Gene body",
+            data.genebody.data,
+            data.genebody.layout,
+            data.genebody.config
+        );
+    </script>
+</div>

@@ -1,0 +1,65 @@
+# # SeekSoulTools Environment Configuration
+# # # This environment includes all necessary dependencies for methylation and single-cell transcriptome analysis,
+# # # including RNA-seq, V(D)J sequencing, and full-length transcriptome analysis workflows.
+# # # Version: 1.3.0
+name: seeksoultools
+channels:
+- bioconda
+- conda-forge
+- defaults
+dependencies:
+- r-base=4.2.2
+- bioconductor-dropletutils=1.18.0
+- bioconductor-limma=3.54.0
+- bioconductor-genomeinfodb=1.34.9
+- bowtie2=2.5.1
+- click=8.1.3
+- cutadapt=4.3
+- jinja2=3.1.2
+- loguru=0.6.0
+- lzstring=1.0.4
+- numpy=1.24.2
+- pandas=1.5.3
+- picard=3.0.0
+- plotly=5.13.1
+- pysam=0.20.0
+- python=3.10.8
+- pyyaml=6.0
+- qualimap=2.2.2d
+- r-argparse=2.2.2
+- r-seurat=4.3.0
+- r-tidyverse=1.3.2
+- rseqc=5.0.1
+- samtools=1.16.1
+- scipy=1.14.0
+- star=2.7.10a
+- subread=2.0.3
+- intervaltree=3.0.2
+- varscan=2.4.4
+- perl=5.32.1
+- biopython=1.81
+- trust4=1.1.4
+- psutil=7.0.0
+- bismark=0.24.2
+- bedtools=2.31.1
+- fastp=1.0.1
+- anndata=0.11.4
+- biopython=1.81
+- dask=2023.11.0
+- numba=0.61.2
+- htslib>=1.9
+- jupyter=1.1.1
+- leidenalg=0.9.1
+- netCDF4=1.7.2
+- opentsne=1.0.2
+- pybedtools=0.10.0
+- pytables=3.10.1
+- xarray=2023.6.0
+- zarr=2.13.3
+- cython=3.1.2
+- papermill=2.6.0
+- imbalanced-learn=0.12.3
+- scanpy=1.11.4
+- pip:
+  - allcools
+  - sc-dandelion==0.5.5

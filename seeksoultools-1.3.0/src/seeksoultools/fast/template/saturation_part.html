@@ -1,0 +1,46 @@
+<div class="card">
+  <div style="display: inline">
+    <div class="has_desc" onclick="show_description(event)">
+      <div class="summary_description" style="display: none;">
+        <p lang="en" class="translation">Performing downsample processing on the data, with Median Genes per Cell on the x-axis and Sequencing Saturation on the y-axis</p>
+        <p lang="zh" class="translation" style="display: none;">对数据进行downsample处理，x轴为Median Genes per Cell，y轴为Sequencing Saturation</p>
+      </div>
+    </div>
+    <h1>Sequencing Saturation</h1>
+  </div>
+  <div class="plot" id="downsample_saturation_plot"></div>
+  <script>
+    var reads = {{ downsample["Reads"] }};
+    var saturation={{ downsample["saturation"] }};
+    //percentage.unshift(0);
+    reads.unshift(0);
+    saturation.unshift(0);
+    var points = {
+      x: reads,
+      y: saturation,
+      mode: 'lines',
+      type: 'scattergl',
+    };
+    var layout = {
+      xaxis: {
+        title: "Mean Reads per Cell",
+      },
+      yaxis: {
+        title: "Sequencing Saturation",
+        range: [0, 100],
+        autorange: false
+      },
+      margin: {
+        l: 50,
+        r: 30,
+        t: 30,
+        b: 50,
+      },
+      width: 520,
+      height: 330,
+    };
+    var plotData = [points];
+    var rmButtons = ['toImage', 'zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'toggleSpikelines', 'hoverCompareCartesian'];
+    Plotly.newPlot('downsample_saturation_plot', plotData, layout, {modeBarButtonsToRemove: rmButtons, displaylogo: false});
+  </script>
+</div>

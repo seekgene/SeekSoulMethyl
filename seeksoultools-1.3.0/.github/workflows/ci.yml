@@ -1,0 +1,50 @@
+name: Python CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - v1.3.0
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: "latest"
+          environment-file: conda_dependencies.yml
+          activate-environment: sgenv
+
+      - name: Install dependencies from conda env file
+        shell: bash -l {0}
+        run: |
+          conda env list
+          conda list
+
+      - name: Install local wheels and package
+        shell: bash -l {0}
+        run: |
+          pip install src/simpleqc/target/wheels/simpleqc-0.1.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+          pip install src/search-pattern/target/wheels/search_pattern-0.1.0-py3-none-manylinux_2_5_x86_64.manylinux1_x86_64.whl
+          pip install .
+
+      - name: Run CLI tests
+        shell: bash -l {0}
+        run: |
+          simpleqc -h
+          search-pattern -h
+          seeksoultools --help
+          seeksoultools rna --help
+          seeksoultools fast --help
+          seeksoultools vdj --help
+          seeksoultools multivdj --help

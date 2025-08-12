@@ -1,0 +1,23 @@
+<div class="card">
+    <div style="display: inline">
+        <div class="has_desc" onclick="show_description(event)">
+            <div class="summary_description" style="display: none;">
+                <p lang="en" class="translation">Distribution of biotypes</p>
+                <p lang="zh" class="translation" style="display: none;">不同类型数据分布</p>
+                <dl>
+                    
+                </dl>
+            </div>
+        </div>
+        <h1>Biotype pie</h1>
+    </div>
+
+    <div class="plot" id="Biotype pie"></div>
+    <script>
+        Plotly.newPlot("Biotype pie",
+            data.biotype_pie.data,
+            data.biotype_pie.layout,
+            data.biotype_pie.config
+        );
+    </script>
+</div>

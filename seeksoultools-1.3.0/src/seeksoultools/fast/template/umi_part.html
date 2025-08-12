@@ -1,0 +1,58 @@
+
+<div class="card">
+  <div style="display: inline">
+    <div class="has_desc" onclick="show_description(event)">
+        <div class="summary_description" style="display: none;">
+          <p lang="en" class="translation">Cellular dimensionality reduction projection, where each point represents an individual cell and the color represents the range of UMI counts</p>
+          <p lang="zh" class="translation" style="display: none;">细胞降维投影，每个点代表一个细胞，颜色代表UMI数</p>
+        </div>
+    </div>
+    <h1>Projection of Cells Colored by UMI Counts</h1>
+  </div>
+  <div class="plot" id="tsne_umi_plot" style="margin-bottom:20; margin-top:6;"></div>
+  <script>
+    var [xlab, ylab] = data['labs'];
+    var points = {
+      x: data['reduction'][xlab],
+      y: data['reduction'][ylab],
+      mode: 'markers',
+      type: 'scattergl',
+      hoverinfo: "text",
+      text: data['reduction']['nCount_RNA'].map(x => 'UMI counts: '+ x),
+      marker :{
+        color: data['reduction']['nCount_RNA'],
+        showscale: true,
+        colorscale: 'Jet',
+        size: 4,
+      }
+    };
+    var layout = {
+      xaxis: {
+        title: xlab,
+                showspikes: true,
+                spikedash: 'solid',
+                spikethickness : 1,
+                spikecolor : 'black',
+      },
+      yaxis: {
+        title: ylab,
+        showspikes: true,
+        spikedash: 'solid',
+        spikethickness : 1,
+        spikecolor : 'black',
+      },
+      hovermode: 'closest',
+      margin: {
+        l: 50,
+        r: 30,
+        t: 30,
+        b: 50,
+      },
+      width: 520,
+      height: 330,
+    };
+    var plotData = [points];
+    var rmButtons = ['toImage', 'zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'toggleSpikelines', 'hoverCompareCartesian'];
+    Plotly.newPlot('tsne_umi_plot', plotData, layout, {modeBarButtonsToRemove: rmButtons, displaylogo: false});
+  </script>
+</div>

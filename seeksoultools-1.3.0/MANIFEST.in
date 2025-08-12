@@ -1,0 +1,4 @@
+include src/seeksoultools/rna/*.R
+recursive-include src/seeksoultools/utils/ *
+recursive-include src/seeksoultools/rna/template/ *
+recursive-include src/seeksoultools/fast/template/ *

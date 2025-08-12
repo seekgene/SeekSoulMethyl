@@ -1,0 +1,46 @@
+          <div class="card">
+            <div style="display: inline">
+              <div class="has_desc" onclick="show_description(event)">
+                <div class="summary_description" style="display: none;">
+                    <dl>
+                      <dt>Reads Mapped to Genome</dt>
+                      <dd lang="en" class="translation">Reads Mapped to Genome: Fraction of reads that aligned to the genome (including both uniquely mapped reads and multi-mapped reads)</dd>
+                      <dd lang="zh" class="translation" style="display: none;">具有有效Barcode的read pairs比对到参考基因组的比例</dd>
+                      <dt>Reads Mapped to Middle Genebody</dt>
+                      <dd lang="en" class="translation">Fraction of read pairs that align within the transcript length range of 25% to 75%, which is typically greater than 55%.</dd>
+                      <dd lang="zh" class="translation" style="display: none;">具有有效Barcode的read pairs比对到转录长度25%-75%内的比例，该值一般大于55%</dd>
+                      <dt>Fraction over 0.2 mean coverage depth of ACTB gene</dt>
+                      <dd lang="en" class="translation">Fraction of read pairs that align to the ACTB gene with a depth greater than 0.2 times the average depth, which is typically greater than 70%.</dd>
+                      <dd lang="zh" class="translation" style="display: none;">具有有效Barcode的read pairs比对到ACTB基因，超过0.2倍平均深度的比例，该值一般大于70%</dd>
+                      <dt>rRNA% in Mapped</dt>
+                      <dd lang="en" class="translation">Fraction of read pairs that mapped to ribosome</dd>
+                      <dd lang="zh" class="translation" style="display: none;">具有有效Barcode的read pairs比对到核糖体的比例</dd>
+                      <dt>Mt_rRNA% in Mapped</dt>
+                      <dd lang="en" class="translation">Fraction of read pairs that mapped to mitochondrial ribosome</dd>
+                      <dd lang="zh" class="translation" style="display: none;">具有有效Barcode的read pairs比对到线粒体上核糖体的比例</dd>
+                      <dt>Reads Mapped Confidently to Genome</dt>
+                      <dd lang="en" class="translation">Reads Mapped Confidently to Genome: Fraction of reads that uniquely mapped to the genome</dd>
+                      <dd lang="zh" class="translation" style="display: none;">具有有效Barcode的read pairs唯一比对到参考基因组的比例</dd>
+                      <dt>Reads Mapped to Intergenic Regions</dt>
+                      <dd lang="en" class="translation">Fraction of reads that mapped to intergenic regions</dd>
+                      <dd lang="zh" class="translation" style="display: none;">具有有效Barcode的read pairs比对到基因间区的比例</dd>
+                      <dt>Reads Mapped to Intronic Regions</dt>
+                      <dd lang="en" class="translation">Fraction of reads that mapped to intronic regions</dd>
+                      <dd lang="zh" class="translation" style="display: none;">具有有效Barcode的read pairs比对到内含子区域的比例</dd>
+                      <dt>Reads Mapped to Exonic Regions</dt>
+                      <dd lang="en" class="translation">Fraction of reads that mapped to exonic regions</dd>
+                      <dd lang="zh" class="translation" style="display: none;">具有有效Barcode的read pairs比对到外显子区域的比例</dd>
+                    </dl>
+                </div>
+              </div>
+            <h1>Mapping</h1>
+            </div>
+            <table class="table table-hover">
+              {% for key, value in mapping_table.items() %}
+              <tr>
+                <td>{{key}}</td>
+                <td>{{value}}</td>
+              </tr>
+              {% endfor %}
+            </table>                   
+          </div>

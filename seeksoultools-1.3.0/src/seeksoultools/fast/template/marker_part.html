@@ -1,0 +1,15 @@
+          <div class="card">
+            <div style="display: inline">
+              <div class="has_desc" onclick="show_description(event)">
+                <div class="summary_description" style="display: none;">
+                    <dl>
+                      <dt>Differential expression analysis</dt>
+                      <dd lang="en" class="translation">Differentially expressed genes (top 20) in each cluster, excluding genes with expression levels below 10% in the respective cluster from differential expression analysis.</dd>
+                      <dd lang="zh" class="translation" style="display: none;">各个簇的差异表达基因(top 20)，不对在簇中的表达不足10%的基因进行差异检测</dd>
+                    </dl>
+                </div>
+              </div>
+            <h1>Top Genes By Cluster (Log2 fold-change, p-value)</h1>
+            </div>
+            {{ marker_table|safe }}                 
+          </div>

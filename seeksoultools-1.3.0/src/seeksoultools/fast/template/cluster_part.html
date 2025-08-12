@@ -1,0 +1,95 @@
+<div class="card">
+  <div style="display: inline">
+    <div class="has_desc" onclick="show_description(event)">
+      <div class="summary_description" style="display: none;">
+        <p lang="en" class="translation">Cellular dimensionality reduction projection, where each point represents an individual cell and the color represents a cluster of cells</p>
+        <p lang="zh" class="translation" style="display: none;">细胞降维投影，每个点代表一个细胞，颜色代表细胞簇</p>
+      </div>
+    </div>
+    <h1>Projection of Cells Colored by Clustering</h1>
+  </div>
+
+  <div class="plot" id="tsne_plot"></div>
+  <div class="control-row">
+    Clustering: <select class="optiondata"></select>
+  </div>
+  <script>
+    textArray = data['params']
+    for (var i = 0; i < textArray.length; i++) {
+      var option = $('<option value="' + textArray[i] + '">' + textArray[i] + '</option>');
+      if (textArray[i] === 'RNA_snn_res.0.8') { 
+        option.attr('selected', 'selected');
+      }
+      $('.optiondata').append(option);
+    }
+    var groupBy = function(data) { // `data` is an array of objects, `key` is the key (or property accessor) to group by
+      // reduce runs this anonymous function on each element of `data` (the `item` parameter,
+      // returning the `storage` parameter at the end
+      return data.reduce(function(storage, item, idx) {
+        // get the first instance of the key by which we're grouping
+        var group = item;
+
+        // set `storage` for this instance of group to the outer scope (if not empty) or initialize it
+        storage[group] = storage[group] || [];
+
+        // add this item to its group within `storage`
+        storage[group].push(idx);
+
+        // return the updated storage to the reduce function, which will then loop through the next
+        return storage;
+      }, {}); // {} is the initial value of the storage
+    };
+    function plot(g){
+      var plotData = [];
+      var groupArr = groupBy(data['reduction'][g]);
+      for (var i in groupArr) {
+        var _x = groupArr[i].map(i => data['reduction'][xlab][i]);
+        var _y = groupArr[i].map(i => data['reduction'][ylab][i]);
+        var points = {
+            x: _x,
+            y: _y,
+            mode: 'markers',
+            type: 'scattergl',
+            hoverinfo: 'name',
+            name: i + ' - ' + _x.length + ' cells',
+            marker: {
+              size: 4,
+            }
+        };
+        plotData.push(points);
+      }
+      var layout = {
+        xaxis: {
+          title: xlab,
+          showspikes: true,
+          spikedash: 'solid',
+          spikethickness : 1,
+          spikecolor : 'black',
+        },
+        yaxis: {
+          title: ylab,
+          showspikes: true,
+          spikedash: 'solid',
+          spikethickness : 1,
+          spikecolor : 'black',
+        },
+        hovermode: 'closest',
+        margin: {
+          l: 50,
+          r: 30,
+          t: 30,
+          b: 50,
+        },
+        width: 520,
+        height: 330,
+      };
+      var rmButtons = ['toImage', 'zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'toggleSpikelines', 'hoverCompareCartesian'];
+      Plotly.newPlot('tsne_plot', plotData, layout, {modeBarButtonsToRemove: rmButtons, displaylogo: false});
+    }
+    function update(){
+      plot($('.optiondata').val());
+    }
+    update();
+    $('.optiondata').bind('change', update);
+  </script>
+</div>

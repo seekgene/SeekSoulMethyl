@@ -1,0 +1,182 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script>{% include 'js/lz-string.min.js' %}</script>
+    <script>{% include 'js/plotly-latest.min.js' %}</script>
+    <script>{% include 'js/jquery-3.5.1.min.js' %}</script>
+    <script>{% include 'js/jquery.dataTables.min.js' %}</script>
+
+    <style>{% include 'css/jquery.dataTables.min.css' %}</style>
+    <style>{% include 'css/bootstrap.min.css' %}</style>
+    <!---
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>    
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+    --> 
+    <style>
+      @media screen and (min-width: 1200px) {
+        .container {
+            max-width: 1140px;
+        }
+      }
+      .table {
+        border-collapse: collapse;
+        width: 94%;
+        font-size: 14px;
+        margin-top: 10px;
+        margin-bottom: 8px;
+        margin-left: 3%;
+        margin-right: 3%;
+      }
+      .table td:first-child {
+        text-align: left;
+      }
+      .table td {
+        text-align: right;
+        padding: 6px 0 6px 0;
+        border-top: 0px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .card h1 {
+        text-align: center;
+        color: #555;
+        font-size: 24px;
+        font-weight: 500;
+        line-height: normal;
+        margin: 0;
+      }
+      .summary_data {
+        text-align: center;
+        color: #0096F0;
+        font-size: 40px;
+      }
+      .card {
+        margin-bottom: 20;
+      }
+      .summary_description::before {
+        float: right;
+        margin-top: 5px;
+        margin-right: 5px;
+        position: relative;
+        right: 5px;
+        content: "\00d7";
+        cursor: pointer;
+        font-size: 18px;
+      }
+      .has_desc::after {
+        float: right;
+        margin-top: 5px;
+        margin-right: 5px;
+        position: relative;
+        background: rgba(0,0,0,0.1);
+        color: white;
+        width: 18px;
+        height: 18px;
+        border-radius: 18px;
+        cursor: pointer;
+        text-align: center;
+        line-height: 20px;
+        content: '?';
+      }
+      #languageSelect {
+        padding: 5px;
+        position: absolute;
+        z-index: 9999;
+        margin-right: 200px;
+      }
+    </style>
+    <script>
+        var rawdata="{{ rawdata }}";
+        var data = JSON.parse(LZString.decompressFromBase64(rawdata))
+    </script>
+    <script>
+      function show_description(ev) {
+        var target = $(ev.target);
+        target.closest(".has_desc").children(".summary_description").toggle();
+      };
+      $(document).ready(function () {
+        var difftable = $('#marker_table').DataTable(
+          {
+            "searching": false,
+            "scrollX": true,
+            "scrollY": "500px",
+            "scrollCollapse": true,
+            "paging": false,
+            "columnDefs": [
+              { className: "text-center", "targets": "_all" }
+            ]
+          }
+        )
+      });
+    </script>
+  </head>
+  <body>
+    <header>
+      <nav class="navbar sticky-top navbar-light bg-light">
+        <div class="container">
+          <a class="navbar-brand" href="#">
+          <!--  <img src='logo.png' width="140" height="50"> -->
+		<img src="data:image/png;base64,{{ logobase64 }}" width="140" height="50">
+          </a>
+          <div style="margin-right: 90px;">
+            <select id="languageSelect" onchange="changeLanguage(this.value)">
+              <option value="en">English</option>
+              <option value="zh">中文</option>
+            </select>
+          </div>
+      </div>
+      </nav>
+    </header>
+    <div class="container">
+      <div class="row">
+        <div class="col-6">
+          {% include 'summary_part.html' %}
+          {% include 'sequencing_part.html' %}
+          {% include 'mapping_part.html' %}
+        </div>
+        <div class="col-6">
+          {% include 'cells_part.html' %}
+          {% include 'sample_part.html' %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+	      {% include 'biotype_pie.html' %}
+          {% include 'median_part.html' %}
+        </div>
+        <div class="col-6">
+	      {% include 'genebody.html' %}
+          {% include 'saturation_part.html' %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          {% include 'umi_part.html' %}
+        </div>
+        <div class="col-6">
+          {% include 'cluster_part.html' %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          {% include 'marker_part.html' %}
+        </div>
+      </div>
+    </div>
+    <script>
+      function changeLanguage(lang) {
+        var translations = document.getElementsByClassName('translation');
+        for (var i = 0; i < translations.length; i++) {
+          translations[i].style.display = translations[i].getAttribute('lang') === lang ? 'block' : 'none';
+        }
+      }
+    </script>
+    <footer>
+    </footer>
+  </body>
+</html>

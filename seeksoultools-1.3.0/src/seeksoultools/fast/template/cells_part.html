@@ -1,0 +1,46 @@
+<div class="card">
+  <div style="display: inline">
+    <div class="has_desc" onclick="show_description(event)">
+      <div class="summary_description" style="display: none;">
+        <dl>
+          <dt>Estimated Number of Cells</dt>
+          <dd lang="en" class="translation">Total number of cells by cell calling</dd>
+          <dd lang="zh" class="translation" style="display: none;">预测的细胞数</dd>
+          <dt>Fraction Reads in Cells</dt>
+          <dd lang="en" class="translation">Fraction of reads after cell calling among all reads used for counting</dd>
+          <dd lang="zh" class="translation" style="display: none;">属于细胞的Reads比例</dd>
+          <dt>Mean Reads per Cell</dt>
+          <dd lang="en" class="translation">Average number of reads per cell, Total number of reads/Number of cells after cell calling</dd>
+          <dd lang="zh" class="translation" style="display: none;">每个细胞Reads数的平均值</dd>
+          <dt>Median Genes per Cell</dt>
+          <dd lang="en" class="translation">Median gene count in barcodes after cell calling</dd>
+          <dd lang="zh" class="translation" style="display: none;">细胞中检测到的基因数的中位值</dd>
+          <dt>Median UMI Counts per Cell</dt>
+          <dd lang="en" class="translation">Median UMI count in barcodes after cell calling</dd>
+          <dd lang="zh" class="translation" style="display: none;">细胞中UMI数的中位值</dd>
+          <dt>Total Genes Detected</dt>
+          <dd lang="en" class="translation">Number of genes detected in all cells</dd>
+          <dd lang="zh" class="translation" style="display: none;">检测到的基因总数</dd>
+        </dl>
+      </div>
+    </div>
+    <h1>Cells</h1>
+  </div>
+
+  <div class="plot" id="barcode_rank_plot"></div>
+  <script>
+    Plotly.newPlot("barcode_rank_plot",
+                    data.barcode_rank_data.data,
+                    data.barcode_rank_data.layout,
+                    data.barcode_rank_data.config
+                  );
+  </script>
+  <table class="table table-hover" data-pagination="true" data-search="true" style="margin-top: 52;">
+    {% for key, value in cells_table.items() %}
+    <tr>
+      <td>{{key}}</td>
+      <td>{{value}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
