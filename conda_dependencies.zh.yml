@@ -61,6 +61,8 @@ dependencies:
 - papermill=2.6.0
 - imbalanced-learn=0.12.3
 - scanpy=1.11.4
+- jq
+- yq
 - pip:
   - --index-url https://pypi.tuna.tsinghua.edu.cn/simple
   - allcools
