@@ -22,8 +22,7 @@ outdir=${6}
 database_dir=${7}
 core=${8}
 
-# Set file descriptor limit
-ulimit -n 99999
+
 
 # Set the number of CPUs for bismark, recommended to be 1/8 of total CPUs
 # Note: If bismark --parallel parameter is set to 8, ensure the machine has at least 64 CPUs

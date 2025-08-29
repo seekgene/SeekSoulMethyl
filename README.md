@@ -108,15 +108,7 @@ bash sc_methy_workflow.sh \
 - **Storage**: At least 500GB available space
 - **OS**: Linux (recommended Ubuntu 18.04+ or CentOS 7+)
 
-## System Configuration
 
-The pipeline automatically optimizes system settings for optimal performance:
-
-- **File Descriptor Limit**: Automatically sets `ulimit -n 99999` to handle high concurrency file operations
-- **Samtools Memory**: Unified memory allocation of 1.5G for samtools operations across all system configurations
-- **Bismark Parallelization**: Automatically calculates optimal thread allocation (1/8 of total CPU cores)
-
-These optimizations ensure consistent performance across different system configurations and prevent resource-related issues during analysis.
 
 ## License
 
