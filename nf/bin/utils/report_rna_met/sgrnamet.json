@@ -1,0 +1,388 @@
+{
+    "logo": "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAABJ0AAAF7CAYAAAB4lfp/AAAACXBIWXMAAC4jAAAuIwF4pT92AAAF8WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjEuMCAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDIyLTA0LTI3VDIwOjMzOjMzKzA4OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyMi0xMC0yOFQwOTozNjoyNCswODowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMi0xMC0yOFQwOTozNjoyNCswODowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3OTM5YzQ0YS1lOGU1LTA4NDYtYTA2Ny0xOWI4YzY4MDIwNGUiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDozMWFlN2M5ZC02OTJjLWJiNDctODdiYy0wYzFkMWUyMzM2ZTgiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDplOWVmMzNlOS0wNTBmLTExNDMtODNmNy04M2JjYWIwMWMwMjciPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmU5ZWYzM2U5LTA1MGYtMTE0My04M2Y3LTgzYmNhYjAxYzAyNyIgc3RFdnQ6d2hlbj0iMjAyMi0wNC0yN1QyMDozMzozMyswODowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo3OTM5YzQ0YS1lOGU1LTA4NDYtYTA2Ny0xOWI4YzY4MDIwNGUiIHN0RXZ0OndoZW49IjIwMjItMTAtMjhUMDk6MzY6MjQrMDg6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMS4wIChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7zLSm6AAA9C0lEQVR4nO3dT4tka34n9m/3XEue1tgVYgYbjaanUlhmNmoqtDEMXlTcV3CzX0FFv4Kb3d4Ye3HjMmDwRjcveN9xwQsvBjobjDHG0FF4542iaIEZI1AWbWFmGKOoGY1Gf1oqL55IZf3JrMrM+J04J058PhBE3ZsZv+eprMyT53zjeX7nW69fvw4AgzRJMr3l+UmST5Os9j4rAACAO/ik7wkAHLnZDc+TtFAJAADgYAmdALo1u+X56b4nAgAAsE9CJ4DdzG55FioBAABHTegE8GGzW56FSgAAAB8gdAKO3TRvN+iebf+/UAkAAGAHQidg7Ka5/S5wj/qYEAAAwDEQOgGHbhqhEgAAwOAInYChm0aoBAAAcHCETkDfTraPaYRKAAAAoyF0Arp28oHH4z4mBAAAQPeETsCuTj7wECoBAAAcKaET8DEnH3gIlQAAALiR0AmYpPVPOrnhIVQCAADgQYROMH6T3H4HuCd9TAgAAIDxEzrB4ZtEqAQAAMDACJ1g+CYRKgEAAHBghE7Qv0mESgAAAIyM0An24Q9+c7b90yxvhkq/9c+f5Nf+aT9zAgAAgA4JnaDC26HSm89P9z0VAAAAGAKhE9yFUAkAAADuRegEiVAJAAAAigmdOA5/8JvTtF5Ks+3/uXoWKgEAAEAHhE6Mw3WodNPzoz6mBAAAAMdM6MRhECoBAADAQRE6MQxCJQAAABgVoRP7IVQCAACAoyJ0osYf/OZJktsej/uYEgAAANAfoRN3I1QCAAAA7kHoxJWTtx5//F/9o/zJ//TbESoBAAAADyB0Oh6TvN1H6SQfWqn07e+8vPH/AwAAANyB0Gk8Jrm5SfckyZM+JgQAAAAcL6HT4ZhEqAQAAAAcCKHTcEwiVAIAAABGQui0X7MIlQAAAIAjIHSqNbvl+em+JwIAAADQJ6HT/cxueRYqwXF5kWQTP/sAAAC3Ejq9bXbLswtLOC5XodL6lucrr/c4JwAAgINybKHT7JZnoRIcl5dJLvPxUAkAAIAHGlvoNM3td4F71MeEgF5chUq3PQAAAOjYQYVOP/rFz6dJJv/tb/yTf/r3P/mVX41QCY6VUAkAAGDgBhU6XYVK+chKpT/567/K3//kV/Y7OWCfhEoAAAAHbq+h011DJWD0hEoAAAAjVxo6/egXPz9JctNjGqESHJNXub1J97qPCQEAALBfDwqdfvSLn8/zfrD0uGZKwAEQKgEAAPBBD13p9OPSWQBDI1QCAABgJ4NqJA7sjVAJAACATgmdYLyeb59XESoBAACwZ0InOFxvhko3PQMAAEBvhE4wXEIlOGzTJOc9z4Faq7QVo6scx6rRVd8TYJTOMq6fn0mSi+Ka8ySXxTU/ZFVUZ53278v+zbePXS23jy5qJ/v/+T9NzffkKsmioM5REjpBf17kW3/nl0n+5+1/r955Bg7bJMnTvidBqTf/PV+mXWieZ78Xh/vk+5cuTPqeQLF5an9WXmT/xxQ/64fvNDX/juc3/L+TotrJ/n/+T1Mz94uCGkdL6ATdeZHbGnX/zh9v+pkSAEUeJ/l8+/g67R3QTY/zAfpxVlzvvLgex2FWVGdVVGcoZkV1VkV1jpLQCR5OqARA0oKnedo7qqs+JwLs1TwtgK7yKu9vbYKPOUnyqKDOy4zrzZOT1Px8Xt31mwcSOsHthEoA3NWjJD9L8oO4aIRjMS+ud15cj+MwK6qzKqozFLOiOquiOkdL6MQxe5m2Z34doRIANX68fV72OQmgc7PU90I6L67HcZgW1VkX1RmKWVGdVVGdoyV0YsyuQqX3H7/zx5f9TAmAI/DjtDcxLvqdBtCheXG9bzKurU3sz6yozqqozlDMiuqsiuocLaETh0yoBMBQLdPefb7sdRZAF06SPCuueV5cj+MwSfKkqNa6qM4QnEQ/p8EQOjFkQiUADtWjtIvI036nAXTgrLje87iw5WGmRXWeF9UZillRnVVRnaMmdKJPV8nx5XsPoRIAh++ztBPfVb/TAApNooE4wzErqrMqqjMUs6I6q6I6R03oRJeuQqXNe8+/88frfqYEAHt1FietMCanqbk9/ZWX0f+Nh5sV1VkV1RmKWVGddVGdoyZ0YhdCJQD4sM/Sektc9jsNoMhi4PU4LtOiOuuiOkNwkpp+Tsn4wrheCJ34EKESAOxultZYHDhsp6m7mE3aufZFYT2OyzQ1q+5eZFx3TpwV1Rlbn6veCJ2O2+2h0m/8s3V+45/1NC0AGJVZhE4wBmfF9ZYZ18U++zUrqrMuqjMUs6I6q6I6R0/oNG63h0rjO7gAwFCd9D0BYGfTJE+La54X1+O4TIvqrIrqDMW0qM6qqM7REzodvqtlf6s3njcRKgHAUFRfqAL7d1Zc75vo9cZuZkV1VkV1hmCS5ElRrVVRnaMndBq+m0KlN58BAIDunCR5VlxzWVyP4zJJTX+xVxlX+DkrqqOfUyGhU/+ESgDjtImTljE4SW3j4GNjNce4fNH3BHoyL673Is712c2sqM6qqM5QzIrqrIrqEKHTPgiVAI7TOnUnP/RnkeO90K6wjHOeMTnGn4VJ6rfWnRfX4/jMiuqsi+oMxayozqqoDhE6Vbi6xeT6nedVP9MBAACKnKbmtvRXXsbWOnY3LaqzKqozBJPo5zRIQqePuy1UunoGAADGaVFcb1lcj+NUdYOKVVGdIZgV1dEaoZjQSagEAAC87zT1Pd3Oi+txfGZFdcYWrsyK6qyK6rB1DKGTUAkAALivs+J638T1B7ubFtVZF9UZillRnVVRHbbGEDq9TLsryruPdRzUAQCA+ztJ3RamK4viehynWVGdVVGdIZhEP6fBOsjQ6ed/9uqHv/2rv3YRt+AF+vR//5cvex3/O7/7nfyj/6HXKQDASC2K6z2PaxdqzIrqrIvqDMGsqM7YthwOwkGGTv/Hn/5/6+//+j+87HsewJH7y8vqPg/3Hf/PhE4AUG6S5FlxzUVxPY7TSWrupni1W2gsZkV1VkV1eMNBhk4AAAAdOSuu9zIuZqkxK6qzKqozFLOiOpvCWodgtY9BhE4AAADXzorrLYrrcbymRXXWRXWGoqqf01dFdQ7JiyTLJBfpaPWb0AkAAG42Tc0t7mcFNdiPeWq2L115lXYxBxVmRXVWRXWGYNb3BA7ck7Sw7au0O2yepfiGbEInAAC42ST1dzBj2BbF9c7jjtrUqVrRsy6qw7g8S3KaFr5fVBUVOgHA/q3iQhZgaGZJqm8Ssiyux/GaFdVxhzY+5FGSnyT5OkVbjb9dUQQAAODALYrrfZNx3SGMfs2K6qyK6jBun6coNBc6AQAAx+4k9StQl8X1OG6zojqrojpDsel7AiP2LAWrnYROAADAsTsrrvc847u4p1/TojrrojpDse57AiP3VXb83tPTCQAAOHaz4nrrDmoO3STj/juv09+qmmlq7qr4IuNcGfTTJJ/1PYkRO88OP9tCJwAA4NhV3RXsyufbxzF5kuRnfU+iQ5+mv9Vr06I666I6Q3MRoVOXnqbd0W75kBfbXgcAAByzWd8TgI+YFdVZFdUZmmWSl31PYuTmD32h0AkAAACGa1ZUZ1VUZ4gWfU9g5J6m3XDh3oROAAAAMEyTJI8L6rxKcllQZ6iWab2d6M7sIS8SOgEAAMAwzYrqrIrqDNk8rVk63Zg+5EUaiQMAAMds0/cE4AOmRXU+S/K6qNZD7dJo/i6N3DdpId0q9TcH4IHfi1Y6AQAAx2zd9wTgA2Z9T+DAbNK+ZrbaDYTQCQAAOHbP+54A3GLS9wQO0CbJaZLvx13teid0AgAAjt1F3xOAW9gm9nAXaXdc+zTJNxFA9UJPJwAA4Ngtk3zV9yTgBq+SPOp7Egdulbf7QU1zfCvIztNTgCl0AgAAjt0myddJPu95HvCudZKnfU9iZNZ9T6AHm74Gtr0OAAAgWaStKoEhuex7ArALK50AYP+W+fhtfxmGWbzDDMdik2Se5Cf9TgPeskryrO9JcPAmfQ0sdAKA/Vv2PQHubBGhExyTiyRfJvmi53nAlVXfE2AUKvo5XT7kRbbXAQAAXFuk9XeCIbhMu/Ma9O3yIS8SOgEAALztLMkPoscTw3De9wTgoYROAAAA71um3Vr9eb/TgKxj9R0HSugEAABws8u0Gwr8btoWJyuf6MtZkhd9TwLuSyNxAAD6MklbSTJU06I6s6I6XVv1PYEBW6fd2S5p/57T9Hg3qGJVTdNfZtw3yrjsewJp33ur1DSFPnbnqTnGr9MCwaGO2TuhEwAAfZkm+Vnfk9iDQ/k7fqvvCRyIVcYV0FWFTpdpTdjpziYteLqIO6vu6vOiOusexlwV1dkL2+sAAADgMGzSgqcfxnbPh5oW1loPeMxBEDoBAADAYTlPcpLky7StjdzdSWGt9R0/b1o45uU9P39SOPa92V4HAAAAh2eTtqVxkRakzFIbqGRbs2or3zd5eG+sh77uJtPCWusBj1k99uYhLxI6AQAAwGG7TDeN3BepC52WGUY/ollRnef3+NxpD2NWWz/kRbbXAQAAAMdiWlRnfY/PrQru7jPmIFjpBADdmKb1W+CwnfQ9AQCgzEmSR0W11nf8vGnRePcZczCETgDQjUnczhgAYEimhbXWAx5zMGyvAwAAAI7BtLDWesBjDobQCQAAADgGs6I6x9ZE/MGETgAAAMAxmBbVWd/jc4+2iXgidAIAAADG7ySaiO+d0AkAAAAYu2lhrfWAx3zXrGj8zUNeJHQCAAAAxm5aWGs94DG78qDxhU4AAADA2M2K6mgifg+f9D0BgEP1o0f/a6/j/yd/84u/91/3OgMAADgY06I663t87lE3EU+sdAI4WP/q29/9077nAAAAB+Akmoj3QugEAEBfVkm+NeDHlwV/x+cD+Hvc9QEwVtPCWusBjzk4QicAALjZtO8JAFBiWlhrPeAxB0foBAAAN5sU1FgV1ABgN7OiOpqI35PQCQAAbjbtewIAlJgW1Vnf43OPvol4InQCAICbnKSm6ey6oAYAD3eS424iPiuYw4MJnQAA4H3TojqbojoAPMy0sNZ6wGN26cFb/D6pnAUA8Lc2OfA9+Aeuakn7yySXRbU4LNOiOquiOgA8zLSw1nrAYw6S0AkAurFOz8uZj9zrojrLJIuiWhyWWUGNlwU1ANjNrKiOJuIPYHsdAAC8r2K13GVBDQB2My2qsx74mIMkdAIAgLedFtVZFdUB4GFOsv8m4n2MOVhCJwAAeNtpUZ1VUR0AHmZaWGs94DEHS+gEAABvmxXVWRfVAeBhpoW11gMec7CETgAAcG2W5HFBnRdpd7EEoD+zojr3aejdx5iDJXQCAIBr86I6q6I6ADzctKjOeuBjfsi0qM6DfPKQF/2DT36l19u//uNf+c53+hwfAIBRmqSun9NFUR0AHuYkmognNfNZPfSFDwqd/pvf+CcVS4538Wc9jw8AwPicpubk/N9un2cFta5sMoLeHgdu1vcEBm6S8XyN1rE9dgymhbXWAx5z0B4UOgEAwAgtiur8b0l+VlTrTb+V5LKDutxNF/+mY/Ik4/kafRpbZMdgWlhrPeAxB01PJwAAqGsgniT/Y5Ivi2q9adFBTWD4Xvf4+KLw7/GzHeYxe8B4D3nNTTQR34GVTgBwbdH3BBicWYb9fbHoewIjsiiq8yqtn9MqyVnqenskybMky1iBAXAX06I664GPOWhCJwC4VvluHuPwdPsYqkXfExiJWer+nS+2z5u0f5+viupeWWQ8fXMAunISTcQHwfY6AACO3aKw1vKNP58nqb7r89PU3WEPYKymhbUuexhzXVirV0InAACO2Tx1q5xe5v2tb2dFtd903kFNgDGZFtZa9TDmurBWr4ROAAAcq0lqVzmd3/D/LlLfEPZxbK0E+JBZUZ0XPYxZ+TtjWljrQYROAAAcq7PU3bHuVd7eWvfuONXO0kIzAN43LaqzHviYHzMpqrN+6AuFTgAAHKNpam8esExrHn6TdZJvCsdKWrPaRXFNgDE4iSbi1TYPfaHQCQCAY7Qsrnf+kY8v0lZDVfo87UIHgGvTwlrrAY95EIROAAAcm/MkTwrrfZOP393oMt00AO+iJsAhmxbWWvUw5rqwVu+ETgAAHJPTtBVClRZ3/Lzz1K92+ix1zWsBxmBWVOfQm4gPgtAJAIBjMU39trqv8/FVTlc26aap+KKDmgCHalpUZz3wMQ+C0AkAgGMwSQucqhq9Jm3V0uKer1kmeVk4hyR5mmReXBPgEJ1EE/FBEToBAHAMLlLbxylp2+U2D3jdvHQWzSJ1t8YGOFTTwlrrAY95MIROAACM3TJtNVCll3n4trZV6vt2PE43W/cADsm0sNaqhzHXhbWSAdzhVOgEAMCYLZM866DuvOfX3+QsVjsBx21WVGcsTcRPiuqsH/pCoRMAAGO1TDeB0ze5+zvgt7nc1qn0KG3LH8CxOimqs77H5057GHPfNg994SeFkwAAgKFYppvA6VXqtrGdJTlNbXPzZ2nb/i4La9J82fcEOvJFUZ2Xqb87ZF8u+57AO/r83pulbnvyN3n41/Yur5ukbTWusL7j551EE/EPEjoBADAmk7Sm4dU9nK6cZod3fN+xSVuZVHXRf2WZuu0eXFv0PYGOVH3/XWa8X6O+LXoeu+p4uszuq0Q/ZFpYaz3gMQ+K7XUAcO1bHqN5VPlyAH+Xffw9x2KadkHTVeD0deovmM7TVohUeppkVlwTYOhmhbVWd/y8aeGY68JagyF0AgBgDE7TLhKedFT/Rbq5O9wm3axiOO+gJsCQTYvqvLjH586KxnxeVGdwhE4AABy68yQ/SW1vpDe9Sgu1urLM/S5y7uJJurlDHsBQTYvqrAc+5kEROgEAcKimaSfqn3c8zjzdNxY+66DmeVqPK4Cxm0QT8UESOgEAcIgWSX4/3W2nu/LDtMbkXVsl+WlxzUfpJswCGJppYa31gMe8r5OO6t6Z0AkAgEMyS1t1VH3Ht5t8k/32RjrrqOZJB3UBhmRWWGt1x8+bFo65Lqz1ppOCGjvd7ELoBADAIThJuxD4Weq2UHzI8+y/J9Jl2h3yKj2K29gD4zctqqOJ+Psud3mx0AkAgCE7SWu0/UdJnu5pzBfptnH4hyzSGpdXepbad+QBhmZaVGc98DEPjtAJAIbvJO226q87fqz28reBu5nlOmx6tsdxX2zH3uxxzDdt0s2Wvi5qAgzBJJqID5bQCQCG7zL72R7zNJoO069J2pa2ddo2un2GTUn/gdOVRXbsoXGDp6nteQIwFNPCWusBj3mQhE4AcBjOs589/4toOsz+zdJWNV0m+XG6vyPdTYYSOF1ZdFBz2UFNgL7NCmut7vh508Ix14W1BkfoBACHY576Xi/vehQXpuzPNC1oulrVVLVV4b6eZ1iBU9J+DquD5sexmhEYn2lRHU3EOyB0AoDDcRnb7BiXSfZzJ7oP+SbDC5yuLDqqOemgLkBfpkV11gMf8yAJnQDgsJzHNjuo8sO0FYRDtUoLxSo9ilAZGI9JNBH/kEnH9T9K6AQAh2ce2+xgF6+SfD+HcUe3RQc1v4hQGRiHaWGt9YDHfKiKHomXu7xY6AQAh+cyttnBQ101DL/odxp3dpnkyw7qLjqoCbBvs8Jaqzt+3rRwzHVhra5c7vJioRMAHKbz2GYH9/V12gXKut9p3Nt56lc3PkvtxRpAH6ZFdTQR74jQCQAO1zy22cFdXG2nO8swG4Z/zCbdNRUHOGTTojrrgY/5ENOO69+J0AkADtdlbLODj/lp2mq9i36nsbPzJC+Laz5NclpcE2BfJtFE/ENOiupc7vJioRMAHLbz2GYHN3mZ5NO0UGXT60zqnHVQ87yDmgD7MC2stR7wmA81LapzucuLhU4AcPjmsc0OrrxKa7w9zd2bwh6Ki9SHzI9jmx1wmGaFtVZ3/Lxp4Zjrwlo3mRXVudzlxUInADh8l9nPagXb7Bi6b9IuCBYZz+qmd511VHPSQV2ALk2L6oyxifgk7bytwuUuLxY6AcA4LHK/k6ZdxjnZwzhwH8+T/Fbaqr/LXmfSvXVauFbpUax2Ag7PtKjOeuBjPsRpUZ2dw7FPHvSqP/jNXcfdza/+9t/Lf34UdxcEgPuYJ/n9jse42mY363gcuItv0lb5rfudxt4t0i4oqprZJsnnaV/Ly8KaAF2ZRBPxD5kX1VnvWuAwVzr9xR/+ad9TAIABWqf1sumabXb06VVa2HS1smnd52R6cpluttR2UROgC9PCWusBj/kQJ6nbWrfatcBhhk4AwG0Wsc3upLDWurAWu3mZ5Idp/77zWJFznvobCHwWqxiBwzArrLW64+dNC8dcF9Z616Kw1mrXAkInABif+R7GGPLd7KaFtTaFtbi/q1VNv5sWNp3Hv8mVTbpZcbjooCZAtWlRnbE1EZ8meVZU60UKfuc+rKcTADBk67Rtdl90PM7VNrvzjse5r1nfE2Anr5JcvPHgdst0s+LwJFaSAcM2LaqzHviY93VeWGtZUUToBADjtEhrNPxkD+NcZFgXqKeFtdaFtbjdi7Ql/BcpWMp/ZBZ9TwBgzybRRPwmi9T1ckqK3vgROgHAeM1zfHezm6fuRPRVbOXq2jrJr8fXGYC7mxbWWg94zPs4Te0K9xcpekNRTycAGK919nc3u9M9jPMxk9Su+lgX1uJmmwicALifWWGt1R0/b1o45rqwVtLmtiyueV5VyEonABi3RfazXWmzhzE+ZpG6VU6JbV4AMETTojp9NBGvvsPwPC0gqtr6l7SV3suqYkInABi/Vd8T2IN5ks+La66K6wEAu5sW1VkPfMwPmaS92VZ97pMU3yDG9joA4NCdJflxcc1XEToBwNBMoon4fFuni8DpVYpDJyudAIBDNUlb/v1ZB7UvOqgJDMMqtXd4onma5HXfk+jZt/qewBGYFtZaD3jMd83S+meepraVwLvOU9wyQegEAByak7R3+c5S28PgTecd1T028wznzoYAHL5ZYa3VHT9vuscxT9J+d07T3lxL9heSv0wH5z9CJwCgwiS1J2Xvmm3HmCV50uE4SWvyue54jGPxrO8JADAq06I6L+/xubOiMe/SRPw0yRdF493XWTq4MYzQCQCoME3ys74nUeS87wkAADeaFtVZD3TMqrHu66fpqLWARuIAANdepvA2wQBAmUnG30R8WjTWfbxK29LXCaETAMC1ed8TAABuNC2stephzPUdPqfrFgI3OU0H2+quCJ0AAJqf5u4noQDAfs0Ka63v+HnTwjFXH/n4rHCsu/phOj73EToBAHS8tBwA2Nm0qM7L3H1lz6xozLs0EZ8WjXVX32QPfSyFTgAALXDa9DwHAOB206I664GOOSsa6y6+yZ7ebBM6AQDH7ut0dMcWAKDEJJqIV9lb4JQInQCA4/ZNkrO+JwEAfNC0sNbqjp93Ujjm+iMfn6QuVPuQvQZOidAJADheLyJwAoBDMCuste5hzNVHPj4tHOs2P0gP/Ss/2feAAAAD8CLtZHLT7zQAgDs4Kapznybi06Ix79JEfFY01k1eJjnN/XpZlbHSCQA4Nt+knUhu+p0GAHBH06I664GOWTXWu77e1r7LHDohdAIAjsmX6WFpOQCwkydFddZ3/LxJ9tu4fFo01pXnST5NayOwKa59L7bXAQDH4GVa2LTqdxoAwD3NCmut7vh508Ix1x/5+CR1AdfzJIsM6HxH6AQAjN3XaSdgm36nAQA8wLSw1vqOnzcrHHP1kY9Pd6z/KslFkuUdxto7oRMAMFbfpIVNl/1OAwDYwbSozpiaiL9MC5guto/BEjoBAGNy9W7fIsKmXT3vewKM0qbvCaTHhrpwgC5T9/tgs8PrKuaw7mHM1R0+Z3bL/3+R66/Z5fax3j4uHz6l/RI6AQBj8NNcv9u36XMiIzLrewLQkbO+JwAHZLl99OmshzHnexxrtsex9k7oBAAckldp7/Btts+rDLB/AQAAQicAoMYqybf6ngQAAMPx7b4nAAAAAMD4CJ0AAAAAKCd0AgAAAKCc0AkAAACAckInAAAAAMoJnQAAAAAoJ3QCAAAAoJzQCQAAAIByQicAAAAAygmdAAAAACgndAIAAACgnNAJAAAAgHJCJwAAAADKCZ0AAAAAKCd0AgAAAKCc0AkAAACAckInAAAAAMoJnQAAAAAoJ3QCAAAAoJzQCQAAAIByQicAAAAAygmdAAAAACgndAIAAACgnNAJAAAAgHJCJwAAAADKfdL3BACA90yTTD7yOZfbBwAADJLQCQD6c5JklhYyXT0e3bPGy7TwaZVkvX3e7DwzAADYkdAJAPZrmmSe5DTJ44J6j7ePp2/8vxdJLraPdcEYAABwb0InAOjeJMlZWthUETR9zJPt44u0lVDnSZaxAgoAgD0SOgFAd06SLJI863EOj5N8tX18s53PZY/zARiyWdqx+2T752z//KE3DF7kOtRfvfF8Gcdb4MgJnQCg3iQt3Pm832m859n2MZbwaZqPN1w/VJfZ/7/PJO1rOlar4nqzghqrghqVpqn/mbrMsI81p2n/lrO0FaIP8ebrrrY6f7F9fpXrfntXj2M3jWP3x0xT9zVaFdXZl9kOr92k/7YCs57H79I6D1g1L3QCgFpnaYHOfRuC79NV+PRl2ta7TZ+TuaNp2vbEad7uXzVWX6Z9H3Vlkrcvtvex7bNv3yqu97OCGtVz2sUsNX+nN73KMC/ATtOOJ7N0f6x+lHbMepoWRL1KCwEuto9Nx+P3bRrH7oc4T93X6/tp32uHYpfj0PPs95hzun1M8/DQ+pB8mgeEmEInAKgxSTupO6ST6i/SLgbmGe47ofO0E/hjCEX24STt63maYQej7Nc03VyUnqX/VQdXTnLdW6/P7/1HST7bPn6ctvJ0meEegx9qHsfuoVimff9vep3FeEzSjiVn8Xv0Tr7d9wQAYARmacvpDylwuvI47V3F857n8a5p2sXqj+Oipcoi7Wv6LE6UuTZJuyit/p74elu3b7O0QO2P0rY8D+17/1naMXidFtQculna70PH7uF4lG5Xzh6Ts7Tv7y8yvGPJYAmdAGA387QLhkM/+fg87aJn0u80krSTut/PcSxV34dJ2ioKJ8ncZJn6n7XnaT/HfTpJ+77/WdqqoqF7khbUXOZww6dF2tdb2DQ8n2eYW10PxSQtvP4qfo/em9AJAB7uPO0iYSyepAVP0x7nsEw7qaPGSdq/6SGuwqN7i9QHMi/Ttm/2ZZJ2HPmjHOb3/eO03yvrHFZIsMx183SGaZlhvLF0aCZpAfYhhNeDJHQCgIdZZnh3p6vwOO3katrD2OdpW02oMUl7Z9aqA25ymvqQ4NW27qa47l2dpq0UGsNx5Emutz5Pep3Jxy0zjq/52D2ObXb3NUk7J7LyegdCJwC4v0XGfYL9KPsPnuYZZ4jXp4s4UeZm03TTb+ks/TQOn6R9v/8k49v6crX1edbvNG41z7h/H46NbXb3cx6/R3cmdAKA+5nnOLYQ7DN4OsnwGpkfukUOc2sR3ZtkXI3DZ2mrm8a89eXqhg9nPc/jXSdx7D5E531P4ECcRqBaQugEAHc3zbh6OH3Mo+ynB8Qi41ud0KeTDO/ilOFYZjyNw88yjhs53NVXGVZfnmWO52s/Jk9im93HTCKcK/NJ3xMAgAMxSdu+sU8v0t7BX9/wsWnanLpezfIk7cLitKP6J/FOYrVFXAhys0XG0zh8meM8djxLO/7P0l/vrGzHt5rycH2Rdk6z7ncagzWPfohlhE4AcDfLdH8C8jLtJPAibWvbXc3SLvpO080cP0tbUXDeQe1FBzWP2ST93jmM4TrNOBqHT9KOkccceDxJ+x0xS3/B07yncamzTL93qx2ys74nMCa21wHAx52m234hz5N8muttUat7vn61fd3Jts5Pi+b1psW2frXTDmoes9NY5cT7pumm39I8+10pMUk73h1z4HTlKnia9DT+aU/jUsc2u5tNY5VTKaETAHzYJN3t678Km2a5f9B0m1XaxcCn2/pVrvo7VZpGQFJt1vcEGJxJuum982X2u+V4Ercuf1dfwdMsjt1j8UW6eUPpkJ32PYGxsb0OAD7sLPXveL1Ke3fxvLjum1ZpFwZnqevx8zTtZOyioFYiIOnCtO8JMDjL1Ac1P81+V0hM0m/g9CLX29jW2z9P83bY09fqq6777t1ktsex6N4y/k3fNOt7AmMjdAKA201Sv6//VdoJzbq47m3O0y7WVqkJns5TFzpNiupwzSoQ3rRI/dbgF9l/P59l9ve9fdVbb5V2nL68x2snaWHUNO04P8t+VgR9lvZvvdjDWImVMWPzNN31bTxEk74nMDa21wHA7eapvWB4kXayvi6seRfr7bgvCmo9Tt0F56yoDvC+03TTOHye/TavPk+3PfWSFjR9neS3ct1b7yL3C5yS9nVZpc35NO3i9Xe3tV/uOMeP+SL7O6ae7Gkc9mcR/65XvHlTzEonALjdWWGtl+n3TkOb7fiX2T1Im6ebpsQP8WXfE+jIqqdxn/c4NnWmGUfj8HmSzzus/zzt67TscIx12u+Ss7Rj8CLdbcW7SAsONh3Vr+TYPSxXfRtn/U5jFF5mOOdI1S4f8iKhEwDcbJq6Xk593Fb8JptcNy3fJXh6mvb1We84nwqLvicwMqv4mh66ScbROHya7rb7vMz1aqZ9WuV6290i9eHTVXBwWly3C4u+J8B7nmZYbyodqsv4/n6L7XUAcLN5ca11Yb1drFNzMjQvqAHUW+bwG4cn3QRnSQvPTrL/wOlNq7Tg6ftpb0pU+ixWq/Bw59HTiGJCJwC42ayozvP0e3Fzk/O0ee3idPdpAMUWGUfj8EXqg7MXaf2VFsV1d3GRFoD9tLjusrgex+NqtRyUEToBwPsmqbvgmRfVqbbY8fWP07a/AMNwmnE0Dp+m/u/xTYazJfhdm7R/ux8W1qy84QPH57N4Y4lCQicAeN+0qM7zPLDp4h6ssvtqp9nu0wAKTDOOxuFJfR+nH+YwApjzJD8orLcorMXxWcY2O4oInQDgfdOiOsuiOl053/H1s4I5ALuZZByNw5MWDlU21/5BumtG3oVl6oInq53YhW12lBE6AcD7JkV11kV1unKR3ZrYzmqmAexgmXE0Dk/xmD/IYV40L1O31W5RVIfjpCk9JYROANCddd8TuIOLHV77KJbfQ5/OM47G4UkLSB4X1TrUwOnKeVofql09jtDgWO26ff7KMn7PsyOhEwB0Z9L3BO5gtePrpwVzAO5vnuTz4pp9NA6/Mi+q83UOO3C6cpbkZUGdeUENDs9ZUZ3HsWKOHQmdAKA7s74ncAerHV8/KZgDcD/TdNOraJ5+VmjOU7PK6XnqLrb7tklNYPQsjtPHaJ3Wl63C5zmM8xkGSugEAN057XsCd3C54+unBXMA7m6Sti12DI3DrywKarzKYRxz72OV1l9rV6cFNTg8i7TtshWWEV7yQEInAHjfpqjOsxxGKFN1Ugp07yJ1vY+u9NU4PGnHyIq/zzz9bAvs2llBjVlBDQ7TvKiObXY8mNAJAN63Lqx1keG/O7jpewLAnZwneVpcs6/G4VfOCmo8T3+rtLp2md1XO53uPg0O1Dq12+ymRbU4IkInAHjfqrDW4229aWFN4PjMM67G4VdOC2rMC2oM2fmOr38Uv4OO2SI1TemTcTTpZ8+ETgBws8otZ0/SgqdFYU3geEwzrsbhV06ze2+qb7J7b7qhW2X30GC6+zQ4YPOiOk/iXIZ7+qTvCQDAQC2TfFVY71GSL9JO/M7TtoJcFtbfxVkevgXwsmwWwE0m6aZx+A/T/5a0WUGNRUGNQ3CR3Va6TWumwYFaJfk6Naslv0j7flwX1OIICJ0A4GYXqQ2drjze1v0qbTXVRdrJ4KqDse5q3ePYwIddpL5x+DfpZuXUfZ3u+Pqf5niC71WETuxmkfYzV3E8Wcb3FHdkex0A3Owy7cKsS0/S3jH8WZLXaRcV52knhZOOxwaG7zzdNA4/K675EJPsfvG73H0aB+Nix9dPC+bAYdukdpvdWVEtRk7oBAC3W+55vKdp72T/JMmfpAVfy7STxJM9zwXo1zzdNA4/zTDuWDnb8fWv0v/2wH3bpddg9fZMDtMqbZtdhUWcm3AHQicAuN0q3a92+pDHSZ4l+XGSP0q7ULxIe3dx1tOcgO5N0832t9MMZzvadMfXXxTM4dCsd3z9rGAOHL5Fau5m9yjHtdqQB9LTCQA+7Cw1d1iq8CjJZ9vHlee57gm12vuM+rfoewKFLtP/Cfws4/qarnJ4PxeTdNc4fFVccxfTHV9/UTCHQ3PZ9wQKLfqeQKHL9H/svo9N2rnNTwpqPd3WOi+oNRYnGdf39yo7/u4QOgHAh23StrlUnJx14en28cX2v1/k7RBq08Oc9umLj3/KwXie/i9crr6fxmTV9wTu6SLjbRz+ppMdX78qmMOh2fQ9gUKO3f26SGvE/9lHPu8uFhnWHXn79jjj+v5Odjze2l4HAB93keTLvidxR0/ydl+odTQnh0NxnvE2Dn/Xkx1e+zLjCmDu6jzJt3Z4rPY9YQZtntYbbVe22fFBQicAuJtF+u3v9FC3hVCz3mYE3GSecTcOr3TZ9wRgBDapu5vd07RjDbxH6AQAdzfPYQZPb7oKoX6W5HXaO99ncQca6NM0428c/qbJjq9fF8wBuN5mV2EZK6q5gdAJAO5nntaQdyyeJvkq7e54q3inEvZtkuNoHP6m6Y6v3xTMAWjmsc2ODgmdAOD+zpN8mppbDg/J07RteOvYfgf7cpHjaBwODNMmdXdb+yzevOIdQicAeJhV2rv1X/c7jU48Sdt+dx5L5aFL5zmexuHAcJ2n3YWvwjLOHXiD0AkAHm6TdnH3u6k7WRuSz3MdrgH1qhuHJ+2Cb9NBXWDc5qnbZrcoqMNICJ0AYHfrtO1on+bwG42/60kET3BIvoqfV+D+LlMXFn0e2/TZ+qTvCQDAiKxyfTe4eVpfg+qtM314lPb3msVdo6DSl0m+6KDuKn5eu3SSulvN79Oi7wkweOepO3dZpgXgm4JaHDChEwDU26SduJ2n9TWYpZ3EzVLfMHhfBE9Qb5EWYDwrrjv0n9dN3xPY0Um6CQu7tuh7AhyEedodbXf1OO177qygFgfM9joA6NYm7e5U87QLld9K8oO0bXiHdve7q9shT/qdBozKPN1syx3yz+t6x9dPC+YA3OwybRVmBdvsEDoBwJ5dpl0IznMdQn0/7S54L3qa0308iXfLodpZuvn5v+rJNumgdp8mfU8ARm6RumPSsqgOB0roBAD9ukxbCXWW9u79t9Iakn+Zdke8ijvJVPPOJdTapP1MdRU8XXRQd1e7HNumVZMAbjUvqnO1zY4jpacTAAzPavu4Mk27IJ1t/zyEvlCLDCN4+lbfExiZL+PioC+bXPdgqv4Zf5rrFZZDsc7DmxU/SlvttCmaC/vn2D1869Td7OCLtPB7XVBr6J5nGOdHg2GlEwAM3zrXd5Q5yTD6Qj2Nkyqotkn7Oe9iheOzDGuby2bH108L5gB82CK22bEjoRMAHJ7LvN8Xqo8Q6myPY8GxWKcFul0FT/MO6j7EesfXzwrmAHzcvKiOnpBHSugEANdWSV7v+OjDZd4OoX49+2lO/tl2PKDWOt2FQz/usPZ9rHd8/WnBHICPW6edT1T4IlYpHh2hEwCMzyZvNyf/9bSVUM87GOu0g5pA+xn+QUe1f5z+Vwqtd3z9k7iLHezLInUrqc+L6nAghE4AUGva9wRusElbCTVLuzNe5Ra808JawNuWSX7YUe2L9Hu8uszuWwhPd58GcAeb1K2QfBrb84+K0AkAak36nsBHrNIuNH9aVO+hd58C7uY8rV9btUe5Ph70ZbXj6+cFcwDuZpW6bXaL2J5/NIROAFBr0vcE7mCTtkKgarvdtKgOcLN5ugueLtLfcWu14+ufxoUr7NMiNaulH8Xd7I6G0AkArl0W1JgW1NiX09TcIWtSUAP4sHm6uTHA47TwZ9JB7Y+5KKixKKgB3M0mttlxT0InALh2WVBjVlBjXzapuWCbFdQAPm6WboKnJ9l91dFDXGb3VRPPYrUT7NMqdVv0F/HG1egdZuj0D//7eVrCOotfMgDUuSyoMS2osU/LvicA3Nkm3QZPyw7qfsxFQY1FQQ3g7uapWSltm90R+KTvCTzIr/5nz9Le1XjTy7SLhavHOu0X89UzAHzMZUGNR2nB07qg1j5s0no7aQgOh2GTdsG3SjveVLo6v54X1/2Q8ySf71jj2bbOesc6d7VOuxNoFxZxPGb4NmnHiZ8U1Posbbv/RUEtBugwQ6ebPd4+bjtIv8jbIdS7zwCwLqozjz4FQHfWaSueVukmeFqnhTj7cJl2nv5kxzrL7G+l6SbdbEc8icCJw3GRts3us4Jay7Tv/01BLQZmTKHTx1z9IhNKAXCbTWoufuYROgHdWqetDvhZB7W/SjseLjuofZPzJD/escaTtFVCix3r9GnR9wTgnuZpwfGu4ffVNrvTHeswQMcUOn2MUAqApB3Xdw2dHqWdiC13rAPwIaskP8jugc1NrmouO6j9rmVa8LTrhesXacfwix3r9GGW99uHwNBt0t5kqzgGXW2zY2SETncnlAI4DhepOfFf5HBCp+mOr78smAPwMMvtcxfB03nauey6g9o3jfVFQZ1lWoCzLqi1L5McZlAGSfuZm6dma+h5QQ0GRuhU52Oh1PPt8+qWZwCGYVVU53Hau3/nRfW6cprdVxdc7j4NYAfLdLNS5lHaMXGW7kOc87RjZsU2nVUOJ3iapJveXLBP87Sft12/jx/vPBMGR+i0P0/feX73nRyhFMAwbFLXGHOR9u71ZUGtrpwW1FgV1AB2M98+dxU8naTb1fub1K12OpTgaZI2z123dEPfLtPOeb7qdxoMkdBpOIRSAMOxTE3o9CgtdJoW1OrCNLtfoL4omAdQY54WZFQcv970ZoizKa79pvO0v0PFaoerOc8zzK1rJ2nzEjgxFudpb2S5AyNvETodDqEUwP5cJHmZmgufJ7nudzA0y4Iaq4IaQJ15ulk98yTdB0+btNUSVf2pHiX5SZKvM6w7is7Sfs/YUsfYzFOzzY4R+XbfE6DM0+3ji+3jZ9vH6+1jlfbLbZH2S3eW4b7zDjAEy8Jaz4rrVVim5qJ0VVADqLNJO8/rYhXik3Tfp26Z6zdTq3yediE8K657X5O0v9/P4qKccbpMu96Ev2Wl0/G4WiF103LrV7n9rnvrbqcFMFjnqWlqe+VqG9tZ+r+r6TI1fV9eZZjbVuDYbdK2uaxTH25cHTvmxXXfNE/93J+khT3fpF0UXxbW/phJ2rH/LMImxu887WfY1lGSCJ1oHkUoBfCuTeqa2l55lrbKdJ5+jp+T1PWrSoaxemvR9wQ6sko/q8hmGe/XdNH3BPbsMu3fc5VugqdNutuydrmtXbXN7k3Pto+fph3jVx2MceUk7Xh/FmHTuxZ9T6Ajq1gBnLTv+9/vexI9Ocl4v7+XeUBgL3TiLoRSwLFapK6p7ZUnaSdiX6Zd8GwKa3/IfDte5YXPeWGth6oMBYdm1cOYV9v1x2jR9wR6sE4Lnrq4+LvasrbsoHa2dWepvxvflc+2j5dpKzYvUvMzd5K2ymweKz0+xLF73NZp5zlj/ne+zeOM9++9itCJntw3lLp85wEwZPO0LRnVvkh79/s83YZP8+2jOkj4Jo7hcAjWSX6QblYNXdVcdlA7acfIaboNbx6nBWifb//7ea7PV9f58Juoszeep9tH5ZsUcMgWaQGs8PXICZ3Yh4+FUi/zfhD15gOgT6u0gKWLd9sf5Tp8unjjsatpWtB0mu4ugBYd1QXqLbfPXQVP63Szun2T7npT3WbMq/1g3+Y53m12bAmdGILH28dtv+CFUkDfztLeye4qwHmU6z4jSXunfZW3322/zTStV9Ns++dZur84+zKOv3BolmnHiM8//GkPsko79qw7qH2Z7npTAd1a53i32bEldOIQCKWAvm3S3m1fZT8XPUN+p/1FrHKCQ3WWFlJXr9x8lHZ8nKabc691BE9wqM5T3x+TAyJ0YgzuFUr97//mX/0//8urf/mHSda/993vbfYxQWAU1unubkqHZN73BICdzLfPXQRPF2nh0Ka4diJ4Slrorz8Oh2aT7vpjcgCEThyDt0Kp//Pf/cnL7X/nR7/4edJ+gW9yw533hFLAO5bb52MNnn4QdyWFMThLNw26n+R6q92muHZy3MHTD9LujCd04hCtknydbrb3MnBCJ7j+5f3eSqkPhVK/993vrfYwN2B4lumuL8qQfZ3u7lAF7Ncm1+FNF8HTMm1LchfWaeHLKscRwLzK9fbuRZ8TgR0t0u0NThgooRN83I2h1DaQSlrD36SdDPzts1AKRu0sbcvuV/1OY2++Sfs7A+OxSQueLlO/auiztOBpXlz3yiYt/D/PuN8AeJH2NVz3Ow0osYltdkdJ6AS7e/rO8xeJUAqOwHnaCdTYt9p9E32cYKw26W672lXPqHlx3Tedpc19mfFtt/s6bWXIpt9pQKlVbLM7OkIn6J5QCsZrmbZK4CLju+BJkh+mhWvAeK3TbfC0Srdbcy/Sttst01ZYHbqXaWHaRb/TgM4s0sLoMZ43cQOhE/RPKAWHbZW2zWOZ2++ieWje7CECjN863d2d86rmsoPaVzZpx6xZWlB+qL2evsz1KloYq01a6PSTfqfBvgidYPiEUjB8l2kXO4tsf0YP2PO0i7dNv9MA9my5fe4qeLpM90H2Ku1NgHna8fhQGhZ/kzbfy36nAXtzkeSnGcfqRD5C6ASH70Oh1Ku8c9e9XN99b72vCcIRWaRduC1zeKueXqXN/7zfaQA9WiaZpJubJFykhfPrDmq/a5nrRuZnGebKp1dpX5NFhE0cp3m6uZEBAyN0gnF7lOsL37feSRBKQWcu0y6sTtMCnEN4p/3q7nSbfqcBDMB52mqhZx/+tHt7lLYSaZb93Y1tuX1M045xp+n/AvdFrue16XMi0LNNbLM7CkInOG5CKejOxfYxz3C3edjSAdxkvn3uInhapgVPm+LaH7LO9d/pNNf9n/Z1XL4Kmi7ieAtvuohtdqP30NDpd9OW3k5veO773QOgjlAKdrfcPk7TLnr6PrF6lTaf8/R/8XOWdv7A+y4f+LpPKyfBB439az1Pt82/+3KR6zvDnaSFT9Pto2Jb9NW50eqN501B3aT9e6yKau3iLI7dt7ksqnOW4/kaz9N+/ipsCmqM/di+i/VDXvSt169fF88jyR/85jRdhlK/9c+TX/unO5fhOP13/++/ePmvf/mXQ1xxMCq/993vJbeHUpfp/2J3Zz/6xc87OIDey6caxh+kk1wHUPvsM/LTtAut5R7HBDg0k7x97XIXq+3zOrbMAbylm+11v/PH6+2fVjd+vOtQChiKW1dKbb3MdQB10wPG6DJtldF5rt9lv3pUBuIv0n4PXz02hbUBxmqT62uYi95mATAS/fR0engodWh3AgI+7PH2cdvPtlCKsbvM9fa75Pp33nT759kb//+mVVEvch0mrXK9mnAdIRMAAD0bZiPxj4VSN6+QmkQoBWMjlOLYbHK9MgkAAA7aMEOnj1tvn1e3fHx2y7NQCsblvqHUOm/3lwIAAKAjhxo6fczqned3zW55FkrBuHwslLramrS+5RkAAIAHGmvo9DGrd57fNbvlWSgF43LVI0coBQAAUOxYQ6ePWb3z/K7ZLc9CKRiXD4ZST/+jf/Av/+b16z//F3/xp5/8zevXv/zXv/zLyjuPAQAAHDSh08Os3nl+0yS3Nzq/6c5DwIH6bPIb/+lN//8P/+LfJUl+/mevXibJ//Xn/zZJIpQCAACOidCp3ibXYdTFDR+fRCgFo/bbv/prV8+Pk+T7b3zs3//NX+eP/+rP8+//5q/zh3/+py///eu/+eTyL/7dL//y9ev/8N/89V/dGGIBAAAcIqHT/m0ilIKj9Xe//Xf+NpT63t/9j99b+SSUAgAAxkLoNDybCKXgaN0nlNr88q++s/cJAgAA3JHQ6fBscrdQ6uSGh34ycODeDKWS/FmfcwEAAPgQodP4bHL7XfeSm8Ooq4dQCgAAACghdDo+l9vHbU4+8BBKAQAAAHcidOJdlxFKAQAAADsSOnFfl7lfKDXNdZ+pR11NCgAAABgWoRPVLvPhUGqa2+/AJ5QCAACAkRA6sW/r7fPqlo9PI5QCAACAgyd0YmjW2+fVLR+fRigFAAAAgyd04tCst8+rWz4+zc2h1NPupgQAAAC8S+jE2Ky3z6tbPj77x7/yne/861/+5X9x9d/bZ6EUAAAAFPrW69ev+54DDMaPfvHz2faP7z4Lpe7p9777vb6ncAw+ze0BKwAAQK+sdII3/N53v7fa/nF108eFUgAAAHA3Qie4hw+FUj/6xc8nub2n1JOOpwYAAACDYnsd7MmxhVK21+2F7XUAAMBgCZ1gIMYWSgmd9kLoBAAADJbQCQ7EoYVSQqe9EDoBAACDJXSCkbghlDp54/F43/MROu2F0AkAABgsoRMciR/94ucneTuIevNRHkoJnfZC6AQAAAyWu9fBkfi9737vMsnlbR/fdygFAADAuAmdgCRCKQAAAGoJnYA7uUcoNZ38nf/gJK231NX/E0oBAAAcGT2dgH2Z5uY7702TPOpjQiOgpxMAADBYVjoB+7LePq9u+fg0QikAAIDREDoBQ7HePq9u+fg0QikAAICDIXQCDsV6+7y65ePTCKUAAAAGQ+gEjMV6+7y65eOzW56fdjEZAACAYyd0Ao7F6p3nd81ueRZKAQAAPIDQCaBZvfP8rtktz0IpAACAGwidAO5m9c7zu2a3PAulAACAoyR0Aqixeuf5TZPc3uj8SZeTAgAA6Mu3Xr9+3fccAI7dJA8LpT7N7SuvAAAAeiV0Ahi+SW4Opc5yfdc+AACAQfn/Aac9Wrg1PWv2AAAAAElFTkSuQmCC",
+    "Joint": [{
+            "name": "TwoCol",
+            "left": [{
+                "id": 0,
+                "name": "CardX",
+                "title": "summary1",
+                "data": {
+                    "Estimated number of cells": "3,878"
+                }
+            }],
+            "right": [{
+                "id": 1,
+                "name": "CardX",
+                "title": "summary2",
+                "data": {
+                    "GEX Median genes per cell": "1,156",
+                    "MET Median CpG number per cell": "20,965"
+                }
+            }]
+        },
+        {
+            "name": "TwoColX",
+            "left": [{
+                "id": 2,
+                "name": "Card",
+                "title": "Sample",
+                "data": {
+                    "Sample ID": "-",
+                    "Sample description": "-",
+                    "Workflow version": "-",
+                    "Fastp version": "-",
+                    "SeekSoulTools version": "-",
+                    "Bismark version": "-",
+                    "ALLCools version": "-",
+                    "Reference": "-",
+                    "Chemistry": "-",
+                    "Include introns": "-"
+                },
+                "description": {
+                    "Sample ID": "Sample name",
+                    "Sample description": "Sample descriptions",
+                    "Workflow version": "Workflow version used",
+                    "SeekSoulTools version": "SeekSoulTools version used",
+                    "Bismark version": "Bismark version used",
+                    "ALLCools version": "ALLCools version used",
+                    "Reference": "Reference file",
+                    "Chemistry": "Reagent type",
+                    "Include introns": "Including intron reads for quantification"
+                }
+            }],
+            "right": [{
+                "id": 3,
+                "name": "PlotlyLineCell",
+                "title": "Joint Cell Calling",
+                "data": {
+                    "data": [],
+                    "xaxis": {
+                        "title": "Barcodes"
+                    },
+                    "yaxis": {
+                        "title": "UMI counts"
+                    }
+                },
+                "description": {
+                    "Joint Cell Calling": "Joint cell calling results. Blue points, grey points.."
+                }
+            }]
+        }
+    ],
+    "tsne": {
+        "data": {
+            "id": 4,
+            "name": "PlotlyDim",
+            "title": "Clustering",
+            "range": {
+                "cluster": [],
+                "nCount_RNA": [],
+                "nFeature_RNA": [],
+                "mito": [],
+                "CpG_number": [],
+                "CpG_methylation": [],
+                "CH_methylation": []
+            },
+            "coordinate": {
+                "tSNE1": [],
+                "tSNE2": []
+            },
+            "nFeature_RNA": [],
+            "nCount_RNA": [],
+            "mito": [],
+            "cluster": [],
+            "xaxis": {
+                "title": "GEX tSNE 1"
+            },
+            "yaxis": {
+                "title": "GEX tSNE 2"
+            },
+            "description": "The plot represents cell-associated barcodes in a 2-D embedding produced by the t-SNE algorithm on dimensionality reduced gene expression UMI counts. The colors show an automated graph clustering analysis which groups together cells that have similar gene expression profiles.",
+            "CpG_number": [],
+            "CpG_methylation": [],
+            "CH_methylation": []
+        }
+    },
+    "RNA": [{
+            "name": "TwoCol",
+            "left": [{
+                "id": 0,
+                "name": "CardX",
+                "title": "summary1",
+                "data": {
+                    "Estimated number of cells": "-"
+                }
+            }],
+            "right": [{
+                "id": 1,
+                "name": "CardX",
+                "title": "summary2",
+                "data": {
+                    "GEX Median genes per cell": "-",
+                    "MET Median CpG number per cell": "-"
+                }
+            }]
+        },
+        {
+            "name": "TwoCol",
+            "left": [{
+                "id": 2,
+                "name": "Card",
+                "title": "Sequencing",
+                "data": {
+                    "Number of Reads": "-",
+                    "Valid Barcode": "-",
+                    "Sequencing Saturation": "-",
+                    "Too Short": "-",
+                    "Q30 Bases in Barcode": "-",
+                    "Q30 Bases in UMI": "-"
+                },
+                "description": {
+                    "Number of Reads": "Total reads",
+                    "Valid Barcode": "Fraction of reads with valid barcodes",
+                    "Sequencing Saturation": "The proportion of reads derived from previously observed UMIs. This is influenced by the complexity of the library and the depth of sequencing.",
+                    "Too Short": "Number of reads that are shorter than 60bps after trimming",
+                    "Q30 Bases in Barcode": "Fraction of reads with valid barcodes in which the barcode has a base quality score greater than 30",
+                    "Q30 Bases in UMI": "Fraction of reads with valid barcodes in which the UMI has a base quality score greater than 30"
+                }
+            }],
+            "right": [{
+                "id": 3,
+                "name": "Card",
+                "title": "Mapping",
+                "data": {
+                    "Reads Mapped to Genome": "-",
+                    "Reads Mapped Confidently to Genome": "-",
+                    "Reads Mapped to Intergenic Regions": "-",
+                    "Reads Mapped to Intronic Regions": "-",
+                    "Reads Mapped to Exonic Regions": "-"
+                },
+                "description": {
+                    "Reads Mapped to Genome": "Fraction of reads that aligned to the genome (including both uniquely mapped reads and multi-mapped reads)",
+                    "Reads Mapped Confidently to Genome": "Fraction of reads that uniquely mapped to the genome",
+                    "Reads Mapped to Intergenic Regions": "Fraction of reads that mapped to intergenic regions",
+                    "Reads Mapped to Intronic Regions": "Fraction of reads that mapped to intronic regions",
+                    "Reads Mapped to Exonic Regions": "Fraction of reads that mapped to exonic regions"
+                }
+            }]
+        },
+        {
+            "name": "TwoCol",
+            "left": [{
+                "id": 4,
+                "name": "Card",
+                "title": "Cells",
+                "data": {
+                    "Estimated Number of Cells": "-",
+                    "Fraction Reads in Cells": "-",
+                    "Mean Reads per Cell": "-",
+                    "Median Genes per Cell": "-",
+                    "Median UMI Counts per Cell": "-",
+                    "Total Genes Detected": "-"
+                },
+                "description": {
+                    "Estimated Number of Cells": "Total number of cells by cell calling",
+                    "Fraction Reads in Cells": "Fraction of reads after cell calling among all reads used for counting",
+                    "Mean Reads per Cell": "Average number of reads per cell, Total number of reads/Number of cells after cell calling",
+                    "Median Genes per Cell": "Median gene count in barcodes after cell calling",
+                    "Median UMI Counts per Cell": "Median UMI count in barcodes after cell calling",
+                    "Total Genes Detected": "Number of genes detected in all cells"
+                }
+            }],
+            "right": []
+        },
+        {
+            "name": "TwoCol",
+            "left": [{
+                "id": 5,
+                "name": "PlotlyLine",
+                "title": "Median Genes per Cell",
+                "data": {
+                    "x": [],
+                    "y": [],
+                    "xaxis": {
+                        "title": "Mean Reads per Cell"
+                    },
+                    "yaxis": {
+                        "title": "Median Genes per Cell"
+                    }
+                },
+                "description": "Performing downsample processing on the data, with Mean Reads per Cell on the x-axis and Median Genes per Cell on the y-axis."
+            }],
+            "right": [{
+                "id": 6,
+                "name": "PlotlyLine",
+                "title": "Sequencing Saturation",
+                "data": {
+                    "x": [],
+                    "y": [],
+                    "xaxis": {
+                        "title": "Mean Reads per Cell"
+                    },
+                    "yaxis": {
+                        "title": "Sequencing Saturation"
+                    }
+                },
+                "description": "Performing downsample processing on the data, with Median Genes per Cell on the x-axis and Sequencing Saturation on the y-axis"
+            }]
+        }
+    ],
+    "diff_title": {
+        "title": "Differential Expression"
+    },
+    "diff_description": {
+        "All": "The top 50 differentially expressed genes in each cluster of the dataset",
+        "Marker": "Filter with some commonly used markers for human and mouse",
+        "Search": "Global keyword search in the table"
+    },
+    "diff": [],
+    "marker": {
+        "CD3D": "T cell",
+        "CD3E": "T cell",
+        "CD3G": "T cell",
+        "PTPRC": "pan-leukocyte protein"
+    },
+    "MET": [{
+            "name": "TwoCol",
+            "left": [{
+                "id": 0,
+                "name": "CardX",
+                "title": "summary1",
+                "data": {
+                    "Estimated number of cells": "-"
+                }
+            }],
+            "right": [{
+                "id": 1,
+                "name": "CardX",
+                "title": "summary2",
+                "data": {
+                    "GEX Median genes per cell": "-",
+                    "MET Median CpG number per cell": "-"
+                }
+            }]
+        },
+        {
+            "name": "TwoCol",
+            "left": [{
+                "id": 2,
+                "name": "Card",
+                "title": "Sequencing",
+                "data": {
+                    "Number of Read Pairs": "-",
+                    "Valid Barcodes": "-",
+                    "Dropped Too Short": "-",
+                    "Dropped Chimeric": "-",
+                    "C-T Conversion": "-",
+                    "C-C Ratio": "-"
+                },
+                "description": {
+                    "Sequenced read pairs": "Total number of sequenced read pairs assigned to the sample",
+                    "Valid barcodes": "Fraction of read pairs with barcodes that match the whitelist after error correction",
+                    "Dropped Too Short": "Fraction of read pairs that R2 shorter than 60bps or R1 shorter than 20bps after step1",
+                    "Dropped Chimeric": "Fraction of read pairs that contained valid barcodes and R1 length \u2265 20bp and R2 length \u2265 60bp filtered out due to containing too many CH-context methylation sites.",
+                    "C-T Conversion": "Fraction of known C sites on the forward strand (17L and ME) that were fully converted to T in the experiment.",
+                    "C-C Ratio": "Fraction of known C sites on the reverse strand (17L and ME) that remained as C in the experiment."
+                }
+            }],
+            "right": [{
+                "id": 3,
+                "name": "Card",
+                "title": "Mapping",
+                "data": {
+                    "Reads Mapped to Genome": "-",
+                    "Reads Mapped Confidently to Genome": "-",
+                    "CpG Methylation Rate": "-",
+                    "CHG Methylation Rate": "-",
+                    "CHH Methylation Rate": "-",
+                    "CpG Coverage Rate": "-",
+                    "Total CpGs Detected": "-"
+                },
+                "description": {
+                    "Reads Mapped to Genome": "Fraction of reads mapped to the genome.",
+                    "Reads Mapped Confidently to Genome": "Fraction of reads uniquely mapped to the genome.",
+                    "CpG Methylation Rate": "CpG methylation rate.",
+                    "CHG Methylation Rate": "CHG methylation rate.",
+                    "CHH Methylation Rate": "CHH methylation rate.",
+                    "CpG Coverage Rate": "Fraction of CpG sites covered.",
+                    "Total CpGs Detected": "Total number of CpG sites detected."
+                }
+            }]
+        },
+        {
+            "name": "TwoCol",
+            "left": [{
+                "id": 4,
+                "name": "Card",
+                "title": "Cells",
+                "data": {
+                    "Estimated Number of Cells": "-",
+                    "Genome Coverage Rate of Max Cell": "-",
+                    "CpGs of Max Cell": "-",
+                    "Reads of Max Cell": "-",
+                    "Saturation of Max Cell": "-",
+                    "Genome Coverage Rate of Median Cell": "-",
+                    "CpGs of Median Cell": "-",
+                    "Reads of Median Cell": "-",
+                    "Saturation of Median Cell": "-",
+                    "Fraction Reads in Cells": "-"
+                },
+                "description": {
+                    "Estimated Number of Cells": "Total number of cells identified by cell calling.",
+                    "Genome Coverage Rate of Max Cell": "Maximum genome coverage rate across cells.",
+                    "CpGs of Max Cell": "Number of CpG sites detected in the cell with the highest genome coverage (strand-specific counting).",
+                    "Reads of Max Cell": "Number of reads uniquely mapped to the genome for the cell with the highest genome coverage.",
+                    "Saturation of Max Cell": "Sequencing saturation of the cell with the highest genome coverage.",
+                    "Genome Coverage Rate of Median Cell": "Median genome coverage rate across cells.",
+                    "CpGs of Median Cell": "Number of CpG sites detected in the cell at the median genome coverage (strand-specific counting).",
+                    "Reads of Median Cell": "Number of reads uniquely mapped to the genome for the cell at the median genome coverage.",
+                    "Saturation of Median Cell": "Sequencing saturation of the cell at the median genome coverage.",
+                    "Fraction Reads in Cells": "Fraction of reads belonging to called cells among all reads uniquely mapped to the genome."
+                }
+            }],
+            "right": [{
+                "id": 5,
+                "name": "PlotlyViolin",
+                "title": "Cell Saturation",
+                "data": {
+                    "y": [],
+                    "yaxis": {
+                        "title": "Cell Saturation(%)"
+                    }
+                },
+                "description": "Violin plot that shows the distribution of sequencing saturation across cells."
+            }]
+        },
+        {
+            "name": "TwoCol",
+            "left": [{
+                "id": 5,
+                "name": "PlotlyViolin",
+                "title": "Cell Genome Coverage",
+                "data": {
+                    "y": [],
+                    "yaxis": {
+                        "title": "Genome Coverage(%)"
+                    }
+                },
+                "description": "Violin plot that shows the distribution of genome coverage across cells."
+            }],
+            "right": [{
+                "id": 6,
+                "name": "PlotlyScatter",
+                "title": "Reads number - CpG number distribution",
+                "data": {
+                    "x": [],
+                    "y": [],
+                    "yaxis": {
+                        "title": "log10(CpG Number), strand-specific"
+                    },
+                    "xaxis": {
+                        "title": "log10(Reads Number)"
+                    }
+                },
+                "description": "X-axis is uniquely mapped reads number across cells, and Y-axis is CpG number detected in each cell."
+            }]
+        }
+    ]
+}
