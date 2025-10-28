@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2025-10-28
+### Changed
+- SeekSoulTools supports analysis of RNA–methylation multi-omics data with ME5 chemistry
+- Added a Nextflow-based workflow to analyze RNA–methylation multi-omics data
+- Bismark (https://github.com/seekgene/Bismark) BAM output now includes CB (error-corrected barcode) and UR (raw UMI) tags
+- Removed Bismark deduplication and featureCounts quantification steps
+- Adopted ALLCools (https://github.com/seekgene/ALLCools) for UMI-based deduplication and methylation level estimation
+- Methylation analysis now defaults to 20K bins with LSI for dimensionality reduction and clustering
+
 ## [Unreleased] - 2024-08-25
 
 ### Changed
