@@ -29,7 +29,7 @@ def get_workflow_version_regex(config_path='nextflow.config'):
         with open(config_path, 'r') as f:
             content = f.read()
         
-        # 匹配manifest块中的version
+        # Match the version inside the manifest block
         pattern = r'manifest\s*\{[^}]*version\s*=\s*[\'"]([^\'"]+)[\'"]'
         match = re.search(pattern, content, re.DOTALL)
         if match:
@@ -40,27 +40,27 @@ def get_workflow_version_regex(config_path='nextflow.config'):
     
 def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, cells_file: str, output_file: str, whitelist_file: str = None) -> pd.DataFrame:
     """
-    合并 RNA 与甲基化三份表格为一个文件（按条形码对应）。
-    - tsne_file: gex tsne 文件（例如 tsne_umi.xls，第一列为 RNA 条形码索引）
-    - filtered_counts_file: 甲基化条形码的计数文件（filtered_barcode_reads_counts.csv，列：reads_counts, barcode）
-    - cells_file: 甲基化细胞指标文件（GYY2155663_cells.csv，列：cell_barcode 等，cell_barcode 形如 <m_cb>_allc.gz）
-    - whitelist_file: 条形码对应白名单文件（bUCB3_whitelist.csv，列：gex_cb(RNA), m_cb(甲基化)）
-    - output_file: 合并后的输出 CSV 文件路径
+    Merge RNA and methylation tables into a single file based on barcode mapping.
+    - tsne_file: GEX tSNE file (e.g., tsne_umi.xls; first column is the RNA barcode index)
+    - filtered_counts_file: methylation barcode counts file (filtered_barcode_reads_counts.csv; columns: reads_counts, barcode)
+    - cells_file: methylation cell metrics file (e.g., GYY2155663_cells.csv; includes cell_barcode where it looks like <m_cb>_allc.gz)
+    - whitelist_file: whitelist mapping file (bUCB3_whitelist.csv; columns: gex_cb (RNA), m_cb (methylation))
+    - output_file: path to the merged CSV output
     """
-    # 读取 tsne 文件（RNA 条形码作为 index）
+    # Read tSNE file (RNA barcode used as index)
     try:
         tsne_df = pd.read_table(tsne_file, index_col=0)
     except Exception as e:
         logger.error(f"读取 tsne 文件失败: {tsne_file} -> {e}")
         raise
-    # 将 index 作为 RNA 条形码列
+    # Use index as the RNA barcode column
     tsne_df = tsne_df.copy()
     if whitelist_file:
         tsne_df['gex_cb'] = tsne_df.index.astype(str)
     else:
         tsne_df['m_cb'] = tsne_df.index.astype(str)
 
-    # 读取过滤条形码计数（甲基化条形码）
+    # Read filtered barcode counts (methylation barcodes)
     try:
         counts_df = pd.read_csv(filtered_counts_file)
     except Exception as e:
@@ -70,7 +70,7 @@ def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, 
         raise ValueError(f"{filtered_counts_file} 缺少 'barcode' 列")
     counts_df = counts_df.rename(columns={'barcode': 'm_cb'})
 
-    # 读取 cells（甲基化条形码在 cell_barcode 中，需去除后缀）
+    # Read cells (methylation barcode is in cell_barcode; strip suffix)
     try:
         cells_df = pd.read_csv(cells_file)
     except Exception as e:
@@ -78,7 +78,7 @@ def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, 
         raise
     if 'cell_barcode' not in cells_df.columns:
         raise ValueError(f"{cells_file} 缺少 'cell_barcode' 列")
-    # 去掉后缀 "_allc.gz" 或可能的 ".gz"
+    # Remove suffix "_allc.gz" or possible ".gz"
     cells_df = cells_df.copy()
     cells_df['m_cb'] = (
         cells_df['cell_barcode']
@@ -88,19 +88,19 @@ def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, 
     )
     tsne_map_df = tsne_df.reset_index(drop=True)
     
-    # 读取 whitelist（gex_cb 对应 m_cb）
+    # Read whitelist (map gex_cb to m_cb)
     if whitelist_file:
         wl_df = pd.read_csv(whitelist_file)
         for col in ('gex_cb', 'm_cb'):
             if col not in wl_df.columns:
                 raise ValueError(f"{whitelist_file} 缺少列: {col}")
-        # 去重，保留首个对应关系
+        # Deduplicate, keep the first mapping per gex_cb
         wl_df = wl_df[['gex_cb', 'm_cb']].drop_duplicates(subset=['gex_cb'])
         tsne_map_df = tsne_map_df.merge(wl_df, on='gex_cb', how='inner')
-    # 合并计数（按 m_cb）
+    # Merge counts by m_cb
     merged_df = tsne_map_df.merge(counts_df, on='m_cb', how='inner') 
     
-    # 合并 cells（按 m_cb），避免列冲突加后缀
+    # Merge cells by m_cb; add suffix to avoid column conflicts
     merged_df = merged_df.merge(cells_df, on='m_cb', how='inner', suffixes=('', '_cells'))
     
     # comput cpg methylation levels and ch methylation levels
@@ -117,7 +117,7 @@ def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, 
     merged_df['CH_mc'] = merged_df[ch_mc_col].sum(axis=1)
     merged_df['CH%'] = round(merged_df['CH_mc'] * 100 / merged_df['CH_cov'], 2)
 
-    # 输出
+    # Output
     try:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         merged_df.to_csv(output_file, index=True, sep = '\t')
@@ -154,22 +154,23 @@ def barcode_rank_data(
     rna_met_df: pd.DataFrame
 ) -> List[Dict[str, Any]]:
     """
-    根据条形码的类别（RNA-MET-contained barcode / RNA-only / Background）将按 UMI 排序的数据按相邻同类切段，生成用于绘图的段列表。
+    Segment UMI-ranked data by adjacent barcode categories (RNA+MET, RNA-only, Background)
+    to generate segment lists for plotting.
 
-    参数：
-    - pre_barcode_rank_data_df: 包含列 [idx, barcode, UMI, is_cell] 的 DataFrame，已按 UMI 降序排列；idx 为排序序号。
-    - rna_met_df: 包含列 [gex_cb] 的 DataFrame，用于定义 "RNA-MET-contained barcode" 的集合。
-    - tail_background_chunk_size: 当末端段为 Background 时，将其按该大小切分（默认 1000）。
+    Parameters:
+    - pre_barcode_rank_data_df: DataFrame with columns [idx, barcode, UMI, is_cell], already sorted by UMI descending; idx is the rank index.
+    - rna_met_df: DataFrame with column [gex_cb], defining the set of "RNA+MET" barcodes.
+    - tail_background_chunk_size: when the last segment is Background, split it by this size (default 1000).
 
-    返回：
-    - List[Dict]，每个 dict 形如 {x: int, y: List[float], text: str, color: str}
-      其中：
-        x: 该段的最小 idx（段起始位置）
-        y: 该段内的 UMI 列表（保持原顺序）
-        text: 段类型（"RNA-MET-contained barcode" | "RNA-only" | "Background"）
-        color: 颜色映射（RNA-MET-contained barcode -> orange；RNA-only -> blue；Background -> blue）
+    Returns:
+    - List[Dict], each dict like {x: int, y: List[float], text: str, color: str}
+      where:
+        x: minimum idx of the segment (segment start)
+        y: list of UMIs within the segment (original order)
+        text: segment type ("RNA+MET" | "RNA-only" | "Background")
+        color: color mapping (RNA+MET -> orange; RNA-only -> blue; Background -> blue)
     """
-    # 校验必需列
+    # Validate required columns
     required_pre = {"idx", "barcode", "UMI", "is_cell"}
     required_rna = {"gex_cb"}
     missing_pre = required_pre - set(pre_barcode_rank_data_df.columns)
@@ -179,23 +180,23 @@ def barcode_rank_data(
     if missing_rna:
         raise ValueError(f"rna_met_df 缺少列: {sorted(missing_rna)}")
 
-    # 保持顺序：优先按 idx 升序（若 idx 与 UMI 排序不一致，请保证输入一致性）
+    # Preserve order: sort by idx ascending (ensure consistency with UMI ranking)
     df = pre_barcode_rank_data_df.copy()
     df = df.sort_values(by=["idx"], ascending=True)
 
-    # RNA-MET-contained 集合
+    # Set of RNA+MET barcodes
     rna_set = set(rna_met_df["gex_cb"].astype(str))
 
-    # 映射颜色
+    # Color mapping
     color_map = {
         "RNA+MET": "rgba(80, 80, 201, 1.0)",
         "RNA-only": "rgba(255, 211, 26, 0.5)",
         "Background": "rgba(221, 221, 221, 1.0)",
     }
 
-    # 逐行标注 cells_status
+    # Annotate cells_status for each row
     def _status(row) -> str:
-        b = str(row["barcode"])  # 防止类型不一致
+        b = str(row["barcode"])  # Prevent type mismatch
         if b in rna_set:
             return "RNA+MET"
         elif bool(row["is_cell"]):
@@ -205,8 +206,8 @@ def barcode_rank_data(
 
     df = df.assign(cells_status=df.apply(_status, axis=1))
 
-    # 将相邻同状态切段（保存 idx 列表和 UMI 列表，后续用于末尾 Background 切分）
-    segments_data: List[Dict[str, Any]] = []  # 暂存：{"status": str, "idxs": List[int], "umis": List[float]}
+    # Split adjacent rows with the same status into segments (keep idx and UMI lists)
+    segments_data: List[Dict[str, Any]] = []  # Temporary: {"status": str, "idxs": List[int], "umis": List[float]}
     current = {"status": None, "idxs": [], "umis": []}
 
     for _, row in df.iterrows():
@@ -228,7 +229,7 @@ def barcode_rank_data(
     if current["status"] is not None:
         segments_data.append(current)
     
-    # 转换为最终输出格式
+    # Convert to final output format
     result: List[Dict[str, Any]] = []
     for seg in segments_data:
         status = seg["status"]

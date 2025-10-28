@@ -249,6 +249,139 @@ process FASTP_METHYLATION {
     """
 }
 
+// Expression data quality control (multi-group)
+process FASTP_EXPRESSION_MULTI {
+    tag "$sample-FASTP_EXPRESSION_MULTI-$group"
+    publishDir "${params.outdir}/fastp"
+    
+    input:
+    tuple val(sample), val(group), val(exp_r1), val(exp_r2)
+    
+    output:
+    tuple val(sample), val(group), path("${sample}_${group}_expression_clean_R1.fastq.gz"), path("${sample}_${group}_expression_clean_R2.fastq.gz"), emit: rna_fastp_multi_data
+    path "*.{html,json}"
+    
+    script:
+    def cores = Math.max(1, task.cpus - 2)
+    """
+    set -e
+    stage_file() {
+        local src="\$1"
+        local name=\$(basename "\$src")
+        if [[ "\$src" == oss://* ]]; then
+            echo "Downloading \$src" >&2
+            cfg="${projectDir}/bin/.ossutilconfig"
+            if [ -f "\$cfg" ]; then
+                ossutil cp --sign-version v4 --region cn-beijing -c "\$cfg" "\$src" "\$name" 1>&2
+            else
+                ossutil cp --sign-version v4 --region cn-beijing "\$src" "\$name" 1>&2
+            fi
+            if [ \$? -ne 0 ]; then
+                echo "ERROR: ossutil failed for \$src" >&2
+                exit 1
+            fi
+        else
+            if [ -f "\$src" ]; then
+                ln -s "\$src" "\$name"
+            else
+                cp "\$src" "\$name"
+            fi
+        fi
+        echo "\$name"
+    }
+    R1_LOCAL=\$(stage_file "${exp_r1}")
+    R2_LOCAL=\$(stage_file "${exp_r2}")
+
+    if [ ! -f "\$R1_LOCAL" ]; then
+        echo "ERROR: R1 file not found: \$R1_LOCAL" >&2
+        exit 1
+    fi
+    if [ ! -f "\$R2_LOCAL" ]; then
+        echo "ERROR: R2 file not found: \$R2_LOCAL" >&2
+        exit 1
+    fi
+
+    fastp \
+        -i \$R1_LOCAL \
+        -I \$R2_LOCAL \
+        -o ${sample}_${group}_expression_clean_R1.fastq.gz \
+        -O ${sample}_${group}_expression_clean_R2.fastq.gz \
+        -w ${cores} \
+        -h ${sample}_${group}_expression_fastp.html \
+        -j ${sample}_${group}_expression_fastp.json \
+        --cut_tail --cut_tail_window_size 1 \
+        --cut_tail_mean_quality 3  --unqualified_percent_limit 80 \
+        --n_base_limit 10  --length_required 60 --max_len1 60 --max_len2 0
+    """
+}
+
+// Methylation data quality control (multi-group)
+process FASTP_METHYLATION_MULTI {
+    tag "$sample-FASTP_METHYLATION_MULTI-$group"
+    publishDir "${params.outdir}/fastp"
+    
+    input:
+    tuple val(sample), val(group), val(methy_r1), val(methy_r2)
+    
+    output:
+    tuple val(sample), val(group), path("${sample}_${group}_methylation_clean_R1.fastq.gz"), path("${sample}_${group}_methylation_clean_R2.fastq.gz"), emit: methy_fastp_multi_data
+    path "*.{html,json}"
+    
+    script:
+    def cores = Math.max(1, task.cpus - 2)
+    """
+    set -e
+    stage_file() {
+        local src="\$1"
+        local name=\$(basename "\$src")
+        if [[ "\$src" == oss://* ]]; then
+            echo "Downloading \$src" >&2
+            cfg="${projectDir}/bin/.ossutilconfig"
+            if [ -f "\$cfg" ]; then
+                ossutil cp --sign-version v4 --region cn-beijing -c "\$cfg" "\$src" "\$name" 1>&2
+            else
+                ossutil cp --sign-version v4 --region cn-beijing "\$src" "\$name" 1>&2
+            fi
+            if [ \$? -ne 0 ]; then
+                echo "ERROR: ossutil failed for \$src" >&2
+                exit 1
+            fi
+        else
+            if [ -f "\$src" ]; then
+                ln -s "\$src" "\$name"
+            else
+                cp "\$src" "\$name"
+            fi
+        fi
+        echo "\$name"
+    }
+    R1_LOCAL=\$(stage_file "${methy_r1}")
+    R2_LOCAL=\$(stage_file "${methy_r2}")
+
+    if [ ! -f "\$R1_LOCAL" ]; then
+        echo "ERROR: R1 file not found: \$R1_LOCAL" >&2
+        exit 1
+    fi
+    if [ ! -f "\$R2_LOCAL" ]; then
+        echo "ERROR: R2 file not found: \$R2_LOCAL" >&2
+        exit 1
+    fi
+
+    fastp \
+        -i \$R1_LOCAL \
+        -I \$R2_LOCAL \
+        -o ${sample}_${group}_methylation_clean_R1.fastq.gz \
+        -O ${sample}_${group}_methylation_clean_R2.fastq.gz \
+        -w ${cores} \
+        -h ${sample}_${group}_methylation_fastp.html \
+        -j ${sample}_${group}_methylation_fastp.json \
+        --disable_adapter_trimming \
+        --cut_tail --cut_tail_window_size 1 \
+        --cut_tail_mean_quality 3  --unqualified_percent_limit 80 \
+        --n_base_limit 10  --length_required 60
+    """
+}
+
 
 // RNA expression analysis
 process SEEKSOULTOOLS_RNA {
@@ -256,7 +389,8 @@ process SEEKSOULTOOLS_RNA {
     publishDir "${params.outdir}/${sample}_exp/"
     
     input:
-    tuple val(sample), path(exp_clean_r1), path(exp_clean_r2)
+    // 传入多组清洗后的 R1/R2 文件列表（使用 path 以便 K8s 挂载）
+    tuple val(sample), path(exp_r1_list), path(exp_r2_list)
     
     output:
     tuple val(sample), path("${sample}/Analysis/step3/filtered_feature_bc_matrix/barcodes.tsv.gz"), emit: gex_barcodes
@@ -269,12 +403,19 @@ process SEEKSOULTOOLS_RNA {
     
     script:
     def cores = Math.max(1, task.cpus - 2)
+    // Build quoted fq args from lists; also create local symlinks
+    def pairs_norm = (0..<exp_r1_list.size()).collect { i -> [ exp_r1_list[i].toString(), exp_r2_list[i].toString() ] }
+    def fq_args = pairs_norm.collect { pr ->
+        def r1n = pr[0].tokenize('/')[-1]
+        def r2n = pr[1].tokenize('/')[-1]
+        "--fq1 \"${r1n}\" --fq2 \"${r2n}\""
+    }.join(' ')
     """
     set -e
+    
     seeksoultools rna run \
         --samplename ${sample} \
-        --fq1 ${exp_clean_r1} \
-        --fq2 ${exp_clean_r2} \
+        ${fq_args} \
         --outdir . \
         --core ${cores} \
         --chemistry ${params.exp_chemistry} \
@@ -294,18 +435,27 @@ process METHYLATION_BARCODE_EXTRACTION {
     publishDir "${params.outdir}/${sample}_methy/"
     
     input:
-    tuple val(sample),  path(methy_clean_r1), path(methy_clean_r2)
+    // 传入多组清洗后的 R1/R2 文件列表（使用 path 以便 K8s 挂载）
+    tuple val(sample), path(methy_r1_list), path(methy_r2_list)
     
     output:
     tuple val(sample), path("step1/${sample}_forward_*_1.fq.gz"), path("step1/${sample}_forward_*_2.fq.gz"), path("step1/${sample}_reverse_*_1.fq.gz"), path("step1/${sample}_reverse_*_2.fq.gz"), path("${sample}_methy_summary.json"), emit: methy_barcode_output
     
     script:
     def cores = Math.max(1, task.cpus - 2)
+    // Guard against empty lists
+    if (methy_r1_list == null || methy_r1_list.size()==0) throw new IllegalArgumentException("No methylation R1 inputs for ${sample}")
+    if (methy_r2_list == null || methy_r2_list.size()==0) throw new IllegalArgumentException("No methylation R2 inputs for ${sample}")
+    def pairs_norm_m = (0..<methy_r1_list.size()).collect { i -> [ methy_r1_list[i].toString(), methy_r2_list[i].toString() ] }
+    def fq_args_m = pairs_norm_m.collect { pr ->
+        def r1n = pr[0].tokenize('/')[-1]
+        def r2n = pr[1].tokenize('/')[-1]
+        "--fq1 \"${r1n}\" --fq2 \"${r2n}\""
+    }.join(' ')
     """
     set -e
     barcode_cs_multi.py \
-        --fq1 ${methy_clean_r1} \
-        --fq2 ${methy_clean_r2} \
+        ${fq_args_m} \
         --barcode ${params.methy_barcode_wl} \
         --outdir . \
         --samplename ${sample} \
