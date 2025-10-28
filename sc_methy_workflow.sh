@@ -31,7 +31,7 @@ bismark_core=$((core/8))
 
 # Get script path
 shell_path=`dirname "$0"`;
-script_path=${shell_path}/src
+script_path=${shell_path}/nf/bin
 
 # Set reference genome related file paths
 genomeDir=${database_dir}/star          # STAR index directory
@@ -39,12 +39,11 @@ genomefa=$database_dir/fasta/genome.fa  # Reference genome fasta file
 gtf=$database_dir/genes/genes.gtf       # Gene annotation file
 genomebed=$database_dir/bed/chr_len.bed # Chromosome length file
 chrom_size_path=$database_dir/bed/chr_nochrM.bed  # Chromosome length file without mitochondria
-annofile=$database_dir/bed/chr_100kbins_anno.bed  # 100kb bins annotation file
 bismark_genome=$database_dir/fasta      # bismark genome index directory
 
 # Set barcode whitelist files
-U3CB_methylation=${script_path}/barcodes/U3CB_methylation.txt  # Methylation library barcode whitelist
-cbcsv=${script_path}/barcodes/bUCB3_whitelist.csv             # Correspondence between methylation and transcriptome library barcodes
+U3CB_methylation=${script_path}/nf/bin/barcodes/U3CB_methylation.txt  # Methylation library barcode whitelist
+cbcsv=${script_path}/nf/bin/barcodes/bUCB3_whitelist.csv             # Correspondence between methylation and transcriptome library barcodes
 
 # Set output paths
 exp_outdir=${outdir}/${sample}_exp    # Transcriptome analysis result directory
@@ -125,13 +124,6 @@ fastp \
 
 ########################## step2: Bismark Alignment and Deduplication ##########################
 mkdir -p ${methy_dir}/step2/bismark
-
-# Add barcode/umi information to read names for subsequent deduplication using deduplicate_bismark with barcode/umi information
-python ${script_path}/add_umi_to_fastq_end_of_read_name.py \
-    --fq1 ${methy_dir}/step1/${sample}_1.fq.gz \
-    --fq2 ${methy_dir}/step1/${sample}_2.fq.gz \
-    --samplename ${sample} \
-    --outdir ${methy_dir}/step2/bismark
 
 # bismark alignment, actual CPU usage should be 4 times the set core
 # Parameter description:
