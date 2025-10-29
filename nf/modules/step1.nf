@@ -397,6 +397,8 @@ process SEEKSOULTOOLS_RNA {
     tuple val(sample), path("${sample}/Analysis/${sample}_gex_summary.json"), emit: gex_summary_json
     tuple val(sample), path("${sample}/Analysis/step3/filtered_feature_bc_matrix"), emit: filtered_dir
     tuple val(sample), path("${sample}/Analysis/step3/raw_feature_bc_matrix"), emit: raw_dir
+    tuple val(sample), path("${sample}/Analysis/step3/counts.xls"), emit: counts_xls
+    tuple val(sample), path("${sample}/Analysis/step3/detail.xls"), emit: detail_xls
     tuple val(sample), path("${sample}/Analysis/step4/tsne_umi.xls"), emit: tsne_umi
     tuple val(sample), path("${sample}/Analysis/step4/FindAllMarkers.xls"), emit:diff_data
     path("${sample}/")

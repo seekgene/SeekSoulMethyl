@@ -55,7 +55,7 @@ process MULTI_REPORT {
     
     input:
     tuple val(sample), path(gexjson), path(filtered_dir), 
-    path(raw_dir), path(tsne_file), path(rna_diff_data),
+    path(raw_dir), path(counts_xls), path(detail_xls), path(tsne_file), path(rna_diff_data),
     path(methyjson), path(methy_filtered_counts_file), path(methy_cells_info_file)
     
 
@@ -63,7 +63,6 @@ process MULTI_REPORT {
     tuple val(sample), path("${sample}_rna_methyl_report.html"), path("${sample}_rna_met.json"), emit: rna_methy_report
     
     script:
-    def whitelist_file = params.chemistry == "DD-M" ? "--whitelist_file ${params.cbcsv}" : ""
     """
     set -e
     step4_report_rna_met.py \
@@ -73,9 +72,12 @@ process MULTI_REPORT {
     --filtered_counts_file ${methy_filtered_counts_file} \
     --cells_file ${methy_cells_info_file} \
     --raw_dir ${raw_dir} \
+    --counts_file ${counts_xls} \
+    --detail_file ${detail_xls} \
+    --gtf ${params.gtf} \
     --filtered_dir ${filtered_dir} \
     --diff_data ${rna_diff_data} \
-    ${whitelist_file} \
+    --whitelist_file ${params.cbcsv} \
     --outdir . \
     --samplename ${sample} \
     --rawname ${sample} \

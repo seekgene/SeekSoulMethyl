@@ -10,6 +10,7 @@ import gzip
 from scipy.io import mmread
 import click
 from typing import List, Dict, Any
+from seeksoultools.utils.countUtil import calculate_metrics
 
 def check_software_version() -> dict:
     sft_version = {}
@@ -281,10 +282,14 @@ def get_gex_tsne(tsnefile):
 @click.option('--raw_dir', required=True, help='Path to the raw directory.')
 @click.option('--filtered_dir', required=True, help='Path to the filtered directory.')
 @click.option('--diff_data', required=True, help='Path to the diff data file.')
+@click.option('--gtf', required=True, help='Path to the GTF file.')
+@click.option('--counts_file', required=True, help='Path to the counts file.')
+@click.option('--detail_file', required=True, help='Path to the detail file.')
 def report(gexjson, metjson, 
            tsne_file, filtered_counts_file, cells_file, 
            outdir, samplename, rawname, nf_config, 
-           raw_dir, filtered_dir, diff_data, whitelist_file=None,
+           raw_dir, filtered_dir, diff_data, gtf, counts_file, detail_file, 
+           whitelist_file=None,
            **kwargs):
     os.makedirs(outdir, exist_ok=True)
     datajson = os.path.join(os.path.dirname(__file__), './utils/report_rna_met/sgrnamet.json')
@@ -383,12 +388,21 @@ def report(gexjson, metjson,
     data_summary["RNA"][1]["right"][0]["data"]["Reads Mapped to Intronic Regions"] = f'{gex_summary["mapping"]["Reads Mapped to Intronic Regions"]:.2%}'
     data_summary["RNA"][1]["right"][0]["data"]["Reads Mapped to Exonic Regions"] = f'{gex_summary["mapping"]["Reads Mapped to Exonic Regions"]:.2%}'
     
+    df["gex_cb"].to_csv(os.path.join(outdir, f'tmp_filtered_barcode.xls'), header = False, index = False, sep = "\t")
+    gex_summary_cells_update, downsample_dict = calculate_metrics(
+        counts_file = counts_file,
+        detail_file = detail_file,
+        filterd_barcodes_file = os.path.join(outdir, f'tmp_filtered_barcode.xls'),
+        gtf = gtf,
+        basedir = os.path.join(outdir)
+    )
+    os.remove(os.path.join(outdir, f'tmp_filtered_barcode.xls'))
     data_summary["RNA"][2]["left"][0]["data"]["Estimated Number of Cells"] = f'{df.shape[0]:,}'
-    data_summary["RNA"][2]["left"][0]["data"]["Fraction Reads in Cells"] = f'{gex_summary["cells"]["Fraction Reads in Cells"]:.2%}'
-    data_summary["RNA"][2]["left"][0]["data"]["Mean Reads per Cell"] = f'{gex_summary["cells"]["Mean Reads per Cell"]:,}'
-    data_summary["RNA"][2]["left"][0]["data"]["Median Genes per Cell"] = f'{int(df["nFeature_RNA"].median()):,}'
-    data_summary["RNA"][2]["left"][0]["data"]["Median UMI Counts per Cell"] = f'{int(df["nCount_RNA"].median()):,}'
-    data_summary["RNA"][2]["left"][0]["data"]["Total Genes Detected"] = f'{gex_summary["cells"]["Total Genes Detected"]:,}'
+    data_summary["RNA"][2]["left"][0]["data"]["Fraction Reads in Cells"] = f'{gex_summary_cells_update["Fraction Reads in Cells"]:.2%}'
+    data_summary["RNA"][2]["left"][0]["data"]["Mean Reads per Cell"] = f'{int(gex_summary_cells_update["Mean Reads per Cell"]):,}'
+    data_summary["RNA"][2]["left"][0]["data"]["Median Genes per Cell"] = f'{int(gex_summary_cells_update["Median Genes per Cell"]):,}'
+    data_summary["RNA"][2]["left"][0]["data"]["Median UMI Counts per Cell"] = f'{int(gex_summary_cells_update["Median UMI Counts per Cell"]):,}'
+    data_summary["RNA"][2]["left"][0]["data"]["Total Genes Detected"] = f'{gex_summary_cells_update["Total Genes Detected"]:,}'
     
     data_summary["RNA"][3]["left"][0]["data"]["x"] = [0, ] + gex_summary["downsample"]["Reads"]
     data_summary["RNA"][3]["left"][0]["data"]["y"] = [0, ] + gex_summary["downsample"]["median"]

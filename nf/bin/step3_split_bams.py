@@ -57,10 +57,13 @@ def count_reads(bam: str, samplename: str, outdir: str, max_cells: int = 12000) 
     logger.info(f"Selected top {len(top_barcodes)} barcodes from {len(barcode_counts)} total barcodes")
     return top_barcodes
 
-def get_barcodes_from_gexcb_and_cbcsv(gexcb: str, cbcsv: str) -> list:
-    cbcsv_map = pd.read_csv(cbcsv, header = 0, sep = ',')
+def get_barcodes_from_gexcb_and_cbcsv(gexcb: str, cbcsv: str = None) -> list:
     gexcb = pd.read_csv(gexcb, header = None, names = ['barcode'], sep = '\t')
-    return cbcsv_map[cbcsv_map['gex_cb'].isin(gexcb['barcode'])]['m_cb'].tolist()
+    if cbcsv:
+        cbcsv_map = pd.read_csv(cbcsv, header = 0, sep = ',')
+        return cbcsv_map[cbcsv_map['gex_cb'].isin(gexcb['barcode'])]['m_cb'].tolist()
+    else:
+        return gexcb['barcode'].tolist()
 
 def split_sortbyname_bam(
     bam: str,

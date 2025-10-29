@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: seeksoultools
+Version: 1.3.0
+Summary: A professional bioinformatics toolkit for comprehensive single-cell transcriptome analysis, supporting RNA-seq, V(D)J sequencing, and full-length transcriptome workflows with high accuracy and efficiency.
+Home-page: https://github.com/seekgenebio/seeksoultools
+Author: seekgenebio
+Author-email: tools@seekgene.com
+License: MIT
+Platform: Linux
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Natural Language :: English

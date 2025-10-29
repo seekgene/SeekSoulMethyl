@@ -1,0 +1,2 @@
+[console_scripts]
+seeksoultools = seeksoultools:cli

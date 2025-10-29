@@ -72,20 +72,24 @@ def aggregate_metrics_to_csv(input_dir, output_csv, gex_cb_map):
             if context in df.index:
                 total_cpg_number += df.loc[context, 'number']
         try:
-        # Calculate summary metrics for each cell
-            cell_summary = {
-                'cell_barcode': cell_barcode,
-                'total_mc': df['mc'].sum(),
-                'total_cov': df['cov'].sum(),
-                'total_number': df['number'].sum(),
-                'total_cpg_number': total_cpg_number,
-                'weighted_mc_rate': df['mc'].sum() / df['cov'].sum() if df['cov'].sum() > 0 else 0,
-                'genome_cov': df['genome_cov'].iloc[0] if len(df) > 0 else 0,
-                'genome_cov_raw_umi': df['genome_cov_raw_umi'].iloc[0] if len(df) > 0 else 0,
-                'cell_saturation': df['cell_saturation'].iloc[0] if len(df) > 0 else 0,
-                'genome_cov_new_umi': df['genome_cov_new_umi'].iloc[0] if len(df) > 0 else 0,
-                'gex_cb': gex_cb_map.get(cell_barcode, None)
-            }
+            if gex_cb_map:
+                gex_cb = gex_cb_map.get(cell_barcode, None)
+            else:
+                gex_cb = cell_barcode
+            # Calculate summary metrics for each cell
+                cell_summary = {
+                    'cell_barcode': cell_barcode,
+                    'total_mc': df['mc'].sum(),
+                    'total_cov': df['cov'].sum(),
+                    'total_number': df['number'].sum(),
+                    'total_cpg_number': total_cpg_number,
+                    'weighted_mc_rate': df['mc'].sum() / df['cov'].sum() if df['cov'].sum() > 0 else 0,
+                    'genome_cov': df['genome_cov'].iloc[0] if len(df) > 0 else 0,
+                    'genome_cov_raw_umi': df['genome_cov_raw_umi'].iloc[0] if len(df) > 0 else 0,
+                    'cell_saturation': df['cell_saturation'].iloc[0] if len(df) > 0 else 0,
+                    'genome_cov_new_umi': df['genome_cov_new_umi'].iloc[0] if len(df) > 0 else 0,
+                    'gex_cb': gex_cb
+                }
         except:
             print(f"skip {cell_barcode}", flush = True)
             continue
@@ -142,6 +146,10 @@ def aggregate_metrics_to_json(input_dir, output_json, gex_cb_map):
             if context in df.index:
                 total_cpg_number += df.loc[context, 'number']
         try:    
+            if gex_cb_map:
+                gex_cb = gex_cb_map.get(cell_barcode, None)
+            else:
+                gex_cb = cell_barcode
             # Store complete data for individual cell
             cell_data = {
                 'file_path': csv_file,
@@ -154,8 +162,7 @@ def aggregate_metrics_to_json(input_dir, output_json, gex_cb_map):
                 'genome_cov_raw_umi': int(df['genome_cov_raw_umi'].iloc[0]) if len(df) > 0 else 0,
                 'cell_saturation': float(df['cell_saturation'].iloc[0]) if len(df) > 0 else 0.0,
                 'genome_cov_new_umi': int(df['genome_cov_new_umi'].iloc[0]) if len(df) > 0 else 0,
-                'gex_cb': gex_cb_map.get(cell_barcode, None),
-                
+                'gex_cb': gex_cb,
                 'contexts': {}
             }
         except:
@@ -234,7 +241,10 @@ def main():
     print(f"Output JSON: {output_json}")
     if args.delete_source:
         print("Warning: Source CSV files will be deleted after successful aggregation")
-    gex_cb_map = generate_cb_map_dcit(args.cbcsv)
+    if not args.cbcsv:
+        gex_cb_map = None
+    else:
+        gex_cb_map = generate_cb_map_dcit(args.cbcsv)
     # Generate CSV summary
     csv_result = aggregate_metrics_to_csv(args.input_dir, output_csv, gex_cb_map)
     

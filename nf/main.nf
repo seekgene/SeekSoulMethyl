@@ -22,13 +22,16 @@ params.genomefa = "${params.database_dir}/fasta/genome.fa"
 params.gtf = "${params.database_dir}/genes/genes.gtf"
 params.bismark_ref = "${params.database_dir}/fasta/"
 params.chrom_size_path = "${params.database_dir}/bed/chr_nochrM.bed"
-params.cbcsv = "${projectDir}/bin/barcodes/bUCB3_whitelist.csv"
 params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
 params.chemistry = "DD-M"
 if (params.chemistry == "DD-M") {
     params.exp_chemistry = "DDV2"
+    params.cbcsv = "${projectDir}/bin/barcodes/DD-M_bUCB3_whitelist.csv"
+    params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
 }else if (params.chemistry == "ME5") {
     params.exp_chemistry = "ME5"
+    params.cbcsv = "${projectDir}/bin/barcodes/ME5_bUCB3_whitelist.csv"
+    params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
 }
 params.split_fastq = 4
 params.filter_ch = 2
@@ -436,17 +439,20 @@ workflow {
             .map{it -> tuple(it[0], it[1])}, by: 0))
     
     // Multi-report
+    /*
     multi_report = MULTI_REPORT(
        rna_results.gex_summary_json
        .combine(rna_results.filtered_dir, by: 0)
        .combine(rna_results.raw_dir, by: 0)
+       .combine(rna_results.counts_xls, by: 0)
+       .combine(rna_results.detail_xls, by: 0)
        .combine(rna_results.tsne_umi, by: 0)
        .combine(rna_results.diff_data, by: 0)
        .combine(methylation_summary.methy_summary.map {it -> tuple(it[0], it[1])}, by: 0)
        .combine(merged_counts.merged_filtered_barcode_reads_counts.map {it -> tuple(it[0], it[2])}, by: 0)
        .combine(merged_counts.allcools_cells_csv_output, by: 0)
     )
-    
+    */
 }
 
 /*
