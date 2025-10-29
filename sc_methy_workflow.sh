@@ -219,7 +219,7 @@ if [ "${chemistry}" = "DD-M" ]; then
     cbcsv=${script_path}/nf/bin/barcodes/DD-M_bUCB3_whitelist.csv
     log_info "Using DD-M barcode whitelist: ${cbcsv}"
 elif [ "${chemistry}" = "ME5" ]; then
-    cbcsv=${script_path}/barcodes/ME5_bUCB3_whitelist.csv
+    cbcsv=${script_path}/nf/bin/barcodes/ME5_bUCB3_whitelist.csv
     log_info "Using ME5 barcode whitelist: ${cbcsv}"
 else
     log_warning "Unknown chemistry '${chemistry}', using default DD-M whitelist"
