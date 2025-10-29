@@ -405,11 +405,15 @@ process SEEKSOULTOOLS_RNA {
     
     script:
     def cores = Math.max(1, task.cpus - 2)
-    // Build quoted fq args from lists; also create local symlinks
-    def pairs_norm = (0..<exp_r1_list.size()).collect { i -> [ exp_r1_list[i].toString(), exp_r2_list[i].toString() ] }
-    def fq_args = pairs_norm.collect { pr ->
-        def r1n = pr[0].tokenize('/')[-1]
-        def r2n = pr[1].tokenize('/')[-1]
+    // Normalize inputs to lists to handle single-file vs multi-file cases
+    def r1s = (exp_r1_list instanceof java.util.List) ? exp_r1_list : [exp_r1_list]
+    def r2s = (exp_r2_list instanceof java.util.List) ? exp_r2_list : [exp_r2_list]
+    if (r1s.size() != r2s.size()) {
+        throw new IllegalArgumentException("Mismatched expression R1/R2 inputs for ${sample}: R1=${r1s.size()} R2=${r2s.size()}")
+    }
+    def fq_args = (0..<r1s.size()).collect { i ->
+        def r1n = r1s[i].toString().tokenize('/')[-1]
+        def r2n = r2s[i].toString().tokenize('/')[-1]
         "--fq1 \"${r1n}\" --fq2 \"${r2n}\""
     }.join(' ')
     """
@@ -437,7 +441,6 @@ process METHYLATION_BARCODE_EXTRACTION {
     publishDir "${params.outdir}/${sample}_methy/"
     
     input:
-    // 传入多组清洗后的 R1/R2 文件列表（使用 path 以便 K8s 挂载）
     tuple val(sample), path(methy_r1_list), path(methy_r2_list)
     
     output:
@@ -445,13 +448,17 @@ process METHYLATION_BARCODE_EXTRACTION {
     
     script:
     def cores = Math.max(1, task.cpus - 2)
-    // Guard against empty lists
-    if (methy_r1_list == null || methy_r1_list.size()==0) throw new IllegalArgumentException("No methylation R1 inputs for ${sample}")
-    if (methy_r2_list == null || methy_r2_list.size()==0) throw new IllegalArgumentException("No methylation R2 inputs for ${sample}")
-    def pairs_norm_m = (0..<methy_r1_list.size()).collect { i -> [ methy_r1_list[i].toString(), methy_r2_list[i].toString() ] }
-    def fq_args_m = pairs_norm_m.collect { pr ->
-        def r1n = pr[0].tokenize('/')[-1]
-        def r2n = pr[1].tokenize('/')[-1]
+    // Normalize inputs to lists to handle single-file vs multi-file cases
+    def mr1s = (methy_r1_list instanceof java.util.List) ? methy_r1_list : [methy_r1_list]
+    def mr2s = (methy_r2_list instanceof java.util.List) ? methy_r2_list : [methy_r2_list]
+    if (mr1s == null || mr1s.size()==0) throw new IllegalArgumentException("No methylation R1 inputs for ${sample}")
+    if (mr2s == null || mr2s.size()==0) throw new IllegalArgumentException("No methylation R2 inputs for ${sample}")
+    if (mr1s.size() != mr2s.size()) {
+        throw new IllegalArgumentException("Mismatched methylation R1/R2 inputs for ${sample}: R1=${mr1s.size()} R2=${mr2s.size()}")
+    }
+    def fq_args_m = (0..<mr1s.size()).collect { i ->
+        def r1n = mr1s[i].toString().tokenize('/')[-1]
+        def r2n = mr2s[i].toString().tokenize('/')[-1]
         "--fq1 \"${r1n}\" --fq2 \"${r2n}\""
     }.join(' ')
     """
