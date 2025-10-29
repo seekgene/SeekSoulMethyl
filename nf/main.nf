@@ -16,7 +16,7 @@ params.samplesheet = null
 params.outdir = "./results"
     
 // Database file paths
-params.database_dir = "/PROJ2/FLOAT/maxingyong/development/sc_methy/database_v1/refdata-cellranger-arc-GRCh38-2024-A"
+params.database_dir = ""
 params.genomeDir = "${params.database_dir}/star"
 params.genomefa = "${params.database_dir}/fasta/genome.fa"
 params.gtf = "${params.database_dir}/genes/genes.gtf"
