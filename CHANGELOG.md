@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 - Removed Bismark deduplication and featureCounts quantification steps
 - Adopted ALLCools (https://github.com/seekgene/ALLCools) for UMI-based deduplication and methylation level estimation
 - Methylation analysis now defaults to 20K bins with LSI for dimensionality reduction and clustering
+- SeekSoulTools add TSO trimming for RNA Read2 data.
+- Change chemistry DD-M to DD-MET3, ME5 to DD-MET5.
 
 ## [Unreleased] - 2024-08-25
 
