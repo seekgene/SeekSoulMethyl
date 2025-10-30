@@ -212,17 +212,17 @@ annofile=$database_dir/bed/chr_100kbins_anno.bed  # 100kb bins annotation file
 bismark_genome=$database_dir/fasta      # bismark genome index directory
 
 # Set barcode whitelist files
-U3CB_methylation=${script_path}/nf/bin/barcodes/U3CB_methylation.txt  # Methylation library barcode whitelist
+U3CB_methylation=${script_path}/barcodes/U3CB_methylation.txt  # Methylation library barcode whitelist
 # Set correspondence file between methylation and transcriptome library barcodes based on chemistry
 if [ "${chemistry}" = "DD-MET3" ]; then
-    cbcsv=${script_path}/nf/bin/barcodes/DD-M_bUCB3_whitelist.csv
+    cbcsv=${script_path}/barcodes/DD-M_bUCB3_whitelist.csv
     log_info "Using DD-MET3 barcode whitelist: ${cbcsv}"
 elif [ "${chemistry}" = "DD-MET5" ]; then
-    cbcsv=${script_path}/nf/bin/barcodes/ME5_bUCB3_whitelist.csv
+    cbcsv=${script_path}/barcodes/ME5_bUCB3_whitelist.csv
     log_info "Using DD-MET5 barcode whitelist: ${cbcsv}"
 else
     log_warning "Unknown chemistry '${chemistry}', using default DD-M whitelist"
-    cbcsv=${script_path}/nf/bin/barcodes/DD-M_bUCB3_whitelist.csv
+    cbcsv=${script_path}/barcodes/DD-M_bUCB3_whitelist.csv
     log_info "Using default barcode whitelist: ${cbcsv}"
 fi
 
