@@ -28,7 +28,6 @@
 
 # Set error handling
 set -e
-set -o pipefail
 
 # Logging functions (pure text output for clean log files)
 log_info() {
@@ -69,7 +68,7 @@ Named parameters:
   --database_dir  Reference genome database path (required)
   --chemistry     Chemistry type: DD-MET5 or DD-MET3 (default: DD-MET5)
   --core          Number of CPUs (default: 64)
-  --filter_ch     Filter channel (default: 2)
+  --filter_ch     Filter CH sites (default: 2)
   --help, -h      Show this help message
 
 Example:

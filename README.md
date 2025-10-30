@@ -79,25 +79,30 @@ conda activate seeksoulmethyl
 ```bash
 # sc_methy_workflow.sh can be found in the SeekSoulMethyl directory you cloned
 bash sc_methy_workflow.sh \
-    sample \
-    /path/to/expression_R1.fastq.gz \
-    /path/to/expression_R2.fastq.gz \
-    /path/to/methy_R1.fastq.gz \
-    /path/to/methy_R2.fastq.gz \
-    /path/to/output_dir \
-    /path/to/database/refdata-cellranger-arc-GRCh38-2024-A \
-    64
+/path/to/expression_R1.fastq.gz \
+/path/to/expression_R2.fastq.gz \
+/path/to/methy_R1.fastq.gz \
+/path/to/methy_R2.fastq.gz \
+--sample WTJW880 \
+--outdir /path/to/results \
+--database_dir /path/to/human-reference-GRCh38 \
+--chemistry DD-MET3 \
+--core 64 \
+--filter_ch 2
 ```
 
 ### Input Parameters:
-- **$1**: Sample name
-- **$2**: Single-cell transcriptome Read1 fastq file
-- **$3**: Single-cell transcriptome Read2 fastq file  
-- **$4**: Single-cell methylation Read1 fastq file
-- **$5**: Single-cell methylation Read2 fastq file
-- **$6**: Output directory path
-- **$7**: Reference genome database path
-- **$8**: Number of CPU cores
+
+- **$1**: Single-cell transcriptome Read1 fastq file
+- **$2**: Single-cell transcriptome Read2 fastq file  
+- **$3**: Single-cell methylation Read1 fastq file
+- **$4**: Single-cell methylation Read2 fastq file
+- **sample**: Sample name
+- **outdir**: Output directory path
+- **database_dir**: Reference genome database path
+- **chemistry**: Methylation chemistry (DD-MET3 or DD-MET5)
+- **core**: Number of CPU cores
+- **filter_ch**: Filter reads that contain > n CH methylation sites.
 
 
 
