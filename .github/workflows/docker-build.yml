@@ -4,12 +4,12 @@ on:
   push:
     branches: [ main, master, develop ]
     paths:
-      - 'dockfile/**'
+      - 'nf/dockerfile/**'
       - '.github/workflows/docker-build.yml'
   pull_request:
     branches: [ main, master, develop ]
     paths:
-      - 'dockfile/**'
+      - 'nf/dockerfile/**'
       - '.github/workflows/docker-build.yml'
   workflow_dispatch:
 
@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         dockerfile:
-          - path: dockfile/Dockerfile.env_seeksoulmethy
+          - path: nf/dockerfile/Dockerfile.env_seeksoulmethy
             name: seeksoulmethy
     
     permissions:
@@ -171,7 +171,7 @@ jobs:
     strategy:
       matrix:
         dockerfile:
-          - path: dockfile/Dockerfile.env_seeksoulmethy
+          - path: nf/dockerfile/Dockerfile.env_seeksoulmethy
             name: seeksoulmethy
     
     permissions:
