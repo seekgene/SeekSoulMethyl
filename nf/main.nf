@@ -2,7 +2,7 @@
 
 /*
  * Single-cell RNA-seq and methylation analysis pipeline
- * Version: 4.0.0
+ * Version: 1.0.0
  */
 
 nextflow.enable.dsl=2
@@ -23,13 +23,13 @@ params.gtf = "${params.database_dir}/genes/genes.gtf"
 params.bismark_ref = "${params.database_dir}/fasta/"
 params.chrom_size_path = "${params.database_dir}/bed/chr_nochrM.bed"
 params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
-params.chemistry = "DD-M"
-if (params.chemistry == "DD-M") {
+params.chemistry = "DD-MET3"
+if (params.chemistry == "DD-MET3") {
     params.exp_chemistry = "DDV2"
     params.cbcsv = "${projectDir}/bin/barcodes/DD-M_bUCB3_whitelist.csv"
     params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
-}else if (params.chemistry == "ME5") {
-    params.exp_chemistry = "ME5"
+}else if (params.chemistry == "DD-MET5") {
+    params.exp_chemistry = "DD-MET5"
     params.cbcsv = "${projectDir}/bin/barcodes/ME5_bUCB3_whitelist.csv"
     params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
 }
@@ -37,16 +37,14 @@ params.split_fastq = 4
 params.filter_ch = 2
 // Help information
 params.help = false
-
-
 // Help message
 def helpMessage() {
     log.info"""
-    Single-cell RNA-seq and methylation analysis pipeline - v4.0.0
+    Single-cell RNA-seq and methylation analysis pipeline - v1.0.0
     
     Usage:
     Batch sample analysis:
-        nextflow run sc_methy_workflow_v4.nf --samplesheet samples.csv --outdir results
+        nextflow run main.nf --samplesheet samples.csv --outdir results --database_dir refdata-cellranger-arc-GRCh38-2024-A
     """.stripIndent()
 }
 

@@ -18,237 +18,6 @@ process COMPUTE_CPG_SITES {
     """
 }
 
-// Intelligent merging of all data files for the same sample - parallel optimized version
-process MERGE_SAMPLE_DATA {
-    tag "$sample-mergedata"
-    publishDir "${params.outdir}/RawData/merged"
-    
-    input:
-    tuple val(sample), val(file_groups)
-    
-    output:
-    tuple val(sample), path("${sample}_merged_expression_R1.fastq.gz"), path("${sample}_merged_expression_R2.fastq.gz"), path("${sample}_merged_methylation_R1.fastq.gz"), path("${sample}_merged_methylation_R2.fastq.gz"), emit:merge_data
-    
-    script:
-    // Collect all expression and methylation files
-    def exp_r1_files = []
-    def exp_r2_files = []
-    def methy_r1_files = []
-    def methy_r2_files = []
-    
-    file_groups.each { key, file_list ->
-        if (key == 'expression_r1') {
-            exp_r1_files.addAll(file_list)
-        } else if (key == 'expression_r2') {
-            exp_r2_files.addAll(file_list)
-        } else if (key == 'methylation_r1') {
-            methy_r1_files.addAll(file_list)
-        } else if (key == 'methylation_r2') {
-            methy_r2_files.addAll(file_list)
-        }
-    }
-    
-    // Separate OSS files and local files
-    def exp_r1_oss = exp_r1_files.findAll { it.toString().startsWith('oss://') }
-    def exp_r1_local = exp_r1_files.findAll { !it.toString().startsWith('oss://') }
-    def exp_r2_oss = exp_r2_files.findAll { it.toString().startsWith('oss://') }
-    def exp_r2_local = exp_r2_files.findAll { !it.toString().startsWith('oss://') }
-    def methy_r1_oss = methy_r1_files.findAll { it.toString().startsWith('oss://') }
-    def methy_r1_local = methy_r1_files.findAll { !it.toString().startsWith('oss://') }
-    def methy_r2_oss = methy_r2_files.findAll { it.toString().startsWith('oss://') }
-    def methy_r2_local = methy_r2_files.findAll { !it.toString().startsWith('oss://') }
-    
-    // Generate download and merge commands
-    def download_oss_cmd = ""
-    def all_files = []
-    
-    // Collect all OSS files that need to be downloaded
-    [exp_r1_oss, exp_r2_oss, methy_r1_oss, methy_r2_oss].flatten().unique().each { oss_file ->
-        if (oss_file) {
-            download_oss_cmd += "echo 'Downloading ${oss_file}...'\n"
-            download_oss_cmd += "ossutil cp --sign-version v4 --region cn-beijing -c ${projectDir}/bin/.ossutilconfig ${oss_file} .\n"
-            download_oss_cmd += "if [ \$? -eq 0 ]; then echo '✓ Downloaded ${oss_file}'; else echo '✗ Failed to download ${oss_file}'; exit 1; fi\n"
-        }
-    }
-    
-    // Generate merge commands
-    def merge_exp_r1_cmd = ""
-    def merge_exp_r2_cmd = ""
-    def merge_methy_r1_cmd = ""
-    def merge_methy_r2_cmd = ""
-    
-    // Process expression data R1
-    def exp_r1_all = []
-    exp_r1_local.each { exp_r1_all.add(it.toString()) }
-    exp_r1_oss.each { oss_file -> 
-        def filename = oss_file.toString().split('/').last()
-        exp_r1_all.add(filename)
-    }
-    merge_exp_r1_cmd = exp_r1_all.size() == 0 ? 
-        "touch ${sample}_merged_expression_R1.fastq.gz" : 
-        (exp_r1_all.size() > 1 ? 
-            "merge_fastq_files.py --force-single-end -i ${exp_r1_all.join(' ')} -o ${sample}_merged_expression_R1.fastq.gz" : 
-            "ln -s  ${exp_r1_all[0]} ${sample}_merged_expression_R1.fastq.gz")
-    
-    // Process expression data R2
-    def exp_r2_all = []
-    exp_r2_local.each { exp_r2_all.add(it.toString()) }
-    exp_r2_oss.each { oss_file -> 
-        def filename = oss_file.toString().split('/').last()
-        exp_r2_all.add(filename)
-    }
-    merge_exp_r2_cmd = exp_r2_all.size() == 0 ? 
-        "touch ${sample}_merged_expression_R2.fastq.gz" : 
-        (exp_r2_all.size() > 1 ? 
-            "merge_fastq_files.py --force-single-end -i ${exp_r2_all.join(' ')} -o ${sample}_merged_expression_R2.fastq.gz" : 
-            "ln -s ${exp_r2_all[0]} ${sample}_merged_expression_R2.fastq.gz")
-    
-    // Process methylation data R1
-    def methy_r1_all = []
-    methy_r1_local.each { methy_r1_all.add(it.toString()) }
-    methy_r1_oss.each { oss_file -> 
-        def filename = oss_file.toString().split('/').last()
-        methy_r1_all.add(filename)
-    }
-    merge_methy_r1_cmd = methy_r1_all.size() == 0 ? 
-        "touch ${sample}_merged_methylation_R1.fastq.gz" : 
-        (methy_r1_all.size() > 1 ? 
-            "merge_fastq_files.py --force-single-end -i ${methy_r1_all.join(' ')} -o ${sample}_merged_methylation_R1.fastq.gz" : 
-            "ln -s ${methy_r1_all[0]} ${sample}_merged_methylation_R1.fastq.gz")
-    
-    // Process methylation data R2
-    def methy_r2_all = []
-    methy_r2_local.each { methy_r2_all.add(it.toString()) }
-    methy_r2_oss.each { oss_file -> 
-        def filename = oss_file.toString().split('/').last()
-        methy_r2_all.add(filename)
-    }
-    merge_methy_r2_cmd = methy_r2_all.size() == 0 ? 
-        "touch ${sample}_merged_methylation_R2.fastq.gz" : 
-        (methy_r2_all.size() > 1 ? 
-            "merge_fastq_files.py --force-single-end -i ${methy_r2_all.join(' ')} -o ${sample}_merged_methylation_R2.fastq.gz" : 
-            "ln -s ${methy_r2_all[0]} ${sample}_merged_methylation_R2.fastq.gz")
-    
-    """
-    set -e
-    echo "Starting parallel data merging for sample: ${sample}"
-    echo "Expression R1 files: ${exp_r1_files.size()}"
-    echo "Expression R2 files: ${exp_r2_files.size()}"
-    echo "Methylation R1 files: ${methy_r1_files.size()}"
-    echo "Methylation R2 files: ${methy_r2_files.size()}"
-    # Download OSS files
-    if [ -n "${download_oss_cmd}" ]; then
-        echo "Downloading OSS files..."
-        ${download_oss_cmd}
-        echo "OSS download completed"
-    fi
-    
-    # Set up PID array for parallel processing
-    pids=()
-    
-    # Parallel merge of expression data R1
-    echo "Starting Expression R1 merge..."
-    (${merge_exp_r1_cmd}) &
-    pids+=(\$!)
-    
-    # Parallel merge of expression data R2
-    echo "Starting Expression R2 merge..."
-    (${merge_exp_r2_cmd}) &
-    pids+=(\$!)
-    
-    # Parallel merge of methylation data R1
-    echo "Starting Methylation R1 merge..."
-    (${merge_methy_r1_cmd}) &
-    pids+=(\$!)
-    
-    # Parallel merge of methylation data R2
-    echo "Starting Methylation R2 merge..."
-    (${merge_methy_r2_cmd}) &
-    pids+=(\$!)
-    
-    # Wait for all parallel tasks to complete
-    echo "Waiting for all merge operations to complete..."
-    for pid in \"\${pids[@]}\"; do
-        wait \$pid
-        if [ \$? -ne 0 ]; then
-            echo "Error: Merge operation failed for PID \$pid"
-            exit 1
-        fi
-    done
-    
-    echo "Verifying merged files..."
-    for file in ${sample}_merged_expression_R1.fastq.gz ${sample}_merged_expression_R2.fastq.gz ${sample}_merged_methylation_R1.fastq.gz ${sample}_merged_methylation_R2.fastq.gz; do
-        if [ ! -f \"\$file\" ]; then
-            echo "Error: Output file \$file not found"
-            exit 1
-        fi
-        echo "✓ \$file created successfully"
-    done
-    
-    echo "Parallel data merging completed successfully for sample: ${sample}"
-    """
-}
-
-// Expression data quality control
-process FASTP_EXPRESSION {
-    tag "$sample-FASTP_EXPRESSION"
-    publishDir "${params.outdir}/fastp"
-    
-    input:
-    tuple val(sample), path(exp_r1), path(exp_r2)
-    
-    output:
-    tuple val(sample), path("${sample}_expression_clean_R1.fastq.gz"), path("${sample}_expression_clean_R2.fastq.gz"), emit: rna_fastp_data
-    path "*.{html,json}"
-    
-    script:
-    """
-    set -e 
-    fastp \
-        -i ${exp_r1} \
-        -I ${exp_r2} \
-        -o ${sample}_expression_clean_R1.fastq.gz \
-        -O ${sample}_expression_clean_R2.fastq.gz \
-        -w ${task.cpus} \
-        -h ${sample}_expression_fastp.html \
-        -j ${sample}_expression_fastp.json \
-        --cut_tail --cut_tail_window_size 1 \
-        --cut_tail_mean_quality 3  --unqualified_percent_limit 80 \
-        --n_base_limit 10  --length_required 60 --max_len1 60 --max_len2 0
-    """
-}
-
-// Methylation data quality control
-process FASTP_METHYLATION {
-    tag "$sample-FASTP_METHYLATION"
-    publishDir "${params.outdir}/fastp"
-    
-    input:
-    tuple val(sample), path(methy_r1), path(methy_r2)
-    
-    output:
-    tuple val(sample), path("${sample}_methylation_clean_R1.fastq.gz"), path("${sample}_methylation_clean_R2.fastq.gz"), emit: methy_fastp_data
-    path "*.{html,json}"
-    
-    script:
-    def cores = Math.max(1, task.cpus - 2)
-    """
-    set -e
-    fastp \
-        -i ${methy_r1} \
-        -I ${methy_r2} \
-        -o ${sample}_methylation_clean_R1.fastq.gz \
-        -O ${sample}_methylation_clean_R2.fastq.gz \
-        -w ${cores} \
-        -h ${sample}_methylation_fastp.html \
-        -j ${sample}_methylation_fastp.json \
-        --disable_adapter_trimming \
-       --cut_tail --cut_tail_window_size 1 \
-       --cut_tail_mean_quality 3  --unqualified_percent_limit 80 \
-       --n_base_limit 10  --length_required 60
-    """
-}
-
 // Expression data quality control (multi-group)
 process FASTP_EXPRESSION_MULTI {
     tag "$sample-FASTP_EXPRESSION_MULTI-$group"
@@ -389,7 +158,6 @@ process SEEKSOULTOOLS_RNA {
     publishDir "${params.outdir}/${sample}_exp/"
     
     input:
-    // 传入多组清洗后的 R1/R2 文件列表（使用 path 以便 K8s 挂载）
     tuple val(sample), path(exp_r1_list), path(exp_r2_list)
     
     output:
@@ -444,7 +212,7 @@ process METHYLATION_BARCODE_EXTRACTION {
     tuple val(sample), path(methy_r1_list), path(methy_r2_list)
     
     output:
-    tuple val(sample), path("step1/${sample}_forward_*_1.fq.gz"), path("step1/${sample}_forward_*_2.fq.gz"), path("step1/${sample}_reverse_*_1.fq.gz"), path("step1/${sample}_reverse_*_2.fq.gz"), path("${sample}_methy_summary.json"), emit: methy_barcode_output
+    tuple val(sample), path("step1/${sample}_forward_*1.fq.gz"), path("step1/${sample}_forward_*2.fq.gz"), path("step1/${sample}_reverse_*1.fq.gz"), path("step1/${sample}_reverse_*2.fq.gz"), path("${sample}_methy_summary.json"), emit: methy_barcode_output
     
     script:
     def cores = Math.max(1, task.cpus - 2)
@@ -473,8 +241,14 @@ process METHYLATION_BARCODE_EXTRACTION {
         --filter_ch ${params.filter_ch} \
         --split_fastq ${params.split_fastq}
     mv "${sample}_summary.json" "${sample}_methy_summary.json"
+    if [[ ${params.split_fastq} > 0 ]]; then
+        rm step1/${sample}_forward_1.fq.gz 
+        rm step1/${sample}_forward_2.fq.gz 
+        rm step1/${sample}_reverse_1.fq.gz 
+        rm step1/${sample}_reverse_2.fq.gz
+    fi
     """
-}
+}    
 
 // Parse and group fastq files - pair based on identifiers
 process PARSE_FASTQ_FILES {
@@ -495,11 +269,11 @@ process PARSE_FASTQ_FILES {
     echo "Creating forward pairs based on identifiers..."
     
     # Extract identifiers from all forward R1 files
-    for r1_file in ${sample}_forward_*_1.fq.gz; do
+    for r1_file in ${sample}_forward_*1.fq.gz; do
         if [ -f "\$r1_file" ]; then
             # Extract identifier (e.g., extract AA from sample_forward_AA_1.fq.gz)
-            identifier=\$(echo "\$r1_file" | sed 's/.*_forward_\\(.*\\)_1\\.fq\\.gz/\\1/')
-            r2_file="${sample}_forward_\${identifier}_2.fq.gz"
+            identifier=\$(echo "\$r1_file" | sed 's/.*_forward_\\(.*\\)1\\.fq\\.gz/\\1/')
+            r2_file="${sample}_forward_\${identifier}2.fq.gz"
             
             # Check if corresponding R2 file exists
             if [ -f "\$r2_file" ]; then
@@ -515,11 +289,11 @@ process PARSE_FASTQ_FILES {
     echo "Creating reverse pairs based on identifiers..."
     
     # Extract identifiers from all reverse R1 files
-    for r1_file in ${sample}_reverse_*_1.fq.gz; do
+    for r1_file in ${sample}_reverse_*1.fq.gz; do
         if [ -f "\$r1_file" ]; then
             # Extract identifier (e.g., extract AA from sample_reverse_AA_1.fq.gz)
-            identifier=\$(echo "\$r1_file" | sed 's/.*_reverse_\\(.*\\)_1\\.fq\\.gz/\\1/')
-            r2_file="${sample}_reverse_\${identifier}_2.fq.gz"
+            identifier=\$(echo "\$r1_file" | sed 's/.*_reverse_\\(.*\\)1\\.fq\\.gz/\\1/')
+            r2_file="${sample}_reverse_\${identifier}2.fq.gz"
             
             # Check if corresponding R2 file exists
             if [ -f "\$r2_file" ]; then
@@ -558,7 +332,7 @@ process CREATE_FORWARD_PAIRS {
     while IFS=',' read -r r1_file r2_file; do
         if [ -n "\$r1_file" ] && [ -n "\$r2_file" ]; then
             # Extract pair_id from filename (e.g., AA from HC2_4_forward_AA_1.fq.gz)
-            pair_id=\$(echo "\$r1_file" | sed 's/.*_forward_\\(.*\\)_1\\.fq\\.gz/\\1/')
+            pair_id=\$(echo "\$r1_file" | sed 's/.*_forward\\(.*\\)1\\.fq\\.gz/\\1/')
             echo "${sample},\${pair_id},\${r1_file},\${r2_file}"
         fi
     done < ${pairs_file}
@@ -582,7 +356,7 @@ process CREATE_REVERSE_PAIRS {
     while IFS=',' read -r r1_file r2_file; do
         if [ -n "\$r1_file" ] && [ -n "\$r2_file" ]; then
             # Extract pair_id from filename (e.g., AA from HC2_4_reverse_AA_1.fq.gz)
-            pair_id=\$(echo "\$r1_file" | sed 's/.*_reverse_\\(.*\\)_1\\.fq\\.gz/\\1/')
+            pair_id=\$(echo "\$r1_file" | sed 's/.*_reverse\\(.*\\)1\\.fq\\.gz/\\1/')
             echo -e "${sample},\${pair_id},\${r1_file},\${r2_file}"
         fi
     done < ${pairs_file}

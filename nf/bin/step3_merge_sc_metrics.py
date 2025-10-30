@@ -77,7 +77,7 @@ def aggregate_metrics_to_csv(input_dir, output_csv, gex_cb_map):
             else:
                 gex_cb = cell_barcode
             # Calculate summary metrics for each cell
-                cell_summary = {
+            cell_summary = {
                     'cell_barcode': cell_barcode,
                     'total_mc': df['mc'].sum(),
                     'total_cov': df['cov'].sum(),
@@ -89,7 +89,7 @@ def aggregate_metrics_to_csv(input_dir, output_csv, gex_cb_map):
                     'cell_saturation': df['cell_saturation'].iloc[0] if len(df) > 0 else 0,
                     'genome_cov_new_umi': df['genome_cov_new_umi'].iloc[0] if len(df) > 0 else 0,
                     'gex_cb': gex_cb
-                }
+            }
         except:
             print(f"skip {cell_barcode}", flush = True)
             continue

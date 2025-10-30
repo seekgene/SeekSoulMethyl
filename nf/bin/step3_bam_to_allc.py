@@ -35,6 +35,7 @@ def run_allcools(args) -> str:
     if tag:
         other_args += f' --tag {tag}'
     samtools_sort_cmd = (f'samtools sort -o {outdir}/{barcode}_dedup_sort.bam {bam};')
+    samtools_index_cmd = (f'samtools index {outdir}/{barcode}_dedup_sort.bam;')
     bam_to_allc_cmd = (
         f'allcools bam-to-allc '
         f'--bam_path {outdir}/{barcode}_dedup_sort.bam '
@@ -44,6 +45,7 @@ def run_allcools(args) -> str:
     )
     try:
         subprocess.run(samtools_sort_cmd, check=True, shell = True)
+        subprocess.run(samtools_index_cmd, check=True, shell = True)
         subprocess.run(bam_to_allc_cmd, check=True, shell = True)
         return f'{barcode} done'
     except subprocess.CalledProcessError as e:

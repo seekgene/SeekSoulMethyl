@@ -47,14 +47,14 @@ CHEMISTRY = {
         'adapter1': [["GATCGGAAGAGCACACGTCTGAACTCCAGTCAC", "3"], ["ACACTCTTTCCCTACACGACGCTCTTCCGATCT", "5"], ["TTTTTTTTTTTT", "5"] ], 
         'adapter2': [["GTGACTGGAGTTCAGACGTGTGCTCTTCCGATC", "5"], ["AAAAAAAAAAAA", "3"], ["AAGCAGTGGTATCAACGCAGAGTACATGG", "5"]],
     },
-    "ME5":{
+    "DD-MET5":{
         'shift': False,
         'structure': 'B17U12',
         'barcode': (os.path.join(__srcdir, 'barcode', 'ME5', 'U3CB_methylation.txt.gz'),),
         'match_type': (1,),
         'sc5p': True,
         'adapter1': [["GATCGGAAGAGCACACGTCTGAACTCCAGTCAC", "3"], ["ACACTCTTTCCCTACACGACGCTCTTCCGATCT", "5"], ["TTTTTTTTTTTT", "5"] ], 
-        'adapter2': [["GTGACTGGAGTTCAGACGTGTGCTCTTCCGATC", "5"], ["AAAAAAAAAAAA", "3"], ["AAGCAGTGGTATCAACGCAGAGTACATGG", "5"]],
+        'adapter2': [["GTGACTGGAGTTCAGACGTGTGCTCTTCCGATC", "5"], ["AAAAAAAAAAAA", "3"], ["AAGCAGTGGTATCAACGCAGAGTACATGG", "5"], ["CCCATATAAGAAA", "3"]],
     },    
     "DDVS":{
         'shift': False,

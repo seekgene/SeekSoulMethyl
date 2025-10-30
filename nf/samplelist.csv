@@ -1,0 +1,2 @@
+sample_id,expression_r1,expression_r2,methylation_r1,methylation_r2
+WTJW880,/path/to/tiny_demo/XYRD-WTJW880-E_S1_L005_R1_001.fastq.gz,/path/to/PROJ2/FLOAT/weiqiuxia/project/20241227_methy/script/SeekSoulMethyl/nf/test/tiny_demo/XYRD-WTJW880-E_S1_L005_R2_001.fastq.gz,/path/to/PROJ2/FLOAT/weiqiuxia/project/20241227_methy/script/SeekSoulMethyl/nf/test/tiny_demo/XYRD-WTJW880-MET_S01_L001_R1_001.fastq.gz,/path/to/PROJ2/FLOAT/weiqiuxia/project/20241227_methy/script/SeekSoulMethyl/nf/test/tiny_demo/XYRD-WTJW880-MET_S01_L001_R2_001.fastq.gz

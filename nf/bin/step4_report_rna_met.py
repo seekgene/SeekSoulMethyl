@@ -394,12 +394,13 @@ def report(gexjson, metjson,
         detail_file = detail_file,
         filterd_barcodes_file = os.path.join(outdir, f'tmp_filtered_barcode.xls'),
         gtf = gtf,
-        basedir = os.path.join(outdir)
+        basedir = os.path.join(outdir),
+        filterd_features_file = None
     )
     os.remove(os.path.join(outdir, f'tmp_filtered_barcode.xls'))
     data_summary["RNA"][2]["left"][0]["data"]["Estimated Number of Cells"] = f'{df.shape[0]:,}'
     data_summary["RNA"][2]["left"][0]["data"]["Fraction Reads in Cells"] = f'{gex_summary_cells_update["Fraction Reads in Cells"]:.2%}'
-    data_summary["RNA"][2]["left"][0]["data"]["Mean Reads per Cell"] = f'{int(gex_summary_cells_update["Mean Reads per Cell"]):,}'
+    data_summary["RNA"][2]["left"][0]["data"]["Mean Reads per Cell"] = f'{int(gex_summary["stat"]["total"]/int(df.shape[0])):,}'
     data_summary["RNA"][2]["left"][0]["data"]["Median Genes per Cell"] = f'{int(gex_summary_cells_update["Median Genes per Cell"]):,}'
     data_summary["RNA"][2]["left"][0]["data"]["Median UMI Counts per Cell"] = f'{int(gex_summary_cells_update["Median UMI Counts per Cell"]):,}'
     data_summary["RNA"][2]["left"][0]["data"]["Total Genes Detected"] = f'{gex_summary_cells_update["Total Genes Detected"]:,}'

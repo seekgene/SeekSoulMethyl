@@ -7,7 +7,7 @@
 #       --sample <sample_name> \
 #       --outdir <output_directory> \
 #       --database_dir <database_directory> \
-#       [--chemistry ME5|DD-M] \
+#       [--chemistry DD-MET5|DD-MET3] \
 #       [--core <cpu_count>] \
 #       [--filter_ch <filter_channel>] \
 #
@@ -21,7 +21,7 @@
 #   --sample        Sample name (required)
 #   --outdir        Result output path (required)
 #   --database_dir  Reference genome database path (required)
-#   --chemistry     Chemistry type: ME5 or DD-M (default: ME5)
+#   --chemistry     Chemistry type: DD-MET5 or DD-MET3 (default: DD-MET5)
 #   --core          Number of CPUs (default: 64)
 #   --filter_ch     Filter channel (default: 2)
 #
@@ -53,7 +53,7 @@ Usage:
       --sample <sample_name> \\
       --outdir <output_directory> \\
       --database_dir <database_directory> \\
-      [--chemistry ME5|DD-M] \\
+      [--chemistry DD-MET5|DD-MET3] \\
       [--core <cpu_count>] \\
       [--filter_ch <filter_channel>] \\
 
@@ -67,7 +67,7 @@ Named parameters:
   --sample        Sample name (required)
   --outdir        Result output path (required)
   --database_dir  Reference genome database path (required)
-  --chemistry     Chemistry type: ME5 or DD-M (default: ME5)
+  --chemistry     Chemistry type: DD-MET5 or DD-MET3 (default: DD-MET5)
   --core          Number of CPUs (default: 64)
   --filter_ch     Filter channel (default: 2)
   --help, -h      Show this help message
@@ -77,7 +77,7 @@ Example:
       --sample sample1 \\
       --outdir /path/to/output \\
       --database_dir /path/to/database \\
-      --chemistry ME5 \\
+      --chemistry DD-MET5 \\
       --core 64
 EOF
     exit 0
@@ -99,7 +99,7 @@ shift 4
 sample=""
 outdir=""
 database_dir=""
-chemistry="ME5"
+chemistry="DD-MET5"
 core=64
 filter_ch=2
 
@@ -159,8 +159,8 @@ if [ -z "$database_dir" ]; then
 fi
 
 # Validate chemistry parameter
-if [ "$chemistry" != "ME5" ] && [ "$chemistry" != "DD-M" ]; then
-    log_error "Invalid chemistry parameter: $chemistry. Must be ME5 or DD-M"
+if [ "$chemistry" != "DD-MET5" ] && [ "$chemistry" != "DD-MET3" ]; then
+    log_error "Invalid chemistry parameter: $chemistry. Must be DD-MET5 or DD-MET3"
     exit 1
 fi
 
@@ -215,12 +215,12 @@ bismark_genome=$database_dir/fasta      # bismark genome index directory
 # Set barcode whitelist files
 U3CB_methylation=${script_path}/nf/bin/barcodes/U3CB_methylation.txt  # Methylation library barcode whitelist
 # Set correspondence file between methylation and transcriptome library barcodes based on chemistry
-if [ "${chemistry}" = "DD-M" ]; then
+if [ "${chemistry}" = "DD-MET3" ]; then
     cbcsv=${script_path}/nf/bin/barcodes/DD-M_bUCB3_whitelist.csv
-    log_info "Using DD-M barcode whitelist: ${cbcsv}"
-elif [ "${chemistry}" = "ME5" ]; then
+    log_info "Using DD-MET3 barcode whitelist: ${cbcsv}"
+elif [ "${chemistry}" = "DD-MET5" ]; then
     cbcsv=${script_path}/nf/bin/barcodes/ME5_bUCB3_whitelist.csv
-    log_info "Using ME5 barcode whitelist: ${cbcsv}"
+    log_info "Using DD-MET5 barcode whitelist: ${cbcsv}"
 else
     log_warning "Unknown chemistry '${chemistry}', using default DD-M whitelist"
     cbcsv=${script_path}/nf/bin/barcodes/DD-M_bUCB3_whitelist.csv
@@ -271,9 +271,9 @@ log_info "Step 2.1: Starting transcriptome analysis with SeekSoulTools..."
 mkdir -p ${exp_outdir}
 
 # Set chemistry parameter for transcriptome analysis based on input chemistry
-if [ "${chemistry}" = "ME5" ]; then
-    exp_chemistry="ME5"
-elif [ "${chemistry}" = "DD-M" ]; then
+if [ "${chemistry}" = "DD-MET5" ]; then
+    exp_chemistry="DD-MET5"
+elif [ "${chemistry}" = "DD-MET3" ]; then
     exp_chemistry="DDV2"
 else
     exp_chemistry="${chemistry}"

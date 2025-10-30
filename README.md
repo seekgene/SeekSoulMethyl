@@ -108,7 +108,48 @@ bash sc_methy_workflow.sh \
 - **Storage**: At least 500GB available space
 - **OS**: Linux (recommended Ubuntu 18.04+ or CentOS 7+)
 
+## Running with nextflow
 
+1. Install nextflow:
+```bash
+conda install -n seeksoulmethyl -c bioconda nextflow
+```
+2. Prepare your input samplesheet
+```
+cat > samplelist.csv << EOF
+sample,expression_R1,expression_R2,methy_R1,methy_R2
+XYRD-WTJW880,/path/to/XYRD-WTJW880-E_S1_L005_R1_001.fastq.gz,/path/to/XYRD-WTJW880-E_S1_L005_R2_001.fastq.gz,/path/to/XYRD-WTJW880-MET_S01_L001_R1_001.fastq.gz,/path/to/XYRD-WTJW880-MET_S01_L001_R2_001.fastq.gz
+EOF
+
+# expression_R1: Single-cell transcriptome Read1 fastq file
+# expression_R2: Single-cell transcriptome Read2 fastq file
+# methy_R1: Single-cell methylation Read1 fastq file
+# methy_R2: Single-cell methylation Read2 fastq file
+```
+
+3. Run the pipeline:
+```bash
+nextflow run -bg SeekSoulMethyl/nf/main.nf \
+--outdir /path/to/tiny_demo/results/ \
+--samplesheet samplelist.csv \
+-w /path/to/tiny_demo/results/work \
+-c SeekSoulMethyl/nf/nextflow.config \
+-profile aliyun_k8s \
+--database_dir /path/to/human-reference-GRCh38/ \
+--split_fastq 4 \
+--filter_ch 2 \
+--chemistry DD-MET3 > methy.log
+
+# --outdir: final results directory
+# --samplesheet: input samplesheet file
+# -w: working directory for nextflow
+# -c: nextflow configuration file. Must be modified according to your server configuration!!!!!
+# -profile: nextflow profile for aliyun k8s
+# --database_dir: reference genome database directory
+# --split_fastq: split fastq according to first n bases of barcode.
+# --filter_ch: filter reads that contain > 2 CH methylation sites.
+# --chemistry: methylation chemistry (DD-MET3 or DD-MET5)
+```
 
 ## License
 

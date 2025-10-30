@@ -66,7 +66,7 @@ ME5_MAX_READ1_LEN = 63
 
 
 CHEMISTRY = {
-    "DD-M":{
+    "DD-MET3":{
         'shift': False,
         'structure': 'B17',
         'adapter1': [["AGATGTGTATAAGAGAYAG", "5", 0.1, 9],
@@ -75,7 +75,7 @@ CHEMISTRY = {
                      ["CTRTCTCTTATACACATCT","3",0.1, 9]], # ME,ME-rev R:G/A
         'match_type': (1,),
     },
-    "ME5":{
+    "DD-MET5":{
         'shift': False,
         'structure': 'B17U12',
         'adapter1': [["AGATGTGTATAAGAGAYAG", "5", 0.1, 9],
@@ -502,7 +502,7 @@ class Pipeline:
 
 class AdapterFilter:
     """Filter adapters"""
-    def __init__(self, adapter1:list=[], adapter2:list=[], non_insert_len:int=52, chemistry:str="DD-M"):
+    def __init__(self, adapter1:list=[], adapter2:list=[], non_insert_len:int=52, chemistry:str="DD-MET3"):
         self.adapter1 = []
         self.non_insert_len = non_insert_len
         self.chemistry = chemistry
@@ -564,7 +564,7 @@ class AdapterFilter:
                     r1_start = self.non_insert_len # cutadapter not rm me left, start from non_insert_len
                 if r1_me_right:
                     r1_end = len(r1.sequence) - 9 # cutadapter cut me right, rm additial 9bp for uncorret methylation of Transposase
-                max_length = ME5_MAX_READ1_LEN if self.chemistry == "ME5" else DEFAULT_MAX_READ1_LEN
+                max_length = ME5_MAX_READ1_LEN if self.chemistry == "DD-MET5" else DEFAULT_MAX_READ1_LEN
                 if r1_end - r1_start > max_length:
                     r1_end = r1_start + max_length
                 r1.sequence = r1.sequence[r1_start:r1_end]
@@ -716,7 +716,7 @@ def calculate_average_quality(quality_string):
     average_quality = sum(quality_scores) / len(quality_scores)
     return average_quality
 
-def calculate_ct_conversion_rate(r1, stat_Dict, positions=None, chemistry="DD-M"):
+def calculate_ct_conversion_rate(r1, stat_Dict, positions=None, chemistry="DD-MET3"):
     """
     Calculate CT conversion rate for methylation analysis
     
@@ -740,7 +740,7 @@ def calculate_ct_conversion_rate(r1, stat_Dict, positions=None, chemistry="DD-M"
         positions = DEFAULT_POSITIONS
     
     # Set sequence extraction parameters based on chemistry parameter
-    if chemistry == "ME5":
+    if chemistry == "DD-MET5":
         seq_7f_start = ME5_SEQ_7F_START
         seq_7f_len = ME5_SEQ_7F_LEN
         l17me_start = ME5_L17ME_START
@@ -770,12 +770,12 @@ def calculate_ct_conversion_rate(r1, stat_Dict, positions=None, chemistry="DD-M"
         stat_Dict["num_17lme"] += 1
     
     # Check 7f sequence pattern
-    if chemistry != "ME5" and (seq_7f != 'TTGCTGT' and seq_7f != 'TTGTTGT'):
-        # In non-ME5 mode, if 7f sequence doesn't match, return directly
+    if chemistry != "DD-MET5" and (seq_7f != 'TTGCTGT' and seq_7f != 'TTGTTGT'):
+        # In non-DD-MET5 mode, if 7f sequence doesn't match, return directly
         return stat_Dict
     
     # 7f sequence matches, increase count
-    if chemistry != "ME5":
+    if chemistry != "DD-MET5":
         stat_Dict["num_7f"] += 1
 
     
@@ -1091,7 +1091,7 @@ def process_barcode(fq1, fq2, fq_out_forward, fq_out_reverse, fqout_multi, r1_st
                     _alt = "M"
 
                 # Determine UMI format based on chemistry type
-                if chemistry == "ME5":
+                if chemistry == "DD-MET5":
                     final_umi = umi  # ME5 mode uses original UMI directly
                 else:
                     # DD-M mode uses first 12bp of final output r1 sequence as umi
@@ -1165,7 +1165,7 @@ def process_barcode(fq1, fq2, fq_out_forward, fq_out_reverse, fqout_multi, r1_st
 @click.option("--skip_misL", "do_L_correction", is_flag=True, default=True, show_default=True, help="Not allow one base err correction in each part of linker.")
 @click.option("--skip_multi", "use_multi", is_flag=True, default=True, show_default=True, help="Do not rescue barcode match multi when do correction.")
 @click.option("--core", default=4, show_default=True, help="Set max number of cpus that pipeline might request at the same time.")
-@click.option("--chemistry", required=True, type=click.Choice(["DD-M","ME5"]), help="chemistry")
+@click.option("--chemistry", required=True, type=click.Choice(["DD-MET3","DD-MET5"]), help="chemistry")
 @click.option("--split_fastq", default=0, type=int, show_default=True, help="Split output by first n bases of barcode (0=no split)")
 @click.option("--filter_ch", default=0, type=int, show_default=True, help="CH pattern filtering threshold (0=no filtering, >0=filter when pattern appears more than this number of times)")
 
@@ -1210,11 +1210,11 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
         logger.info("ignore barcode match multi barcode in whitelist.")
     
     # Select positions and non_insert_len based on chemistry parameter
-    if chemistry == "ME5":
+    if chemistry == "DD-MET5":
         positions = ME5_POSITIONS
         non_insert_len = ME5_NON_INSERT_LEN
-        logger.info(f"Chemistry '{chemistry}' detected - using ME5 mode positions for CT conversion rate calculation.")
-        logger.info(f"Using ME5 mode non_insert_len: {non_insert_len}")
+        logger.info(f"Chemistry '{chemistry}' detected - using DD-MET5 mode positions for CT conversion rate calculation.")
+        logger.info(f"Using DD-MET5 mode non_insert_len: {non_insert_len}")
     else:
         positions = DEFAULT_POSITIONS
         non_insert_len = DEFAULT_NON_INSERT_LEN
@@ -1350,7 +1350,7 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
                     chain_direction = determine_chain_direction(r1.sequence, chemistry, positions)
                     
                     # Determine UMI format based on chemistry type
-                    if chemistry == "ME5":
+                    if chemistry == "DD-MET5":
                         final_umi = umi  # ME5 mode uses original UMI directly
                     else:
                         # DD-M mode uses first 12bp of final output r1 sequence as umi

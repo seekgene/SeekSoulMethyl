@@ -38,7 +38,7 @@ def rna(obj, steps):
 @click.option("--skip_multi", "use_multi", is_flag=True, default=True, show_default=True, help="Do not rescue barcode match multi when do correction.")
 @click.option("--skip_len", "use_short_read", is_flag=True, default=False, show_default=True, help="Skip filtering short reads after adapter filter, short reads will be used.")
 @click.option("--core", default=4, show_default=True, help="Set max number of cpus that pipeline might request at the same time.")
-@click.option("--chemistry", type=click.Choice(["DDV1", "DDV2", "ME5", "DDVS", "DD5V1", "MM", "MM-D", "DD-Q", "custom"]), help="DDV1, DDV2, ME5, DDVS, DD5V1, MM, MM-D, DD-Q.")
+@click.option("--chemistry", type=click.Choice(["DDV1", "DDV2", "DD-MET5", "DDVS", "DD5V1", "MM", "MM-D", "DD-Q", "custom"]), help="DDV1, DDV2, DD-MET5, DDVS, DD5V1, MM, MM-D, DD-Q.")
 @validate_cores
 @click.pass_obj
 def step1(obj, **kwargs):
@@ -171,8 +171,8 @@ def report(obj, **kwargs):
               help="Path to GTF file.")
 @click.option("--star_path", "star_path", default="STAR",
               help="Path to executable STAR aligner.")
-@click.option("--chemistry", type=click.Choice(["DDV1", "DDV2", "ME5", "DDVS", "DD5V1", "MM", "MM-D", "DD-Q", "Auto", "custom"]),
-              help="DDV1, DDV2, ME5, DDVS, DD5V1, MM, MM-D, DD-Q, Auto.")
+@click.option("--chemistry", type=click.Choice(["DDV1", "DDV2", "DD-MET5", "DDVS", "DD5V1", "MM", "MM-D", "DD-Q", "Auto", "custom"]),
+              help="DDV1, DDV2, DD-MET5, DDVS, DD5V1, MM, MM-D, DD-Q, Auto.")
 @click.option("--expectNum", "expectNum", default=3000, show_default=True,
               help="Expected number of cells that used as input in cell calling algorithm.")
 @click.option("--forceCell", "forceCell", required=False,
