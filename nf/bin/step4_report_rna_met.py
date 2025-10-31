@@ -36,7 +36,7 @@ def get_workflow_version_regex(config_path='nextflow.config'):
         if match:
             return match.group(1)
     except Exception as e:
-        print(f"读取配置文件失败: {e}")
+        print(f"Failed to read config file: {e}")
     return ""
     
 def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, cells_file: str, output_file: str, whitelist_file: str = None) -> pd.DataFrame:
@@ -52,7 +52,7 @@ def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, 
     try:
         tsne_df = pd.read_table(tsne_file, index_col=0)
     except Exception as e:
-        logger.error(f"读取 tsne 文件失败: {tsne_file} -> {e}")
+        logger.error(f"Failed to read tSNE file: {tsne_file} -> {e}")
         raise
     # Use index as the RNA barcode column
     tsne_df = tsne_df.copy()
@@ -65,20 +65,20 @@ def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, 
     try:
         counts_df = pd.read_csv(filtered_counts_file)
     except Exception as e:
-        logger.error(f"读取甲基化计数文件失败: {filtered_counts_file} -> {e}")
+        logger.error(f"Failed to read methylation counts file: {filtered_counts_file} -> {e}")
         raise
     if 'barcode' not in counts_df.columns:
-        raise ValueError(f"{filtered_counts_file} 缺少 'barcode' 列")
+        raise ValueError(f"Missing 'barcode' column in {filtered_counts_file}")
     counts_df = counts_df.rename(columns={'barcode': 'm_cb'})
 
     # Read cells (methylation barcode is in cell_barcode; strip suffix)
     try:
         cells_df = pd.read_csv(cells_file)
     except Exception as e:
-        logger.error(f"读取 cells 文件失败: {cells_file} -> {e}")
+        logger.error(f"Failed to read cells file: {cells_file} -> {e}")
         raise
     if 'cell_barcode' not in cells_df.columns:
-        raise ValueError(f"{cells_file} 缺少 'cell_barcode' 列")
+        raise ValueError(f"Missing 'cell_barcode' column in {cells_file}")
     # Remove suffix "_allc.gz" or possible ".gz"
     cells_df = cells_df.copy()
     cells_df['m_cb'] = (
@@ -94,7 +94,7 @@ def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, 
         wl_df = pd.read_csv(whitelist_file)
         for col in ('gex_cb', 'm_cb'):
             if col not in wl_df.columns:
-                raise ValueError(f"{whitelist_file} 缺少列: {col}")
+                raise ValueError(f"Whitelist file {whitelist_file} is missing column: {col}")
         # Deduplicate, keep the first mapping per gex_cb
         wl_df = wl_df[['gex_cb', 'm_cb']].drop_duplicates(subset=['gex_cb'])
         tsne_map_df = tsne_map_df.merge(wl_df, on='gex_cb', how='inner')
@@ -123,10 +123,10 @@ def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, 
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         merged_df.to_csv(output_file, index=True, sep = '\t')
         logger.info(
-            f"合并完成，输出文件: {output_file} | tsne行数: {len(tsne_df)} | 计数匹配: {merged_df['reads_counts'].notna().sum()} | cells匹配: {merged_df['cell_barcode'].notna().sum()}"
+            f"Merge completed, output file: {output_file} | tSNE rows: {len(tsne_df)} | counts matched: {merged_df['reads_counts'].notna().sum()} | cells matched: {merged_df['cell_barcode'].notna().sum()}"
         )
     except Exception as e:
-        logger.error(f"写出合并结果失败: {output_file} -> {e}")
+        logger.error(f"Failed to write merged result: {output_file} -> {e}")
         raise
     return(merged_df)
 
@@ -177,9 +177,9 @@ def barcode_rank_data(
     missing_pre = required_pre - set(pre_barcode_rank_data_df.columns)
     missing_rna = required_rna - set(rna_met_df.columns)
     if missing_pre:
-        raise ValueError(f"pre_barcode_rank_data_df 缺少列: {sorted(missing_pre)}")
+        raise ValueError(f"pre_barcode_rank_data_df missing columns: {sorted(missing_pre)}")
     if missing_rna:
-        raise ValueError(f"rna_met_df 缺少列: {sorted(missing_rna)}")
+        raise ValueError(f"rna_met_df missing columns: {sorted(missing_rna)}")
 
     # Preserve order: sort by idx ascending (ensure consistency with UMI ranking)
     df = pre_barcode_rank_data_df.copy()
