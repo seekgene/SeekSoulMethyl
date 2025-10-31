@@ -184,13 +184,46 @@ process ALLCOOLS_GENERATE_DATASETS {
         \$QUANTIFIERS_PARAMS
     """
 }
+
+process ALLCOOLS_SUBMERGE {
+    tag "$sample-ALLCOOLS_SUBMERGE"
+    //publishDir "${params.outdir}/${sample}_methy/step3/"
+
+    input:
+    tuple val(sample), val(pair_id), path(allcools_allc_output)
+
+    output:
+    tuple val(sample), val(pair_id), path("${sample}_${pair_id}/"), emit: allcools_submerge_allc
+
+    script:
+    def cores = Math.max(1, task.cpus - 2)
+    """
+    set -e     
+    mkdir -p ${sample}_${pair_id}
+    ls */*_allc.gz > merge_list.txt
+    n_lines=`wc -l merge_list.txt | awk '{print \$1}'`
+    if [[ \$n_lines -gt 1 ]]; then
+        allcools merge \
+        --cpu ${cores} \
+        --allc_paths merge_list.txt \
+        --output_path ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz \
+        --chrom_size_path ${params.chrom_size_path}
+    else
+        source_file=`ls */*_allc.gz`
+        cp \${source_file} ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz
+        cp \${source_file}.tbi ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz.tbi
+    fi
+    """
+
+}
 // merge single cell allc to bulk allc
 process ALLCOOLS_MERGE {
     tag "$sample-ALLCOOLS_MERGE"
     publishDir "${params.outdir}/${sample}_methy/step3/"
 
     input:
-    tuple val(sample), path(allcools_allc_output)
+    // Accept a collection of per-pair merged allc files for a sample
+    tuple val(sample), path(allcools_submerge_allc)
 
     output:
     tuple val(sample), path("${sample}_merge_allc.gz"), path("${sample}_merge_allc.gz.tbi"), emit: allcools_merge_allc

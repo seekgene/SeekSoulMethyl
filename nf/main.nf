@@ -89,6 +89,7 @@ include {
     MERGE_FILTERED_BARCODE_READS_COUNTS;
     ALLCOOLS_BAM_TO_ALLC;
     ALLCOOLS_GENERATE_DATASETS;
+    ALLCOOLS_SUBMERGE;
     ALLCOOLS_MERGE;
     ALLCOOLS_EXTRACT
 } from './modules/step3'
@@ -98,6 +99,10 @@ include {
     METHYLATION_LSI_PCA_CLUSTERING;
     MULTI_REPORT
 } from './modules/step4'
+
+def groupKey(sample_id, pair_count) {
+    return sample_id?.toString() ?: 'unknown'
+}
 
 // Create input channel
 def create_input_channel() {
@@ -337,9 +342,8 @@ workflow {
     allc_generated = ALLCOOLS_BAM_TO_ALLC(
         sc_bismark_merge_bam.sc_merged_bam_dir
         .combine(sc_bismark_merge_bam.merged_filtered_barcode, by: [0,1]))
-    
-    
-    // Merge filtered barcode reads counts - 按样本聚合，样本间并行
+
+    // Merge filtered barcode reads counts 
     merged_counts = MERGE_FILTERED_BARCODE_READS_COUNTS(
     sc_bismark_merge_bam.merged_filtered_barcode
     .combine(pair_counts_per_sample, by: 0)
@@ -388,17 +392,36 @@ workflow {
         .combine(
         merged_counts.merged_filtered_barcode_reads_counts
         .map{it -> tuple(it[0], it[1])}, by: 0))
-    
-    // Run allcools merge datasets
-    allcools_merged = ALLCOOLS_MERGE(allc_generated.allcools_allc_output
-        .combine(pair_counts_per_sample, by: 0)
-        .map { sample_id, pair_id, allc_data, pair_count -> 
-            tuple(groupKey(sample_id, pair_count), allc_data)
-        }
-        .groupTuple()
-        .map { group_key, allc_list -> 
-            tuple(group_key.toString(), allc_list)
-        })
+    if (params.split_fastq > 0) {
+        // Run allcools merge for split dataset
+        allc_submerge = ALLCOOLS_SUBMERGE(allc_generated.allcools_allc_output)
+        // Run allcools merge datasets
+        allcools_merged = ALLCOOLS_MERGE(
+            allc_submerge.allcools_submerge_allc
+            .combine(pair_counts_per_sample, by: 0)
+            .map { sample_id, pair_id, allc_data , pair_count -> 
+                // pass only the gz file paths as a collected list per sample
+                tuple(groupKey(sample_id, pair_count), allc_data)
+            }
+            .groupTuple()
+            .map { group_key, allc_list -> 
+                tuple(group_key.toString(), allc_list)
+            }
+        )
+    }else{
+        allcools_merged = ALLCOOLS_MERGE(
+            allc_generated.allcools_allc_output
+            .combine(pair_counts_per_sample, by: 0)
+            .map { sample_id, pair_id, allc_data, pair_count -> 
+                // pass only the gz file paths as a collected list per sample
+                tuple(groupKey(sample_id, pair_count), allc_data)
+            }
+            .groupTuple()
+            .map { group_key, allc_list -> 
+                tuple(group_key.toString(), allc_list)
+            }
+        )
+    }
     
     // Run allcools extract datasets
     allcools_extracted = ALLCOOLS_EXTRACT(allcools_merged.allcools_merge_allc)
