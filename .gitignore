@@ -129,3 +129,7 @@ node_modules/
 *.tar.gz
 *.rar
 *.7z
+
+# building reference related
+reference.json
+build_ref.sh
