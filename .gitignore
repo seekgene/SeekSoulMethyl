@@ -133,3 +133,5 @@ node_modules/
 # building reference related
 reference.json
 build_ref.sh
+
+oss_list_r1r2_from_csv.sh
