@@ -99,11 +99,12 @@ include {
     METHYLATION_LSI_PCA_CLUSTERING;
     MULTI_REPORT
 } from './modules/step4'
-/*
-def groupKey(sample_id, pair_count) {
+
+// Helper: build a stable per-sample grouping key (avoid name clash with Nextflow's groupKey aggregator)
+def sampleGroupKey(sample_id, pair_count) {
     return sample_id?.toString() ?: 'unknown'
 }
-*/
+
 
 // Create input channel
 def create_input_channel() {
@@ -205,6 +206,7 @@ workflow {
         }
         return pairs
     }.flatMap { it }
+     .view { "EXP_GROUPS: ${it}" }
 
     methy_groups = input_ch.map { sample_id, files ->
         def r1s = files['methylation_r1'] ?: []
@@ -218,25 +220,66 @@ workflow {
         }
         return pairs
     }.flatMap { it }
+     .view { "METHY_GROUPS: ${it}" }
 
     // Run fastp per group
     exp_clean_multi = FASTP_EXPRESSION_MULTI(exp_groups)
     methy_clean_multi = FASTP_METHYLATION_MULTI(methy_groups)
 
-    // Assemble cleaned file lists for downstream multi-input tools (stageable paths)
-    exp_clean_pairs = exp_clean_multi.rna_fastp_multi_data
+    // Compute expected fastp group counts per sample
+    exp_group_counts = exp_groups
         .groupTuple(by: 0)
-        .map { t ->
-            // t is [sample, groups, r1s, r2s]
-            tuple(t[0], t[2], t[3])
-        }
+        .map { t -> tuple(t[0], t[1].size()) }
 
-    methy_clean_pairs = methy_clean_multi.methy_fastp_multi_data
+    methy_group_counts = methy_groups
         .groupTuple(by: 0)
+        .map { t -> tuple(t[0], t[1].size()) }
+
+    // Assemble cleaned file lists per sample, and emit immediately
+    def exp_counts = [:]
+    def methy_counts = [:]
+    exp_group_counts.subscribe { v -> exp_counts[v[0].toString()] = v[1] }
+    methy_group_counts.subscribe { v -> methy_counts[v[0].toString()] = v[1] }
+
+    def exp_acc_r1 = [:]
+    def exp_acc_r2 = [:]
+    exp_clean_pairs = exp_clean_multi.rna_fastp_multi_data
         .map { t ->
-            // t is [sample, groups, r1s, r2s]
-            tuple(t[0], t[2], t[3])
+            def sample = t[0].toString()
+            def r1 = t[2]
+            def r2 = t[3]
+            if (!exp_acc_r1.containsKey(sample)) { exp_acc_r1[sample] = []; exp_acc_r2[sample] = [] }
+            exp_acc_r1[sample] << r1
+            exp_acc_r2[sample] << r2
+            def expected = (exp_counts[sample] ?: 1) as Integer
+            if ((exp_acc_r1[sample].size() as Integer) >= expected) {
+                def out = tuple(sample, exp_acc_r1[sample], exp_acc_r2[sample])
+                exp_acc_r1.remove(sample); exp_acc_r2.remove(sample)
+                return out
+            }
+            return null
         }
+        .filter { it != null }
+
+    def methy_acc_r1 = [:]
+    def methy_acc_r2 = [:]
+    methy_clean_pairs = methy_clean_multi.methy_fastp_multi_data
+        .map { t ->
+            def sample = t[0].toString()
+            def r1 = t[2]
+            def r2 = t[3]
+            if (!methy_acc_r1.containsKey(sample)) { methy_acc_r1[sample] = []; methy_acc_r2[sample] = [] }
+            methy_acc_r1[sample] << r1
+            methy_acc_r2[sample] << r2
+            def expected = (methy_counts[sample] ?: 1) as Integer
+            if ((methy_acc_r1[sample].size() as Integer) >= expected) {
+                def out = tuple(sample, methy_acc_r1[sample], methy_acc_r2[sample])
+                methy_acc_r1.remove(sample); methy_acc_r2.remove(sample)
+                return out
+            }
+            return null
+        }
+        .filter { it != null }
 
     // RNA expression analysis with multi-group inputs
     rna_results = SEEKSOULTOOLS_RNA(exp_clean_pairs)
@@ -248,12 +291,16 @@ workflow {
     parsed_files = PARSE_FASTQ_FILES(methy_barcode.methy_barcode_output)
     
     // Create file pairs and distribute to Bismark alignment
-    forward_pairs_raw = CREATE_FORWARD_PAIRS(parsed_files.forward_pairs
-    .combine(methy_barcode.methy_barcode_output
-    .map {it -> tuple(it[0], it[1], it[2])}, by:0))
-    reverse_pairs_raw = CREATE_REVERSE_PAIRS(parsed_files.reverse_pairs.
-    combine(methy_barcode.methy_barcode_output
-    .map {it -> tuple(it[0], it[1], it[2])}, by:0))
+    forward_pairs_raw = CREATE_FORWARD_PAIRS(
+        parsed_files.forward_pairs
+        .combine(
+            methy_barcode.methy_barcode_output
+            .map {it -> tuple(it[0], it[1], it[2])}, by:0))
+    reverse_pairs_raw = CREATE_REVERSE_PAIRS(
+        parsed_files.reverse_pairs
+        .combine(
+            methy_barcode.methy_barcode_output
+            .map {it -> tuple(it[0], it[1], it[2])}, by:0))
     //forward_pairs_raw.view()
     //reverse_pairs_raw.view()
     // Process stdout output, convert multi-line strings to individual tuples
