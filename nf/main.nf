@@ -99,10 +99,11 @@ include {
     METHYLATION_LSI_PCA_CLUSTERING;
     MULTI_REPORT
 } from './modules/step4'
-
+/*
 def groupKey(sample_id, pair_count) {
     return sample_id?.toString() ?: 'unknown'
 }
+*/
 
 // Create input channel
 def create_input_channel() {
