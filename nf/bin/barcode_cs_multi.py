@@ -149,6 +149,8 @@ class Writer:
         self.split_fastq = split_fastq
         self.samplename = samplename
         self.file_handles = {}  # Store file handles for different barcode prefixes
+        self.barcode_counts = defaultdict(int)  # Store counts for each barcode
+        self.stats_file = f"{file}_barcode_stats.txt"  # File to store barcode statistics
 
         if paired_out:
             # Create output files for both chain directions
@@ -186,6 +188,8 @@ class Writer:
         parts = read_name.split('_')
         if len(parts) > 0:
             full_barcode = parts[0]  # Complete barcode
+            # Count the full barcode regardless of split_fastq setting
+            self.barcode_counts[full_barcode] += 1
             return full_barcode[:self.split_fastq] if self.split_fastq > 0 else ""
         return ""
 
@@ -380,6 +384,27 @@ class Writer:
         for file_handles in self.file_handles.values():
             for fh in file_handles:
                 fh.close()
+        
+        # Write barcode statistics to file
+        self._write_barcode_stats()
+        
+    def _write_barcode_stats(self):
+        """Write barcode read pair counts to a statistics file"""
+        try:
+            with open(self.stats_file, 'w') as f:
+                f.write("Barcode\tReadPairCount\n")
+                # Sort barcodes by count (descending)
+                sorted_barcodes = sorted(self.barcode_counts.items(), key=lambda x: x[1], reverse=True)
+                for barcode, count in sorted_barcodes:
+                    f.write(f"{barcode}\t{count}\n")
+                
+                # Write total count
+                total_count = sum(self.barcode_counts.values())
+                f.write(f"\nTotal\t{total_count}\n")
+                
+            logger.info(f"Barcode statistics written to {self.stats_file}")
+        except Exception as e:
+            logger.error(f"Failed to write barcode statistics: {e}")
 
 class Worker(Process):
     """Worker process class

@@ -199,8 +199,8 @@ process ALLCOOLS_SUBMERGE {
     def cores = Math.max(1, task.cpus - 2)
     """
     set -e     
+    find ./*/ -name "*_allc.gz" > merge_list.txt
     mkdir -p ${sample}_${pair_id}
-    ls */*_allc.gz > merge_list.txt
     n_lines=`wc -l merge_list.txt | awk '{print \$1}'`
     if [[ \$n_lines -gt 1 ]]; then
         allcools merge \
@@ -208,10 +208,13 @@ process ALLCOOLS_SUBMERGE {
         --allc_paths merge_list.txt \
         --output_path ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz \
         --chrom_size_path ${params.chrom_size_path}
-    else
+    elif [[ \$n_lines -eq 1 ]]; then
         source_file=`ls */*_allc.gz`
         cp \${source_file} ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz
         cp \${source_file}.tbi ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz.tbi
+    else
+        touch ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz
+        touch ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz.tbi
     fi
     """
 
@@ -235,9 +238,10 @@ process ALLCOOLS_MERGE {
     # Run allcools to merge datasets, about 12h
     set -e
     ls */*_allc.gz > merge_list.txt
+    cat merge_list.txt | while read id; do if [[ -s \${id} ]]; then echo "\${id}" >> merge_list_real.txt;fi;done
     allcools merge \
     --cpu ${cores} \
-    --allc_paths merge_list.txt \
+    --allc_paths merge_list_real.txt \
     --output_path ${sample}_merge_allc.gz \
     --chrom_size_path ${params.chrom_size_path}
     """

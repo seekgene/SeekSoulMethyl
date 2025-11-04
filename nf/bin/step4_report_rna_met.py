@@ -155,12 +155,12 @@ def barcode_rank_data(
     rna_met_df: pd.DataFrame
 ) -> List[Dict[str, Any]]:
     """
-    Segment UMI-ranked data by adjacent barcode categories (RNA+MET, RNA-only, Background)
+    Segment UMI-ranked data by adjacent barcode categories (RNA+DNA, RNA-only, Background)
     to generate segment lists for plotting.
 
     Parameters:
     - pre_barcode_rank_data_df: DataFrame with columns [idx, barcode, UMI, is_cell], already sorted by UMI descending; idx is the rank index.
-    - rna_met_df: DataFrame with column [gex_cb], defining the set of "RNA+MET" barcodes.
+    - rna_met_df: DataFrame with column [gex_cb], defining the set of "RNA+DNA" barcodes.
     - tail_background_chunk_size: when the last segment is Background, split it by this size (default 1000).
 
     Returns:
@@ -168,8 +168,8 @@ def barcode_rank_data(
       where:
         x: minimum idx of the segment (segment start)
         y: list of UMIs within the segment (original order)
-        text: segment type ("RNA+MET" | "RNA-only" | "Background")
-        color: color mapping (RNA+MET -> orange; RNA-only -> blue; Background -> blue)
+        text: segment type ("RNA+DNA" | "RNA-only" | "Background")
+        color: color mapping (RNA+DNA -> orange; RNA-only -> blue; Background -> blue)
     """
     # Validate required columns
     required_pre = {"idx", "barcode", "UMI", "is_cell"}
@@ -185,12 +185,12 @@ def barcode_rank_data(
     df = pre_barcode_rank_data_df.copy()
     df = df.sort_values(by=["idx"], ascending=True)
 
-    # Set of RNA+MET barcodes
+    # Set of RNA+DNA barcodes
     rna_set = set(rna_met_df["gex_cb"].astype(str))
 
     # Color mapping
     color_map = {
-        "RNA+MET": "rgba(80, 80, 201, 1.0)",
+        "RNA+DNA": "rgba(80, 80, 201, 1.0)",
         "RNA-only": "rgba(255, 211, 26, 0.5)",
         "Background": "rgba(221, 221, 221, 1.0)",
     }
@@ -199,7 +199,7 @@ def barcode_rank_data(
     def _status(row) -> str:
         b = str(row["barcode"])  # Prevent type mismatch
         if b in rna_set:
-            return "RNA+MET"
+            return "RNA+DNA"
         elif bool(row["is_cell"]):
             return "RNA-only"
         else:
@@ -442,18 +442,16 @@ def report(gexjson, metjson,
     data_summary["MET"][1]["right"][0]["data"]["Total CpGs Detected"] = f'{met_summary["cells"]["Total CPGs Detected"]:,}'
     
     data_summary["MET"][2]["left"][0]["data"]["Estimated Number of Cells"] = f'{met_summary["cells"]["Estimated Number of Cells"]:,}'
-    data_summary["MET"][2]["left"][0]["data"]["Genome Coverage Rate of Max Cell"] = f'{met_summary["cells"]["Genome Coverage rate of max cell"]:.2%}'
-    data_summary["MET"][2]["left"][0]["data"]["CpGs of Max Cell"] = f'{int(met_summary["cells"]["CPGs of max cell"]):,}'
-    data_summary["MET"][2]["left"][0]["data"]["Reads of Max Cell"] = f'{int(met_summary["cells"]["Reads of max cell"]):,}'
-    data_summary["MET"][2]["left"][0]["data"]["Saturation of Max Cell"] = f'{met_summary["cells"]["Saturation of max cell"]:.2%}'
     data_summary["MET"][2]["left"][0]["data"]["Genome Coverage Rate of Median Cell"] = f'{met_summary["cells"]["Genome Coverage rate of median cell"]:.2%}'
     data_summary["MET"][2]["left"][0]["data"]["CpGs of Median Cell"] = f'{int(met_summary["cells"]["CPGs of median cell"]):,}'
     data_summary["MET"][2]["left"][0]["data"]["Reads of Median Cell"] = f'{int(met_summary["cells"]["Reads of median cell"]):,}'
     data_summary["MET"][2]["left"][0]["data"]["Saturation of Median Cell"] = f'{met_summary["cells"]["Saturation of median cell"]:.2%}'
     data_summary["MET"][2]["left"][0]["data"]["Fraction Reads in Cells"] = f'{met_summary["cells"]["Fraction Reads in Cells"]:.2%}' 
-    data_summary["MET"][2]["right"][0]["data"]["y"] = [ round(i*100, 2) for i in df["cell_saturation"].tolist()]
+    data_summary["MET"][2]["right"][0]["data"]["y"]['Cell Saturation'] = [ round(i*100, 2) for i in df["cell_saturation"].tolist()]
+    data_summary["MET"][2]["right"][0]["data"]["y"]['Cell Genome Coverage'] = [ round(i*100,2) for i in Genome_coverage ]
     
-    data_summary["MET"][3]["left"][0]["data"]["y"] = [ round(i*100,2) for i in Genome_coverage ]
+    data_summary["MET"][3]["left"][0]["data"]["y"]['CG methylation'] = [ round(i,2) for i in CpG_methylation_level ]
+    data_summary["MET"][3]["left"][0]["data"]["y"]['CH methylation'] = [ round(i,2) for i in CH_methylation_level ]
     data_summary["MET"][3]["right"][0]["data"]["x"] = np.log10(df["reads_counts"] + 1).round(4).tolist()
     data_summary["MET"][3]["right"][0]["data"]["y"] = np.log10(df["total_cpg_number"] + 1).round(4).tolist()
     

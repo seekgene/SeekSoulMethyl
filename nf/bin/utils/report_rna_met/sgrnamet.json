@@ -281,8 +281,8 @@
                     "Valid barcodes": "Fraction of read pairs with barcodes that match the whitelist after error correction",
                     "Dropped Too Short": "Fraction of read pairs that R2 shorter than 60bps or R1 shorter than 20bps after step1",
                     "Dropped Chimeric": "Fraction of read pairs that contained valid barcodes and R1 length \u2265 20bp and R2 length \u2265 60bp filtered out due to containing too many CH-context methylation sites.",
-                    "C-T Conversion": "Fraction of known C sites on the forward strand (17L and ME) that were fully converted to T in the experiment.",
-                    "C-C Ratio": "Fraction of known C sites on the reverse strand (17L and ME) that remained as C in the experiment."
+                    "C-T Conversion": "Fraction of unmethylated C sites that were converted to T on the forward strand (17L and ME) in the experiment.",
+                    "C-C Ratio": "Fraction of methylated C sites that remained as C on the reverse strand (17L and ME) in the experiment."
                 }
             }],
             "right": [{
@@ -299,7 +299,7 @@
                     "Total CpGs Detected": "-"
                 },
                 "description": {
-                    "Reads Mapped to Genome": "Fraction of reads mapped to the genome.",
+                    "Reads Mapped to Genome": "Total number of reads mapped to the genome.",
                     "Reads Mapped Confidently to Genome": "Fraction of reads uniquely mapped to the genome.",
                     "CpG Methylation Rate": "CpG methylation rate.",
                     "CHG Methylation Rate": "CHG methylation rate.",
@@ -310,17 +310,13 @@
             }]
         },
         {
-            "name": "TwoCol",
+            "name": "TwoColX",
             "left": [{
                 "id": 4,
                 "name": "Card",
                 "title": "Cells",
                 "data": {
                     "Estimated Number of Cells": "-",
-                    "Genome Coverage Rate of Max Cell": "-",
-                    "CpGs of Max Cell": "-",
-                    "Reads of Max Cell": "-",
-                    "Saturation of Max Cell": "-",
                     "Genome Coverage Rate of Median Cell": "-",
                     "CpGs of Median Cell": "-",
                     "Reads of Median Cell": "-",
@@ -329,10 +325,6 @@
                 },
                 "description": {
                     "Estimated Number of Cells": "Total number of cells identified by cell calling.",
-                    "Genome Coverage Rate of Max Cell": "Maximum genome coverage rate across cells.",
-                    "CpGs of Max Cell": "Number of CpG sites detected in the cell with the highest genome coverage (strand-specific counting).",
-                    "Reads of Max Cell": "Number of reads uniquely mapped to the genome for the cell with the highest genome coverage.",
-                    "Saturation of Max Cell": "Sequencing saturation of the cell with the highest genome coverage.",
                     "Genome Coverage Rate of Median Cell": "Median genome coverage rate across cells.",
                     "CpGs of Median Cell": "Number of CpG sites detected in the cell at the median genome coverage (strand-specific counting).",
                     "Reads of Median Cell": "Number of reads uniquely mapped to the genome for the cell at the median genome coverage.",
@@ -343,14 +335,18 @@
             "right": [{
                 "id": 5,
                 "name": "PlotlyViolin",
-                "title": "Cell Saturation",
+                "title": "",
                 "data": {
-                    "y": [],
+                    "y": {
+                        "Cell Saturation": [],
+                        "Cell Genome Coverage": []
+
+                    },
                     "yaxis": {
-                        "title": "Cell Saturation(%)"
+                        "title": "%"
                     }
                 },
-                "description": "Violin plot that shows the distribution of sequencing saturation across cells."
+                "description": "Violin plot that shows the distribution of sequencing saturation and genome coverage across cells."
             }]
         },
         {
@@ -358,27 +354,30 @@
             "left": [{
                 "id": 5,
                 "name": "PlotlyViolin",
-                "title": "Cell Genome Coverage",
+                "title": "Methylation Level",
                 "data": {
-                    "y": [],
+                    "y": {
+                        "CG methylation": [],
+                        "CH methylation": []
+                    },
                     "yaxis": {
-                        "title": "Genome Coverage(%)"
+                        "title": "%"
                     }
                 },
-                "description": "Violin plot that shows the distribution of genome coverage across cells."
+                "description": "Violin plot that shows the distribution of CG and CH methylation across cells."
             }],
             "right": [{
                 "id": 6,
                 "name": "PlotlyScatter",
-                "title": "Reads number - CpG number distribution",
+                "title": "Aligned Reads number - CpG number distribution",
                 "data": {
                     "x": [],
                     "y": [],
                     "yaxis": {
-                        "title": "log10(CpG Number), strand-specific"
+                        "title": "log10(CpG Number)"
                     },
                     "xaxis": {
-                        "title": "log10(Reads Number)"
+                        "title": "log10(Aligned Reads Number)"
                     }
                 },
                 "description": "X-axis is uniquely mapped reads number across cells, and Y-axis is CpG number detected in each cell."

@@ -213,6 +213,7 @@ process METHYLATION_BARCODE_EXTRACTION {
     
     output:
     tuple val(sample), path("step1/${sample}_forward_*1.fq.gz"), path("step1/${sample}_forward_*2.fq.gz"), path("step1/${sample}_reverse_*1.fq.gz"), path("step1/${sample}_reverse_*2.fq.gz"), path("${sample}_methy_summary.json"), emit: methy_barcode_output
+    tuple val(sample), path("step1/${sample}_barcode_stats.txt"), emit: all_cb_step1_reads_counts
     
     script:
     def cores = Math.max(1, task.cpus - 2)
