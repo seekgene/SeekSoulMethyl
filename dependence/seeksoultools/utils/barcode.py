@@ -350,7 +350,7 @@ def process_barcode(fq1, fq2, fq_out, fqout_multi, r1_structure, shift, shift_pa
                 r1.sequence = sequence[start_pos:]
                 r1.qualities = qualities[start_pos:]
                 if contaminate and stat_Dict["total"] < TEST_CONTAMINATE_READS_NUMBER:
-                    if contaminate in r1.sequence:
+                    if contaminate in r1.sequence or contaminate.replace('C', 'T') in r1.sequence:
                         stat_Dict["seq_ME"] += 1       
                             
                 if is_multi: #write r2 multi files
@@ -397,7 +397,7 @@ def process_barcode(fq1, fq2, fq_out, fqout_multi, r1_structure, shift, shift_pa
                 if is_B_no_correction:
                     stat_Dict["B_no_correction"] += 1
                 if contaminate and stat_Dict["total"] < TEST_CONTAMINATE_READS_NUMBER:
-                    if contaminate in r1.sequence:
+                    if contaminate in r1.sequence or contaminate.replace('C', 'T') in r1.sequence:
                         stat_Dict["seq_ME"] += 1
 
                 if is_L_no_correction:
