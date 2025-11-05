@@ -10,6 +10,8 @@ ADAPTERS = {
 R1_MINLEN = 0
 R2_MINLEN = 60
 
+TEST_CONTAMINATE_READS_NUMBER = 10000
+
 CHEMISTRY = {
     '__SO01V3':{
         'shift': True,
@@ -46,6 +48,7 @@ CHEMISTRY = {
         'match_type': (1,),
         'adapter1': [["GATCGGAAGAGCACACGTCTGAACTCCAGTCAC", "3"], ["ACACTCTTTCCCTACACGACGCTCTTCCGATCT", "5"], ["TTTTTTTTTTTT", "5"] ], 
         'adapter2': [["GTGACTGGAGTTCAGACGTGTGCTCTTCCGATC", "5"], ["AAAAAAAAAAAA", "3"], ["AAGCAGTGGTATCAACGCAGAGTACATGG", "5"]],
+        'contaminate': "AGATGTGTATAAGAGATAG"
     },
     "DD-MET5":{
         'shift': False,
@@ -55,6 +58,7 @@ CHEMISTRY = {
         'sc5p': True,
         'adapter1': [["GATCGGAAGAGCACACGTCTGAACTCCAGTCAC", "3"], ["ACACTCTTTCCCTACACGACGCTCTTCCGATCT", "5"], ["TTTTTTTTTTTT", "5"] ], 
         'adapter2': [["GTGACTGGAGTTCAGACGTGTGCTCTTCCGATC", "5"], ["AAAAAAAAAAAA", "3"], ["AAGCAGTGGTATCAACGCAGAGTACATGG", "5"], ["CCCATATAAGAAA", "3"]],
+        'contaminate': "AGATGTGTATAAGAGATAG"
     },    
     "DDVS":{
         'shift': False,
