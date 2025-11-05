@@ -507,8 +507,6 @@ workflow {
             merged_counts.merged_filtered_barcode_reads_counts
             .map{it -> tuple(it[0], it[1])}, by: 0))
     
-    // Multi-report
-    /*
     multi_report = MULTI_REPORT(
        rna_results.gex_summary_json
        .combine(rna_results.filtered_dir, by: 0)
@@ -521,7 +519,7 @@ workflow {
        .combine(merged_counts.merged_filtered_barcode_reads_counts.map {it -> tuple(it[0], it[2])}, by: 0)
        .combine(merged_counts.allcools_cells_csv_output, by: 0)
     )
-    */
+    
 }
 
 /*

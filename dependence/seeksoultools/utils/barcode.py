@@ -7,7 +7,7 @@ from functools import partial
 from .pipeline import Pipeline
 from collections import defaultdict, Counter
 from .helper import AdapterFilter, QcStat, parse_structure, read_file, get_new_bc, logger
-from .chemistry import R1_MINLEN, R2_MINLEN, CHEMISTRY
+from .chemistry import R1_MINLEN, R2_MINLEN, CHEMISTRY, TEST_CONTAMINATE_READS_NUMBER
 from .wrappers import cmd_execute, STAR_wrapper, qualimap_wrapper, samtools_sort_wrapper
 
 def mapping_report(logfile):
@@ -211,7 +211,7 @@ def summary(seq, seq_q, seq_dict, qua_dict):
 def process_barcode(fq1, fq2, fq_out, fqout_multi, r1_structure, shift, shift_pattern,
                     barcode_wl_dict, linker_wl_dict, match_type_dict, adapter1=[["AAAAAAAAAAAA", "3"],],
                     adapter2=[["AAAAAAAAAAAA", "3"],], do_B_correction=True, do_L_correction=True,
-                    use_multi=True, use_short_read=False, paired_out=True):
+                    use_multi=True, use_short_read=False, paired_out=True, contaminate = None):
     try:
     
         barcode_list_flag = False
@@ -349,6 +349,9 @@ def process_barcode(fq1, fq2, fq_out, fqout_multi, r1_structure, shift, shift_pa
                 
                 r1.sequence = sequence[start_pos:]
                 r1.qualities = qualities[start_pos:]
+                if contaminate and stat_Dict["total"] < TEST_CONTAMINATE_READS_NUMBER:
+                    if contaminate in r1.sequence:
+                        stat_Dict["seq_ME"] += 1       
                             
                 if is_multi: #write r2 multi files
                     if use_multi:         
@@ -393,6 +396,9 @@ def process_barcode(fq1, fq2, fq_out, fqout_multi, r1_structure, shift, shift_pa
             else:
                 if is_B_no_correction:
                     stat_Dict["B_no_correction"] += 1
+                if contaminate and stat_Dict["total"] < TEST_CONTAMINATE_READS_NUMBER:
+                    if contaminate in r1.sequence:
+                        stat_Dict["seq_ME"] += 1
 
                 if is_L_no_correction:
                     stat_Dict["L_no_correction"] += 1
@@ -423,7 +429,7 @@ def barcode_main(fq1:list, fq2:list, samplename: str, outdir:str,
                  structure:str="B8L8B8L10B8U12T15", linker: list=[],
                  core:int=4, do_B_correction=True, do_L_correction=True,
                  use_multi=True, use_short_read=False, adapter1=[["TTTTTTTTTTTT", "5"], ],
-                 adapter2=[["AAAAAAAAAAAA", "3"], ], paired_out=True, **kwargs):
+                 adapter2=[["AAAAAAAAAAAA", "3"], ], paired_out=True, contaminate = None, **kwargs):
     logger.info("extract barcode start!")
     #parse r1 structure
     r1_structure = parse_structure(structure)
@@ -463,6 +469,7 @@ def barcode_main(fq1:list, fq2:list, samplename: str, outdir:str,
         use_short_read=use_short_read,
         adapter1=adapter1,
         adapter2=adapter2,
+        contaminate=contaminate
     )
     
     stat = QcStat()
@@ -545,6 +552,7 @@ def barcode_main(fq1:list, fq2:list, samplename: str, outdir:str,
     logger.info("deal multi done!")
     stat.data["stat"]["chemistry"] = kwargs.get("chemistry", "custom")
     stat.data["stat"]["samplename"] = samplename
+    stat.data["stat"]["seq_ME"] = stat.data["stat"]["seq_ME"] / TEST_CONTAMINATE_READS_NUMBER
     stat.save(os.path.join(outdir, f"{samplename}_summary.json"))
     logger.info("extract barcode done!")
     return fqout1, fqout2

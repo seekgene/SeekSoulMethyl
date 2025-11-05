@@ -64,6 +64,7 @@ ME5_L17ME_LEN = 18
 DEFAULT_MAX_READ1_LEN = 81
 ME5_MAX_READ1_LEN = 63
 
+TEST_CONTAMINATE_READS_NUMBER = 10000
 
 CHEMISTRY = {
     "DD-MET3":{
@@ -74,6 +75,7 @@ CHEMISTRY = {
         'adapter2': [["AGATGTGTATAAGAGACAG", "5", 0.1, 9],
                      ["CTRTCTCTTATACACATCT","3",0.1, 9]], # ME,ME-rev R:G/A
         'match_type': (1,),
+        'contaminate':{'polyT': 'TTTTTTTTTTTTTTT'}
     },
     "DD-MET5":{
         'shift': False,
@@ -83,6 +85,7 @@ CHEMISTRY = {
         'adapter2': [["AGATGTGTATAAGAGACAG", "5", 0.1, 9],
                      ["CTRTCTCTTATACACATCT","3",0.1, 9]], # ME,ME-rev R:G/A
         'match_type': (1,),
+        'contaminate':{'TSO': 'TTTCTTATATGGG'}
     }    
 }
 
@@ -930,7 +933,8 @@ def summary(seq, seq_q, seq_dict, qua_dict):
 def process_barcode(fq1, fq2, fq_out_forward, fq_out_reverse, fqout_multi, r1_structure, shift, shift_pattern,
                     barcode_wl_dict, linker_wl_dict, match_type_dict, adapter1=[["AAAAAAAAAAAA", "3"],],
                     adapter2=[["AAAAAAAAAAAA", "3"],], do_B_correction=True, do_L_correction=True,
-                    use_multi=True, use_short_read=False, paired_out=True, positions=None, non_insert_len=52, chemistry="DD-M", split_fastq=0, filter_ch=0):
+                    use_multi=True, use_short_read=False, paired_out=True, positions=None, non_insert_len=52, 
+                    chemistry="DD-MET3", split_fastq=0, filter_ch=0, contaminate = None):
     
     barcode_list_flag = False
     linker_list_flag = False
@@ -950,6 +954,10 @@ def process_barcode(fq1, fq2, fq_out_forward, fq_out_reverse, fqout_multi, r1_st
     UMI_Q_Counter = Counter()
     R2_Q_Counter = Counter()
     
+    if contaminate:
+        contaminate_key = list(contaminate.keys())[0]
+        contaminate_seq = list(contaminate.values())[0]
+        
     adapter_filter = AdapterFilter(adapter1=adapter1, adapter2=adapter2, non_insert_len=non_insert_len, chemistry=chemistry)
     
     fh = dnaio.open(fq1, fq2, fileformat="fastq", mode="r", open_threads=4)
@@ -1075,6 +1083,11 @@ def process_barcode(fq1, fq2, fq_out_forward, fq_out_reverse, fqout_multi, r1_st
             
             r1.sequence = sequence[start_pos:]
             r1.qualities = qualities[start_pos:]
+            if contaminate and stat_Dict["total"] <= TEST_CONTAMINATE_READS_NUMBER:
+                if contaminate_seq in r1.sequence[0:(len(contaminate_seq) + 12)]:
+                    stat_Dict[contaminate_key] += 1
+                    
+                        
                         
             if is_multi: #write r2 multi files
                 if use_multi:         
@@ -1156,6 +1169,10 @@ def process_barcode(fq1, fq2, fq_out_forward, fq_out_reverse, fqout_multi, r1_st
                 elif chain_direction == 'reverse':
                     stat_Dict["B_corrected_reverse"] += 1
         else:
+            if contaminate and stat_Dict["total"] <= TEST_CONTAMINATE_READS_NUMBER:
+                if contaminate_seq in r1.sequence[0:(len(contaminate_seq) + 12)]:
+                    stat_Dict[contaminate_key] += 1
+                    
             if is_B_no_correction:
                 stat_Dict["B_no_correction"] += 1
 
@@ -1205,6 +1222,7 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
     adapter1 = CHEMISTRY[chemistry]['adapter1']
     adapter2 = CHEMISTRY[chemistry]['adapter2']
     match_type = CHEMISTRY[chemistry]['match_type']
+    contaminate = CHEMISTRY[chemistry]['contaminate']
 
     logger.info("extract barcode start!")
     #parse r1 structure
@@ -1266,6 +1284,7 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
         chemistry=chemistry,
         split_fastq=split_fastq,
         filter_ch=filter_ch,
+        contaminate=contaminate
     )
     
     stat = QcStat()
@@ -1454,6 +1473,8 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
     stat.data["stat"]["rate_17lme"] = stat.data["stat"]["num_17lme"] / stat.data["stat"]["total"]
     # rate_7f17lme = num_7f17lme / total
     stat.data["stat"]["rate_7f17lme"] = stat.data["stat"]["num_7f17lme"] / stat.data["stat"]["total"]
+    if contaminate:
+        stat.data["stat"][list(contaminate.keys())[0]] = stat.data["stat"][list(contaminate.keys())[0]] / TEST_CONTAMINATE_READS_NUMBER
     stat.save(os.path.join(outdir, f"{samplename}_summary.json"))
     logger.info("extract barcode done!")
     # Return all output file paths
