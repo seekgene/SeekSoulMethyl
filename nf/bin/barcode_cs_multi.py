@@ -1086,6 +1086,10 @@ def process_barcode(fq1, fq2, fq_out_forward, fq_out_reverse, fqout_multi, r1_st
             if contaminate and stat_Dict["total"] <= TEST_CONTAMINATE_READS_NUMBER:
                 if contaminate_seq in r1.sequence[0:(len(contaminate_seq) + 12)]:
                     stat_Dict[contaminate_key] += 1
+                        
+            if contaminate and stat_Dict["total"] <= TEST_CONTAMINATE_READS_NUMBER:
+                if contaminate_seq in r1.sequence[0:(len(contaminate_seq) + 12)]:
+                    stat_Dict[contaminate_key] += 1
                     
                         
                         
