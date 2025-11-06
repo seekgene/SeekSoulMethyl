@@ -38,7 +38,13 @@ def get_workflow_version_regex(config_path='nextflow.config'):
     except Exception as e:
         print(f"Failed to read config file: {e}")
     return ""
-    
+
+def try_get_value(dict_obj: dict, key: str, default: Any = None) -> Any:
+    """
+    Safely get a value from a dictionary. If the key is not found, return the default value.
+    """
+    return dict_obj.get(key, default)
+   
 def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, cells_file: str, output_file: str, whitelist_file: str = None) -> pd.DataFrame:
     """
     Merge RNA and methylation tables into a single file based on barcode mapping.
@@ -426,10 +432,11 @@ def report(gexjson, metjson,
     data_summary["MET"][1]["left"][0]["data"]["Number of Read Pairs"] = met_summary["stat"]["total"]
     data_summary["MET"][1]["left"][0]["data"]["Valid Barcodes"] = f'{met_summary["stat"]["valid"]/met_summary["stat"]["total"]:.2%}'
     data_summary["MET"][1]["left"][0]["data"]["Dropped Too Short"] = f'{met_summary["stat"]["too_short"] / met_summary["stat"]["total"]:.2%}'
-    forward_chimeric = met_summary["stat"]["forward_chimeric"]
-    reverse_chimeric = met_summary["stat"]["reverse_chimeric"]
-    too_short = met_summary["stat"]["too_short"]
-    vaildreads = met_summary["stat"]["valid"]
+    
+    forward_chimeric = try_get_value(met_summary["stat"], "forward_chimeric", 0)
+    reverse_chimeric = try_get_value(met_summary["stat"], "reverse_chimeric", 0)
+    too_short = try_get_value(met_summary["stat"], "too_short", 0)
+    vaildreads = try_get_value(met_summary["stat"], "valid", 0)
     data_summary["MET"][1]["left"][0]["data"]["Dropped Chimeric"] = f'{(forward_chimeric + reverse_chimeric) / (vaildreads - too_short):.2%}'
     data_summary["MET"][1]["left"][0]["data"]["C-T Conversion"] = f'{met_summary["stat"]["ct_mean"]:.2%}'
     data_summary["MET"][1]["left"][0]["data"]["C-C Ratio"] = f'{met_summary["stat"]["cc_mean"]:.2%}'

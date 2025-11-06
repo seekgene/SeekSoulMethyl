@@ -349,9 +349,11 @@ def process_barcode(fq1, fq2, fq_out, fqout_multi, r1_structure, shift, shift_pa
                 
                 r1.sequence = sequence[start_pos:]
                 r1.qualities = qualities[start_pos:]
-                if contaminate and stat_Dict["total"] < TEST_CONTAMINATE_READS_NUMBER:
+                if contaminate and stat_Dict["total"] <= TEST_CONTAMINATE_READS_NUMBER:
+                    stat_Dict["test_real_seq"] += 1
                     if contaminate in r1.sequence or contaminate.replace('C', 'T') in r1.sequence:
-                        stat_Dict["seq_ME"] += 1       
+                        stat_Dict["seq_ME"] += 1
+                        
                             
                 if is_multi: #write r2 multi files
                     if use_multi:         
@@ -396,7 +398,8 @@ def process_barcode(fq1, fq2, fq_out, fqout_multi, r1_structure, shift, shift_pa
             else:
                 if is_B_no_correction:
                     stat_Dict["B_no_correction"] += 1
-                if contaminate and stat_Dict["total"] < TEST_CONTAMINATE_READS_NUMBER:
+                if contaminate:
+                    stat_Dict["test_real_seq"] += 1
                     if contaminate in r1.sequence or contaminate.replace('C', 'T') in r1.sequence:
                         stat_Dict["seq_ME"] += 1
 
@@ -552,7 +555,8 @@ def barcode_main(fq1:list, fq2:list, samplename: str, outdir:str,
     logger.info("deal multi done!")
     stat.data["stat"]["chemistry"] = kwargs.get("chemistry", "custom")
     stat.data["stat"]["samplename"] = samplename
-    stat.data["stat"]["seq_ME"] = stat.data["stat"]["seq_ME"] / TEST_CONTAMINATE_READS_NUMBER
+    if contaminate:
+        stat.data["stat"]["seq_ME"] = stat.data["stat"]["seq_ME"] / stat.data["stat"]["test_real_seq"]
     stat.save(os.path.join(outdir, f"{samplename}_summary.json"))
     logger.info("extract barcode done!")
     return fqout1, fqout2
