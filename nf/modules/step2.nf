@@ -15,7 +15,7 @@ process BISMARK_ALIGNMENT_FORWARD {
     """
     set -e   
     # Bismark alignment
-    /PROJ2/FLOAT/weiqiuxia/software/Bismark/bismark \
+    bismark \
         --genome ${params.bismark_ref} \
         --parallel 8 \
         -1 ${methy_forward_r1} \
@@ -43,7 +43,7 @@ process BISMARK_ALIGNMENT_REVERSE {
     """
     set -e    
     # Bismark alignment
-    /PROJ2/FLOAT/weiqiuxia/software/Bismark/bismark \
+    bismark \
         --genome ${params.bismark_ref} \
         --parallel 8 \
         -1 ${methy_reverse_r1} \
