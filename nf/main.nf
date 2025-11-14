@@ -328,8 +328,8 @@ workflow {
                     if (parts.size() == 4) {
                         def sample_id = parts[0]
                         def pair_id = parts[1]
-                        def r1_file = file("${params.outdir}/${sample}_methy/step1/${parts[2]}")
-                        def r2_file = file("${params.outdir}/${sample}_methy/step1/${parts[3]}")
+                        def r1_file = file("${params.outdir}/${sample}/${sample}_methy/step1/${parts[2]}")
+                        def r2_file = file("${params.outdir}/${sample}/${sample}_methy/step1/${parts[3]}")
                         pairs.add(tuple(sample_id, pair_id, r1_file, r2_file))
                     }
                 }
@@ -347,8 +347,8 @@ workflow {
                     if (parts.size() == 4) {
                         def sample_id = parts[0]
                         def pair_id = parts[1]
-                        def r1_file = file("${params.outdir}/${sample}_methy/step1/${parts[2]}")
-                        def r2_file = file("${params.outdir}/${sample}_methy/step1/${parts[3]}")
+                        def r1_file = file("${params.outdir}/${sample}/${sample}_methy/step1/${parts[2]}")
+                        def r2_file = file("${params.outdir}/${sample}/${sample}_methy/step1/${parts[3]}")
                         pairs.add(tuple(sample_id, pair_id, r1_file, r2_file))
                     }
                 }
