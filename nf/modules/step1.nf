@@ -155,7 +155,7 @@ process FASTP_METHYLATION_MULTI {
 // RNA expression analysis
 process SEEKSOULTOOLS_RNA {
     tag "$sample-SEEKSOULTOOLS_RNA"
-    publishDir "${params.outdir}/${sample}_exp/"
+    publishDir "${params.outdir}/${sample}/${sample}_exp/"
     
     input:
     tuple val(sample), path(exp_r1_list), path(exp_r2_list)
@@ -206,7 +206,7 @@ process SEEKSOULTOOLS_RNA {
 // Methylation barcode extraction
 process METHYLATION_BARCODE_EXTRACTION {
     tag "$sample-METHYLATION_BARCODE_EXTRACTION"
-    publishDir "${params.outdir}/${sample}_methy/"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/"
     
     input:
     tuple val(sample), path(methy_r1_list), path(methy_r2_list)
@@ -254,7 +254,7 @@ process METHYLATION_BARCODE_EXTRACTION {
 // Parse and group fastq files - pair based on identifiers
 process PARSE_FASTQ_FILES {
     tag "$sample-PARSE_FASTQ_FILES"
-    publishDir "${params.outdir}/${sample}_methy/"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/"
     
     input:
     tuple val(sample), path(forward_r1_files), path(forward_r2_files), path(reverse_r1_files), path(reverse_r2_files), path(summary_json)
@@ -367,7 +367,7 @@ process CREATE_REVERSE_PAIRS {
 // Fastp quality control after methylation barcode extraction
 process FASTP_METHYLATION_BARCODE_EXTRACT {
     tag "$sample-FASTP_METHYLATION_BARCODE_EXTRACT"
-    publishDir "${params.outdir}/${sample}_methy/step1/"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step1/"
    
     input:
     tuple val(sample), val(pair_id),path(methy_barcode_r1), path(methy_barcode_r2)

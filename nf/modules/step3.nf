@@ -26,7 +26,7 @@ process SPLIT_BAM_FILES {
 // merge single cell forward and reverse bam
 process MERGE_BISMARK_BAM {
     tag "$sample-BISMARK_ALIGNMENT_MERGE"
-    publishDir "${params.outdir}/${sample}_methy/step3/split_bams/merged/"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step3/split_bams/merged/"
 
     input:
     tuple val(sample), val(pair_id), path(forward_split_bams_dir), path(forward_filtered_barcodes), path(forward_filtered_barcode_reads_counts), path(reverse_split_bams_dir), path(reverse_filtered_barcodes), path(reverse_filtered_barcode_reads_counts)
@@ -85,7 +85,7 @@ process MERGE_BISMARK_BAM {
 // run allcools bam-to-allc
 process ALLCOOLS_BAM_TO_ALLC {
     tag "$sample-ALLCOOLS_BAM_TO_ALLC"
-    publishDir "${params.outdir}/${sample}_methy/step3/allcools/"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step3/allcools/"
     
     input:
     tuple val(sample), val(pair_id), path(sc_merged_bam_dir), path(filtered_barcode)
@@ -113,7 +113,7 @@ process ALLCOOLS_BAM_TO_ALLC {
 // merge all single cell metrics
 process MERGE_FILTERED_BARCODE_READS_COUNTS {
     tag "$sample-MERGE_FILTERED_BARCODE_READS_COUNTS"
-    publishDir "${params.outdir}/${sample}_methy/step3/split_bams/merged/"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step3/split_bams/merged/"
 
     input:
     tuple val(sample), path(merged_filtered_barcode), path(merged_filtered_barcode_reads_counts), path(allcools_allc_output)
@@ -135,7 +135,7 @@ process MERGE_FILTERED_BARCODE_READS_COUNTS {
 // run allcools generate-datasets
 process ALLCOOLS_GENERATE_DATASETS {
     tag "$sample-ALLCOOLS_GENERATE_DATASETS"
-    publishDir "${params.outdir}/${sample}_methy/step3/allcools_generate_datasets/"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step3/allcools_generate_datasets/"
     
     input:
     tuple val(sample), path(allcools), path(filtered_barcode)
@@ -222,7 +222,7 @@ process ALLCOOLS_SUBMERGE {
 // merge single cell allc to bulk allc
 process ALLCOOLS_MERGE {
     tag "$sample-ALLCOOLS_MERGE"
-    publishDir "${params.outdir}/${sample}_methy/step3/"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step3/"
 
     input:
     // Accept a collection of per-pair merged allc files for a sample
@@ -251,7 +251,7 @@ process ALLCOOLS_MERGE {
 // extract cg context allc
 process ALLCOOLS_EXTRACT {
     tag "$sample-ALLCOOLS_EXTRACT"
-    publishDir "${params.outdir}/${sample}_methy/step3/"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step3/"
 
     input:
     tuple val(sample), path(allcools_merge_allc), path(allcools_merge_allc_tbi)

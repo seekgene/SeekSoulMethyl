@@ -1,7 +1,7 @@
 // Generate summary
 process METHYLATION_SUMMARY {
     tag "$sample-METHYLATION_SUMMARY"
-    publishDir "${params.outdir}/${sample}_methy/"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/"
     
     input:
     tuple val(sample),path(bismark_forward_report), path(bismark_reverse_report), path(allcools_cells_csv_output), 
@@ -25,7 +25,7 @@ process METHYLATION_SUMMARY {
 // LSI or PCA reduction and clustering analysis
 process METHYLATION_LSI_PCA_CLUSTERING {
     tag "METHYLATION_LSI_PCA_CLUSTERING-$sample"
-    publishDir "${params.outdir}/${sample}_methy/step4/", mode: "copy"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step4/", mode: "copy"
     
     input:
     tuple val(sample), path(mcds_file), path(filtered_barcode)
@@ -51,7 +51,7 @@ process METHYLATION_LSI_PCA_CLUSTERING {
 // generate RNA-MET multi report
 process MULTI_REPORT {
     tag "MULTI_REPORT-$sample"
-    publishDir "${params.outdir}/", mode: "copy"
+    publishDir "${params.outdir}/${sample}/", mode: "copy"
     
     input:
     tuple val(sample), path(gexjson), path(filtered_dir), 

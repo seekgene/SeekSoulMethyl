@@ -2,7 +2,7 @@
 // Bismark forward strand alignment
 process BISMARK_ALIGNMENT_FORWARD {
     tag "$sample-BISMARK_ALIGNMENT_FORWARD"
-    publishDir "${params.outdir}/${sample}_methy/step2/bismark"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step2/bismark"
     
     input:
     tuple val(sample), val(pair_id), path(methy_forward_r1), path(methy_forward_r2)
@@ -30,7 +30,7 @@ process BISMARK_ALIGNMENT_FORWARD {
 // Bismark reverse strand alignment
 process BISMARK_ALIGNMENT_REVERSE {
     tag "$sample-BISMARK_ALIGNMENT_REVERSE"
-    publishDir "${params.outdir}/${sample}_methy/step2/bismark"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step2/bismark"
     
     input:
     tuple val(sample), val(pair_id), path(methy_reverse_r1), path(methy_reverse_r2)
