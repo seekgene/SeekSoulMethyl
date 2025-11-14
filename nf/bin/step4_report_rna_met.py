@@ -360,6 +360,8 @@ def report(gexjson, metjson,
     data_summary["tsne"]["data"]["mito"] = [ round(i,2) for i in mito ]
     data_summary["tsne"]["data"]["cluster"] = gex_cluster
     data_summary["tsne"]["data"]["CpG_number"] = [ int(i) for i in MET_Total_CpG_number ]
+    CpG_methylation_level = [ 0 if np.isnan(i) else i for i in CpG_methylation_level ]
+    CH_methylation_level = [ 0 if np.isnan(i) else i for i in CH_methylation_level ]
     data_summary["tsne"]["data"]["CpG_methylation"] = [ round(i,2) for i in CpG_methylation_level ]
     data_summary["tsne"]["data"]["CH_methylation"] = [ round(i,2) for i in CH_methylation_level ]
     
