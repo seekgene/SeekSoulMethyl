@@ -43,7 +43,7 @@ process FASTP_EXPRESSION_MULTI {
             if [ -f "\$cfg" ]; then
                 ossutil cp --sign-version v4 --region cn-beijing -c "\$cfg" "\$src" "\$name" 1>&2
             else
-                ossutil cp --sign-version v4 --region cn-beijing "\$src" "\$name" 1>&2
+                ossutil cp --sign-version v4 --region cn-beijing -i "\$AccessKeyId" -k "\$AccessKeySecret" "\$src" "\$name" 1>&2
             fi
             if [ \$? -ne 0 ]; then
                 echo "ERROR: ossutil failed for \$src" >&2
@@ -109,7 +109,7 @@ process FASTP_METHYLATION_MULTI {
             if [ -f "\$cfg" ]; then
                 ossutil cp --sign-version v4 --region cn-beijing -c "\$cfg" "\$src" "\$name" 1>&2
             else
-                ossutil cp --sign-version v4 --region cn-beijing "\$src" "\$name" 1>&2
+                ossutil cp --sign-version v4 --region cn-beijing -i "\$AccessKeyId" -k "\$AccessKeySecret" "\$src" "\$name" 1>&2
             fi
             if [ \$? -ne 0 ]; then
                 echo "ERROR: ossutil failed for \$src" >&2
