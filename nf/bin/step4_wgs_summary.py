@@ -335,7 +335,7 @@ def outcsv(outdir, samplename, summary_json, genome_info_json):
     methylation_metrics = get_methylation_metrics(samplename, outdir)
     
     summary.update(methylation_metrics)
-    raw = f'{summary["stat"]["total"] * 2}'
+    raw = f'{summary["stat"]["total"]}'
     vaild = f'{vaildratio:.2%}'
     dropped_too_short = f'{dropped_too_short_ratio:.2%}'
     dropped_chimeric = f'{dropped_chimeric_ratio:.2%}'
