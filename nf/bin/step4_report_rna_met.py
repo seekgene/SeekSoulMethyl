@@ -322,7 +322,6 @@ def report(gexjson, metjson,
     # joint: title
     data_summary["Joint"][0]["left"][0]["data"]["Estimated number of cells"] = f'{df.shape[0]:,}'
     data_summary["Joint"][0]["right"][0]["data"]["GEX Median genes per cell"] = f'{int(df["nFeature_RNA"].median()):,}'
-    data_summary["Joint"][0]["right"][0]["data"]["MET Median CpG number per cell"] = f'{int(df["total_cpg_number"].median()):,}'
     # joint: left_Sample riget_Joint Metrics
     data_summary["Joint"][1]["left"][0]["data"]["Sample ID"] = samplename
     data_summary["Joint"][1]["left"][0]["data"]["Sample description"] = rawname
@@ -377,7 +376,7 @@ def report(gexjson, metjson,
     # rna: title
     data_summary["RNA"][0]["left"][0]["data"]["Estimated number of cells"] = f'{df.shape[0]:,}'
     data_summary["RNA"][0]["right"][0]["data"]["GEX Median genes per cell"] = f'{int(df["nFeature_RNA"].median()):,}'
-    data_summary["RNA"][0]["right"][0]["data"]["MET Median CpG number per cell"] = f'{int(df["total_cpg_number"].median()):,}'
+    
     
     # rna: left_Sequencing riget_Saturation
     data_summary["RNA"][1]["left"][0]["data"]["Number of Reads"] = f'{gex_summary["stat"]["total"]:,}'
@@ -429,7 +428,7 @@ def report(gexjson, metjson,
     # atac: title
     data_summary["MET"][0]["left"][0]["data"]["Estimated number of cells"] = f'{df.shape[0]:,}'
     data_summary["MET"][0]["right"][0]["data"]["GEX Median genes per cell"] = f'{int(df["nFeature_RNA"].median()):,}'
-    data_summary["MET"][0]["right"][0]["data"]["MET Median CpG number per cell"] = f'{int(df["total_cpg_number"].median()):,}'
+    
     # met: left_Sequencing riget_median_fragments
     data_summary["MET"][1]["left"][0]["data"]["Number of Read Pairs"] = met_summary["stat"]["total"]
     data_summary["MET"][1]["left"][0]["data"]["Valid Barcodes"] = f'{met_summary["stat"]["valid"]/met_summary["stat"]["total"]:.2%}'
@@ -463,6 +462,12 @@ def report(gexjson, metjson,
     data_summary["MET"][3]["left"][0]["data"]["y"]['CH methylation'] = [ round(i,2) for i in CH_methylation_level ]
     data_summary["MET"][3]["right"][0]["data"]["x"] = np.log10(df["reads_counts"] + 1).round(4).tolist()
     data_summary["MET"][3]["right"][0]["data"]["y"] = np.log10(df["total_cpg_number"] + 1).round(4).tolist()
+    
+    data_summary["Joint"][0]["right"][0]["data"]["MET CpG number of median cell"] = f'{int(met_summary["cells"]["CPGs of median cell"]):,}'
+    data_summary["RNA"][0]["right"][0]["data"]["MET CpG number of median cell"] = f'{int(met_summary["cells"]["CPGs of median cell"]):,}'
+    data_summary["MET"][0]["right"][0]["data"]["MET CpG number of median cell"] = f'{int(met_summary["cells"]["CPGs of median cell"]):,}'
+    
+    
     
     with open(os.path.join(outdir, f'{samplename}_rna_met.json'), 'w') as fh:
         json.dump(data_summary, fh, indent = 4)
