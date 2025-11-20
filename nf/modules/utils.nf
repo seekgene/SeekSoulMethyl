@@ -10,6 +10,7 @@ process COUNTS_MAPPED_READS {
 
     script:
     """
+    set -e
     step2_counts_aligned_reads.py -b ${bismark_bam} -o .
     """
 }
@@ -26,7 +27,25 @@ process ESTIMATED_CELLS {
     
     script:
     """
+    set -e
     echo "estimated cells"
     step3_estimated_cells.py -r ./ --outdir .
+    """
+}
+
+process GTF_TO_GENE_BED {
+    tag "GTF_TO_GENE_BED"
+    publishDir "${params.outdir}/"
+    time "30m"
+    
+    output:
+    path("geneslop2k.bed"), emit: gene_bed
+    
+    script:
+    """
+    set -e
+    echo "gtf to gene bed"
+    gtf_to_gene_bed.py --gtf ${params.gtf} --out genes.bed;
+    bedtools slop -b 2000 -i genes.bed -g ${params.chrom_size_path_full} > geneslop2k.bed
     """
 }
