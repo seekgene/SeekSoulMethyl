@@ -137,4 +137,3 @@ build_ref.sh
 oss_list_r1r2_from_csv.sh
 Dockerfile
 benchmark_mcds_read_speed.py
-gtf_to_gene_bed.py
