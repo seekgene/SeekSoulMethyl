@@ -16,7 +16,7 @@
                 "title": "summary2",
                 "data": {
                     "GEX Median genes per cell": "1,156",
-                    "MET Median CpG number per cell": "20,965"
+                    "MET CpG number of median cell": "20,965"
                 }
             }]
         },
@@ -119,7 +119,7 @@
                 "title": "summary2",
                 "data": {
                     "GEX Median genes per cell": "-",
-                    "MET Median CpG number per cell": "-"
+                    "MET CpG number of median cell": "-"
                 }
             }]
         },
@@ -258,7 +258,7 @@
                 "title": "summary2",
                 "data": {
                     "GEX Median genes per cell": "-",
-                    "MET Median CpG number per cell": "-"
+                    "MET CpG number of median cell": "-"
                 }
             }]
         },
