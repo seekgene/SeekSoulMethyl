@@ -377,12 +377,12 @@ def outcsv(outdir, samplename, summary_json, genome_info_json):
     cov_max_cell = f'{summary["cells"]["Genome Coverage rate of max cell"]:.2%}'
     cpgs_max_cell = f'{summary["cells"]["CPGs of max cell"]}'
     
-    reads_max_cell = f'{summary["cells"]["Reads of max cell"]}'
+    reads_max_cell = f'{int(summary["cells"]["Reads of max cell"] / 2)}'
     saturation_max_cell = f'{summary["cells"]["Saturation of max cell"]:.2%}'
     cov_median_cell = f'{summary["cells"]["Genome Coverage rate of median cell"]:.2%}'
     cpgs_median_cell = f'{summary["cells"]["CPGs of median cell"]}'
     
-    reads_median_cell = f'{summary["cells"]["Reads of median cell"]}'
+    reads_median_cell = f'{int(summary["cells"]["Reads of median cell"] / 2)}'
     saturation_median_cell = f'{summary["cells"]["Saturation of median cell"]:.2%}'
     cellnum = f'{summary["cells"]["Estimated Number of Cells"]}'
     summary["cells"]["Fraction Reads in Cells"] = summary["cells"]["Reads in Cells"] / summary["mapping"]["uniquereads"]

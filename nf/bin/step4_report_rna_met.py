@@ -441,8 +441,8 @@ def report(gexjson, metjson,
     data_summary["MET"][1]["left"][0]["data"]["Dropped Chimeric"] = f'{(forward_chimeric + reverse_chimeric) / (vaildreads - too_short):.2%}'
     data_summary["MET"][1]["left"][0]["data"]["C-T Conversion"] = f'{met_summary["stat"]["ct_mean"]:.2%}'
     data_summary["MET"][1]["left"][0]["data"]["C-C Ratio"] = f'{met_summary["stat"]["cc_mean"]:.2%}'
-    data_summary["MET"][1]["right"][0]["data"]["Reads Mapped to Genome"] = f'{met_summary["mapping"]["Reads Mapped to Genome"]:.2%}'
-    data_summary["MET"][1]["right"][0]["data"]["Reads Mapped Confidently to Genome"] = f'{met_summary["mapping"]["Reads Mapped Confidently to Genome"]:.2%}'
+    data_summary["MET"][1]["right"][0]["data"]["Read Pairs Mapped to Genome"] = f'{met_summary["mapping"]["Reads Mapped to Genome"]:.2%}'
+    data_summary["MET"][1]["right"][0]["data"]["Read Pairs Mapped Confidently to Genome"] = f'{met_summary["mapping"]["Reads Mapped Confidently to Genome"]:.2%}'
     data_summary["MET"][1]["right"][0]["data"]["CpG Methylation Rate"] = f'{round(met_summary["cpg_methylation_rate"],2)}%'
     data_summary["MET"][1]["right"][0]["data"]["CHG Methylation Rate"] = f'{round(met_summary["chg_methylation_rate"],2)}%'
     data_summary["MET"][1]["right"][0]["data"]["CHH Methylation Rate"] = f'{round(met_summary["chh_methylation_rate"],2)}%'
@@ -452,7 +452,7 @@ def report(gexjson, metjson,
     data_summary["MET"][2]["left"][0]["data"]["Estimated Number of Cells"] = f'{met_summary["cells"]["Estimated Number of Cells"]:,}'
     data_summary["MET"][2]["left"][0]["data"]["Genome Coverage Rate of Median Cell"] = f'{met_summary["cells"]["Genome Coverage rate of median cell"]:.2%}'
     data_summary["MET"][2]["left"][0]["data"]["CpGs of Median Cell"] = f'{int(met_summary["cells"]["CPGs of median cell"]):,}'
-    data_summary["MET"][2]["left"][0]["data"]["Reads of Median Cell"] = f'{int(met_summary["cells"]["Reads of median cell"]):,}'
+    data_summary["MET"][2]["left"][0]["data"]["Read Pairs of Median Cell"] = f'{int(met_summary["cells"]["Reads of median cell"] / 2):,}'
     data_summary["MET"][2]["left"][0]["data"]["Saturation of Median Cell"] = f'{met_summary["cells"]["Saturation of median cell"]:.2%}'
     data_summary["MET"][2]["left"][0]["data"]["Fraction Reads in Cells"] = f'{met_summary["cells"]["Fraction Reads in Cells"]:.2%}' 
     data_summary["MET"][2]["right"][0]["data"]["y"]['Cell Saturation'] = [ round(i*100, 2) for i in df["cell_saturation"].tolist()]
@@ -460,7 +460,7 @@ def report(gexjson, metjson,
     
     data_summary["MET"][3]["left"][0]["data"]["y"]['CG methylation'] = [ round(i,2) for i in CpG_methylation_level ]
     data_summary["MET"][3]["left"][0]["data"]["y"]['CH methylation'] = [ round(i,2) for i in CH_methylation_level ]
-    data_summary["MET"][3]["right"][0]["data"]["x"] = np.log10(df["reads_counts"] + 1).round(4).tolist()
+    data_summary["MET"][3]["right"][0]["data"]["x"] = np.log10((df["reads_counts"] / 2) + 1).round(4).tolist()
     data_summary["MET"][3]["right"][0]["data"]["y"] = np.log10(df["total_cpg_number"] + 1).round(4).tolist()
     
     data_summary["Joint"][0]["right"][0]["data"]["MET CpG number of median cell"] = f'{int(met_summary["cells"]["CPGs of median cell"]):,}'
