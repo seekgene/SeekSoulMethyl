@@ -21,6 +21,7 @@ params.genomeDir = "${params.database_dir}/star"
 params.genomefa = "${params.database_dir}/fasta/genome.fa"
 params.gtf = "${params.database_dir}/genes/genes.gtf"
 params.bismark_ref = "${params.database_dir}/fasta/"
+params.chrom_size_path_full = "${params.database_dir}/bed/chr_len.bed"
 params.chrom_size_path = "${params.database_dir}/bed/chr_nochrM.bed"
 params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
 params.chemistry = "DD-MET3"
@@ -99,6 +100,10 @@ include {
     METHYLATION_LSI_PCA_CLUSTERING;
     MULTI_REPORT
 } from './modules/step4'
+
+include {
+    GTF_TO_GENE_BED
+} from './modules/utils'
 
 // Helper: build a stable per-sample grouping key (avoid name clash with Nextflow's groupKey aggregator)
 def sampleGroupKey(sample_id, pair_count) {
@@ -192,6 +197,9 @@ workflow {
     
     // Total CG sites in genome
     cpg_sites = COMPUTE_CPG_SITES()
+
+    // Generate gene bed file
+    gene_bed = GTF_TO_GENE_BED()
     
     // Build per-group tuples (no merging; each group goes through fastp)
     exp_groups = input_ch.map { sample_id, files ->
@@ -439,7 +447,8 @@ workflow {
         }
         .combine(
         merged_counts.merged_filtered_barcode_reads_counts
-        .map{it -> tuple(it[0], it[1])}, by: 0))
+        .map{it -> tuple(it[0], it[1])}, by: 0)
+        .combine(gene_bed.gene_bed))
     if (params.split_fastq > 0) {
         // Run allcools merge for split dataset
         allc_submerge = ALLCOOLS_SUBMERGE(allc_generated.allcools_allc_output)
