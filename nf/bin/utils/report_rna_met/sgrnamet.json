@@ -269,7 +269,7 @@
                 "name": "Card",
                 "title": "Sequencing",
                 "data": {
-                    "Number of Read Pairs": "-",
+                    "Number of Reads": "-",
                     "Valid Barcodes": "-",
                     "Dropped Too Short": "-",
                     "Dropped Chimeric": "-",
@@ -277,10 +277,10 @@
                     "C-C Ratio": "-"
                 },
                 "description": {
-                    "Sequenced read pairs": "Total number of sequenced read pairs assigned to the sample",
-                    "Valid barcodes": "Fraction of read pairs with barcodes that match the whitelist after error correction",
-                    "Dropped Too Short": "Fraction of read pairs that R2 shorter than 60bps or R1 shorter than 20bps after step1",
-                    "Dropped Chimeric": "Fraction of read pairs that contained valid barcodes and R1 length \u2265 20bp and R2 length \u2265 60bp filtered out due to containing too many CH-context methylation sites.",
+                    "Number of Reads": "Total number of sequenced reads assigned to the sample",
+                    "Valid barcodes": "Fraction of reads with barcodes that match the whitelist after error correction",
+                    "Dropped Too Short": "Fraction of reads that R2 shorter than 60bps or R1 shorter than 20bps after step1",
+                    "Dropped Chimeric": "Fraction of reads that contained valid barcodes and R1 length \u2265 20bp and R2 length \u2265 60bp filtered out due to containing too many CH-context methylation sites.",
                     "C-T Conversion": "Fraction of unmethylated C sites that were converted to T on the forward strand (17L and ME) in the experiment.",
                     "C-C Ratio": "Fraction of methylated C sites that remained as C on the reverse strand (17L and ME) in the experiment."
                 }

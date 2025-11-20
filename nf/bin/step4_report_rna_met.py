@@ -430,7 +430,7 @@ def report(gexjson, metjson,
     data_summary["MET"][0]["right"][0]["data"]["GEX Median genes per cell"] = f'{int(df["nFeature_RNA"].median()):,}'
     
     # met: left_Sequencing riget_median_fragments
-    data_summary["MET"][1]["left"][0]["data"]["Number of Read Pairs"] = met_summary["stat"]["total"]
+    data_summary["MET"][1]["left"][0]["data"]["Number of Reads"] = f'{met_summary["stat"]["total"] * 2:,}'
     data_summary["MET"][1]["left"][0]["data"]["Valid Barcodes"] = f'{met_summary["stat"]["valid"]/met_summary["stat"]["total"]:.2%}'
     data_summary["MET"][1]["left"][0]["data"]["Dropped Too Short"] = f'{met_summary["stat"]["too_short"] / met_summary["stat"]["total"]:.2%}'
     
