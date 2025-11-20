@@ -138,7 +138,7 @@ process ALLCOOLS_GENERATE_DATASETS {
     publishDir "${params.outdir}/${sample}/${sample}_methy/step3/allcools_generate_datasets/"
     
     input:
-    tuple val(sample), path(allcools), path(filtered_barcode)
+    tuple val(sample), path(allcools), path(filtered_barcode), path(gene_bed)
     
     output:
     tuple val(sample), path("${sample}.mcds"), emit: allcools_generate_datasets
@@ -164,6 +164,7 @@ process ALLCOOLS_GENERATE_DATASETS {
         ["chrom50k"]=50000
         ["chrom20k"]=20000
         ["chrom10k"]=10000
+        ["geneslop2k"]=${gene_bed}
     )
     
     # Generate parameters for each bin size
