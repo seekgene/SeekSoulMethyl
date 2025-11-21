@@ -290,8 +290,8 @@
                 "name": "Card",
                 "title": "Mapping",
                 "data": {
-                    "Reads Mapped to Genome": "-",
-                    "Reads Mapped Confidently to Genome": "-",
+                    "Read Pairs Mapped to Genome": "-",
+                    "Read Pairs Mapped Confidently to Genome": "-",
                     "CpG Methylation Rate": "-",
                     "CHG Methylation Rate": "-",
                     "CHH Methylation Rate": "-",
@@ -299,8 +299,8 @@
                     "Total CpGs Detected": "-"
                 },
                 "description": {
-                    "Reads Mapped to Genome": "Total number of reads mapped to the genome.",
-                    "Reads Mapped Confidently to Genome": "Fraction of reads uniquely mapped to the genome.",
+                    "Read Pairs Mapped to Genome": "Total number of read pairs mapped to the genome.",
+                    "Read Pairs Mapped Confidently to Genome": "Fraction of read pairs uniquely mapped to the genome.",
                     "CpG Methylation Rate": "CpG methylation rate.",
                     "CHG Methylation Rate": "CHG methylation rate.",
                     "CHH Methylation Rate": "CHH methylation rate.",
@@ -319,17 +319,17 @@
                     "Estimated Number of Cells": "-",
                     "Genome Coverage Rate of Median Cell": "-",
                     "CpGs of Median Cell": "-",
-                    "Reads of Median Cell": "-",
+                    "Read Pairs of Median Cell": "-",
                     "Saturation of Median Cell": "-",
-                    "Fraction Reads in Cells": "-"
+                    "Fraction Read Pairs in Cells": "-"
                 },
                 "description": {
                     "Estimated Number of Cells": "Total number of cells identified by cell calling.",
                     "Genome Coverage Rate of Median Cell": "Median genome coverage rate across cells.",
                     "CpGs of Median Cell": "Number of CpG sites detected in the cell at the median genome coverage (strand-specific counting).",
-                    "Reads of Median Cell": "Number of reads uniquely mapped to the genome for the cell at the median genome coverage.",
+                    "Read Pairs of Median Cell": "Number of read pairs uniquely mapped to the genome for the cell at the median genome coverage.",
                     "Saturation of Median Cell": "Sequencing saturation of the cell at the median genome coverage.",
-                    "Fraction Reads in Cells": "Fraction of reads belonging to called cells among all reads uniquely mapped to the genome."
+                    "Fraction Read Pairs in Cells": "Fraction of read pairs belonging to called cells among all read pairs uniquely mapped to the genome."
                 }
             }],
             "right": [{
@@ -369,7 +369,7 @@
             "right": [{
                 "id": 6,
                 "name": "PlotlyScatter",
-                "title": "Aligned Reads number - CpG number distribution",
+                "title": "Aligned read pairs number - CpG number",
                 "data": {
                     "x": [],
                     "y": [],
@@ -377,10 +377,10 @@
                         "title": "log10(CpG Number)"
                     },
                     "xaxis": {
-                        "title": "log10(Aligned Reads Number)"
+                        "title": "log10(Aligned Read Pairs Number)"
                     }
                 },
-                "description": "X-axis is uniquely mapped reads number across cells, and Y-axis is CpG number detected in each cell."
+                "description": "X-axis is uniquely mapped read pairs number across cells, and Y-axis is CpG number detected in each cell."
             }]
         }
     ]
