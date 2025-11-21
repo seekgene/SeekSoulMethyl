@@ -60,7 +60,10 @@ process MULTI_REPORT {
     
 
     output:
-    tuple val(sample), path("${sample}_rna_methyl_report.html"), path("${sample}_rna_met.json"), emit: rna_methy_report
+    tuple val(sample), path("${sample}_rna_methyl_report.html"), 
+    path("${sample}_rna_met.json"), 
+    path("${sample}_rna_methy_summary.csv"),
+    emit: rna_methy_report
     
     script:
     """
