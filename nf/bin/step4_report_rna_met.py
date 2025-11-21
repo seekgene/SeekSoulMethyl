@@ -11,6 +11,91 @@ from scipy.io import mmread
 import click
 from typing import List, Dict, Any
 from seeksoultools.utils.countUtil import calculate_metrics
+from collections import defaultdict
+
+CSV_KEY = {
+    'Joint': [
+        'Sample ID', 'Estimated number of cells', 'GEX Median genes per cell', 'MET CpG number of median cell',
+        'Workflow version','Fastp version','SeekSoulTools version','Bismark version',
+        'ALLCools version','Reference','Chemistry','Include introns'],
+    'RNA': [
+        'Number of Reads',
+        'Valid Barcode',
+        'Sequencing Saturation',
+        'Too Short',
+        'Q30 Bases in Barcode',
+        'Q30 Bases in UMI',
+        'Reads Mapped to Genome',
+        'Reads Mapped Confidently to Genome',
+        'Reads Mapped to Intergenic Regions',
+        'Reads Mapped to Intronic Regions',
+        'Reads Mapped to Exonic Regions',
+        'Fraction Reads in Cells',
+        'Mean Reads per Cell',
+        'Median Genes per Cell',
+        'Median UMI Counts per Cell',
+        'Total Genes Detected'
+    ],
+    'MET':[
+        'Number of Read Pairs',
+        'Valid Barcodes',
+        'Dropped Too Short',
+        'Dropped Chimeric',
+        'C-T Conversion',
+        'C-C Ratio',
+        'Read Pairs Mapped to Genome',
+        'Read Pairs Mapped Confidently to Genome',
+        'CpG Methylation Rate',
+        'CHG Methylation Rate',
+        'CHH Methylation Rate',
+        'CpG Coverage Rate',
+        'Total CpGs Detected',
+        'Genome Coverage Rate of Median Cell',
+        'Read Pairs of Median Cell',
+        'Saturation of Median Cell',
+        'Fraction Read Pairs in Cells'
+    ]
+}
+
+PREFIX = {
+    'Joint': '',
+    'RNA':'GEX_',
+    'MET':'MET_'
+}
+
+FIX_KEY = {
+    'Joint': ['Estimated number of cells', 'GEX Median genes per cell', 'MET CpG number of median cell'],
+    'RNA': ['Number of Reads', 'Too Short', 'Mean Reads per Cell', 'Median Genes per Cell',
+            'Median UMI Counts per Cell', 'Total Genes Detected'],
+    'MET': ['Number of Read Pairs','Total CpGs Detected', 'Read Pairs of Median Cell']
+}
+
+def find_key_in_nested_structure(data, target_key):
+    """
+    Find the value of a key in a nested dictionary or list.
+    """
+    if isinstance(data, dict):
+        if target_key in data:
+            return data[target_key]
+        
+        for value in data.values():
+            result = find_key_in_nested_structure(value, target_key)
+            if result is not None:
+                return result
+                
+    elif isinstance(data, list):
+        for item in data:
+            result = find_key_in_nested_structure(item, target_key)
+            if result is not None:
+                return result
+                
+    return 
+
+def fix_key_number(n_with_comma: str) -> int:
+    """
+    Convert a number string with a comma to an integer.
+    """
+    return int(n_with_comma.replace(',', ''))
 
 def check_software_version() -> dict:
     sft_version = {}
@@ -317,8 +402,7 @@ def report(gexjson, metjson,
         cells_file = cells_file,
         whitelist_file = whitelist_file,
         output_file = os.path.join(outdir, f'{samplename}_rna_met_merge.xls'),
-    )
-
+    )    
     # joint: title
     data_summary["Joint"][0]["left"][0]["data"]["Estimated number of cells"] = f'{df.shape[0]:,}'
     data_summary["Joint"][0]["right"][0]["data"]["GEX Median genes per cell"] = f'{int(df["nFeature_RNA"].median()):,}'
@@ -425,7 +509,7 @@ def report(gexjson, metjson,
         diff_data = pre_diff_data(diff_table)
         data_summary["diff"] = diff_data
 
-    # atac: title
+    
     data_summary["MET"][0]["left"][0]["data"]["Estimated number of cells"] = f'{df.shape[0]:,}'
     data_summary["MET"][0]["right"][0]["data"]["GEX Median genes per cell"] = f'{int(df["nFeature_RNA"].median()):,}'
     
@@ -441,8 +525,8 @@ def report(gexjson, metjson,
     data_summary["MET"][1]["left"][0]["data"]["Dropped Chimeric"] = f'{(forward_chimeric + reverse_chimeric) / (vaildreads - too_short):.2%}'
     data_summary["MET"][1]["left"][0]["data"]["C-T Conversion"] = f'{met_summary["stat"]["ct_mean"]:.2%}'
     data_summary["MET"][1]["left"][0]["data"]["C-C Ratio"] = f'{met_summary["stat"]["cc_mean"]:.2%}'
-    data_summary["MET"][1]["right"][0]["data"]["Reads Mapped to Genome"] = f'{met_summary["mapping"]["Reads Mapped to Genome"]:.2%}'
-    data_summary["MET"][1]["right"][0]["data"]["Reads Mapped Confidently to Genome"] = f'{met_summary["mapping"]["Reads Mapped Confidently to Genome"]:.2%}'
+    data_summary["MET"][1]["right"][0]["data"]["Read Pairs Mapped to Genome"] = f'{met_summary["mapping"]["Reads Mapped to Genome"]:.2%}'
+    data_summary["MET"][1]["right"][0]["data"]["Read Pairs Mapped Confidently to Genome"] = f'{met_summary["mapping"]["Reads Mapped Confidently to Genome"]:.2%}'
     data_summary["MET"][1]["right"][0]["data"]["CpG Methylation Rate"] = f'{round(met_summary["cpg_methylation_rate"],2)}%'
     data_summary["MET"][1]["right"][0]["data"]["CHG Methylation Rate"] = f'{round(met_summary["chg_methylation_rate"],2)}%'
     data_summary["MET"][1]["right"][0]["data"]["CHH Methylation Rate"] = f'{round(met_summary["chh_methylation_rate"],2)}%'
@@ -452,15 +536,15 @@ def report(gexjson, metjson,
     data_summary["MET"][2]["left"][0]["data"]["Estimated Number of Cells"] = f'{met_summary["cells"]["Estimated Number of Cells"]:,}'
     data_summary["MET"][2]["left"][0]["data"]["Genome Coverage Rate of Median Cell"] = f'{met_summary["cells"]["Genome Coverage rate of median cell"]:.2%}'
     data_summary["MET"][2]["left"][0]["data"]["CpGs of Median Cell"] = f'{int(met_summary["cells"]["CPGs of median cell"]):,}'
-    data_summary["MET"][2]["left"][0]["data"]["Reads of Median Cell"] = f'{int(met_summary["cells"]["Reads of median cell"]):,}'
+    data_summary["MET"][2]["left"][0]["data"]["Read Pairs of Median Cell"] = f'{int(met_summary["cells"]["Reads of median cell"]):,}'
     data_summary["MET"][2]["left"][0]["data"]["Saturation of Median Cell"] = f'{met_summary["cells"]["Saturation of median cell"]:.2%}'
-    data_summary["MET"][2]["left"][0]["data"]["Fraction Reads in Cells"] = f'{met_summary["cells"]["Fraction Reads in Cells"]:.2%}' 
+    data_summary["MET"][2]["left"][0]["data"]["Fraction Read Pairs in Cells"] = f'{met_summary["cells"]["Fraction Reads in Cells"]:.2%}' 
     data_summary["MET"][2]["right"][0]["data"]["y"]['Cell Saturation'] = [ round(i*100, 2) for i in df["cell_saturation"].tolist()]
     data_summary["MET"][2]["right"][0]["data"]["y"]['Cell Genome Coverage'] = [ round(i*100,2) for i in Genome_coverage ]
     
     data_summary["MET"][3]["left"][0]["data"]["y"]['CG methylation'] = [ round(i,2) for i in CpG_methylation_level ]
     data_summary["MET"][3]["left"][0]["data"]["y"]['CH methylation'] = [ round(i,2) for i in CH_methylation_level ]
-    data_summary["MET"][3]["right"][0]["data"]["x"] = np.log10(df["reads_counts"] + 1).round(4).tolist()
+    data_summary["MET"][3]["right"][0]["data"]["x"] = np.log10((df["reads_counts"] / 2) + 1).round(4).tolist()
     data_summary["MET"][3]["right"][0]["data"]["y"] = np.log10(df["total_cpg_number"] + 1).round(4).tolist()
     
     data_summary["Joint"][0]["right"][0]["data"]["MET CpG number of median cell"] = f'{int(met_summary["cells"]["CPGs of median cell"]):,}'
@@ -477,6 +561,17 @@ def report(gexjson, metjson,
     template = env.get_template('base.html')
     with open(os.path.join(outdir, f'{samplename}_rna_methyl_report.html'), 'w') as fh:
         fh.write(template.render(websummary_json_data=json.dumps(data_summary).replace("5'", "5\\'").replace("3'", "3\\'")))
+        
+    rna_methy_summary_combine = defaultdict(dict)
+    for k,v in CSV_KEY.items():
+        for i in v:
+            i_with_no_space = i.replace(" ","_")
+            rna_methy_summary_combine[f'{PREFIX[k]}{i_with_no_space}'] = find_key_in_nested_structure(data_summary[k], i)
+            if i in FIX_KEY[k]:
+                rna_methy_summary_combine[f'{PREFIX[k]}{i_with_no_space}'] = fix_key_number(rna_methy_summary_combine[f'{PREFIX[k]}{i_with_no_space}'])
+    pd.DataFrame([rna_methy_summary_combine]).to_csv(os.path.join(outdir, f'{samplename}_rna_methy_summary.csv'), index=False)
+
+
 
 if __name__ == "__main__":
     report()
