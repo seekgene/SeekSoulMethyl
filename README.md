@@ -137,7 +137,7 @@ bash sc_methy_workflow.sh \
 - **sample**: Sample name
 - **outdir**: Output directory path
 - **database_dir**: Reference genome database path
-- **chemistry**: Methylation chemistry (DD-MET3 or DD-MET5)
+- **chemistry**: Methylation chemistry (DD-MET3 or DD-MET5). DD-MET3 is a dual-label dataset, meaning the RNA and DNA methylation data barcodes are different for the same cell, while DD-MET5 is single-label, meaning the RNA and DNA methylation data barcodes are the same for the same cell.
 - **core**: Number of CPU cores
 - **filter_ch**: Filter reads that contain > n CH methylation sites.
 
