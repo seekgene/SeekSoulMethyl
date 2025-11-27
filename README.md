@@ -391,7 +391,7 @@ This section describes each Nextflow process with inputs, core logic, key parame
   - `${sample}_rna_methyl_report.html` (if running the main workflow)
 - Nextflow run artifacts (as configured by `-c nf/nextflow.config`): `execution_report.html`, `execution_timeline.html`, `pipeline_dag.html`, `execution_trace.txt` (script/SeekSoulMethyl/nf/nextflow.config:17)
 
-## Methylation-only workflow (optional)
+## Methylation-only workflow (test version, currently not recommended for use)
 Use the simplified workflow when you only have methylation reads:
 ```bash
 nextflow run SeekSoulMethyl/nf/methy_only.nf \
