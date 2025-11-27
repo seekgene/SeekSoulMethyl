@@ -11,39 +11,33 @@ from pathlib import Path
 @click.option('--outdir', '-o', required=True, help='Output directory')
 def estimated_cells(raw_aligned_reads_counts:str, expected_cell_num:int, outdir:str):
     """
-    估计细胞数量并过滤barcode
-    如果raw_aligned_reads_counts是目录，则处理该目录下所有以_barcode_counts.csv结尾的文件
-    并按barcode列进行汇总
+    Estimate the number of cells and filter barcodes.
+    If `raw_aligned_reads_counts` is a directory, process all files ending with
+    `_cb_aligned_reads_counts.csv` in that directory and aggregate by the `barcode` column.
     """
     os.makedirs(outdir, exist_ok=True)
     
-    # 创建一个字典来存储每个barcode的总reads数
     barcode_total_reads = {}
     
-    # 检查输入是文件还是目录
+    # Check whether the input is a file or a directory
     if os.path.isdir(raw_aligned_reads_counts):
-        print(f"处理目录: {raw_aligned_reads_counts}")
-        # 获取目录下所有以_barcode_counts.csv结尾的文件
         csv_files = glob.glob(os.path.join(raw_aligned_reads_counts, "*_cb_aligned_reads_counts.csv"))
         
         if not csv_files:
-            print(f"在{raw_aligned_reads_counts}中没有找到*_cb_aligned_reads_counts.csv文件")
+            print(f"No *_cb_aligned_reads_counts.csv files found in {raw_aligned_reads_counts}")
             return
             
-        print(f"找到{len(csv_files)}个文件需要处理")
+        print(f"Found {len(csv_files)} files to process")
         
-        # 读取所有文件并汇总barcode的reads数
+        # Read all files and aggregate reads per barcode
         for csv_file in csv_files:
-            print(f"处理文件: {os.path.basename(csv_file)}")
             try:
                 df = pd.read_csv(csv_file)
                 
-                # 确保文件包含必要的列
                 if 'barcode' not in df.columns or 'aligned_reads' not in df.columns:
-                    print(f"警告: 文件{csv_file}没有必要的列(barcode, aligned_reads)，跳过。")
+                    print(f"Warning: {csv_file} missing required columns (barcode, aligned_reads), skipping.")
                     continue
                 
-                # 遍历每一行，将reads数加到对应barcode的总数中
                 for _, row in df.iterrows():
                     barcode = row['barcode']
                     reads = row['aligned_reads']
@@ -53,47 +47,39 @@ def estimated_cells(raw_aligned_reads_counts:str, expected_cell_num:int, outdir:
                         barcode_total_reads[barcode] = reads
                         
             except Exception as e:
-                print(f"处理文件{csv_file}时出错: {str(e)}")
+                print(f"Error processing file {csv_file}: {str(e)}")
                 continue
     else:
-        # 直接读取单个文件
-        print(f"处理单个文件: {raw_aligned_reads_counts}")
         try:
             df = pd.read_csv(raw_aligned_reads_counts)
-            # 确保文件包含必要的列
             if 'barcode' not in df.columns or 'aligned_reads' not in df.columns:
-                print(f"警告: 文件{raw_aligned_reads_counts}没有必要的列(barcode, aligned_reads)。")
+                print(f"Warning: {raw_aligned_reads_counts} missing required columns (barcode, aligned_reads).")
                 return
                 
-            # 遍历每一行，将reads数加到对应barcode的总数中
             for _, row in df.iterrows():
                 barcode = row['barcode']
                 reads = row['aligned_reads']
                 barcode_total_reads[barcode] = reads
                 
         except Exception as e:
-            print(f"读取文件{raw_aligned_reads_counts}时出错: {str(e)}")
+            print(f"Error reading file {raw_aligned_reads_counts}: {str(e)}")
             return
     
     if not barcode_total_reads:
-        print("没有找到有效数据。退出。")
+        print("No valid data found. Exiting.")
         return
         
-    # 将汇总结果转换为DataFrame
     merged_df = pd.DataFrame({
         'barcode': list(barcode_total_reads.keys()),
         'aligned_reads': list(barcode_total_reads.values())
     })
     
-    # 保存合并后的数据
     merged_file = os.path.join(outdir, 'merged_barcode_counts.csv')
     merged_df.to_csv(merged_file, index=False)
-    print(f"合并后的数据已保存到{merged_file}")
     
-    # 按reads数量降序排序
     merged_df = merged_df.sort_values(by='aligned_reads', ascending=False)
     
-    # 计算阈值
+    # Compute threshold
     percentile = 99
     threshold_index = int(expected_cell_num * (1 - percentile / 100))
     if threshold_index >= len(merged_df):
@@ -101,16 +87,11 @@ def estimated_cells(raw_aligned_reads_counts:str, expected_cell_num:int, outdir:
         
     readscut = merged_df.iloc[threshold_index]['aligned_reads'] * 0.1
     
-    # 筛选出reads大于readscut的行
     filtered_df = merged_df[merged_df['aligned_reads'] > readscut]
     
-    # 保存过滤后的结果
     filtered_file = os.path.join(outdir, 'filtered_barcode_read_counts.csv')
     filtered_df.to_csv(filtered_file, sep=',', index=False, header=False)
     filtered_df["barcode"].to_csv('filtered_barcode', sep=',', index=False, header=False)
     
-    print(f"过滤后的barcode已保存到{filtered_file}")
-    print(f"原始barcode数量: {len(merged_df)}, 过滤后barcode数量: {len(filtered_df)}")
-
 if __name__ == '__main__':
     estimated_cells()

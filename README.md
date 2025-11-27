@@ -1,6 +1,39 @@
 # SeekSoulMethyl
 SeekSoulMethyl is a single-cell transcriptome + methylation dual-omics analysis pipeline designed for analyzing data from Beijing SeekGene Biotechnology Co., Ltd. single-cell transcriptome + methylation dual-omics kit.
 
+## 数据结构
+RNA-MET数据分为双标签数据和单标签数据。双标签数据对应的chemistry为DD-MET3，即同一个细胞的RNA和DNA甲基化数据的barcode标签不一致，且RNA转录组属于3‘转录组数据。单标签的数据对应的chemistry是DD-MET5，同一个细胞的RNA和DNA甲基化数据的barcode标签一致，且RNA转录组属于5‘转录组数据。下面详细描述一下双标签数据和单标签数据的DNA甲基化文库结构。
+
+**DD-MET3 Methlytion Library Structure**
+<figure style="text-align: center;">
+<img src="./docs/DD-MET3_library_structure.png" alt="DD-MET3 Methylation Library" width="600" style="max-width: 100%; height: auto;" />
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">图 1. DD-MET3 甲基化文库结构示意图</figcaption>
+</figure>
+
+结构说明：
+- SP1/SP2：接头序列；
+- barcode：17bp的cell barcode；
+- 7F：7bp的连接序列；
+- 17L和ME：17bp的固定序列 <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt；
+- ME: 19bp的固定序列AGATGTGTATAAGAGA<span style="color:#43a047;">Y</span>AG；
+- 9bp：为Tn5酶打断后的插入片段的延伸序列。
+
+**DD-MET5 Methlytion Library Structure**
+<figure style="text-align: center;">
+<img src="./docs/DD-MET5_library_structure.png" alt="DD-MET5 Methylation Library" width="600" style="max-width: 100%; height: auto;" />
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">图 2. DD-MET5 甲基化文库结构示意图</figcaption>
+</figure>
+
+结构说明：
+- SP1/SP2：接头序列；
+- barcode：17bp的cell barcode；
+- UMI: 12bp的UMI序列；
+- TSO：13bpTSO序列TTT<span style="color:#43a047;">Y</span>TTATATGGG；
+- 17L和ME：17bp的固定序列 <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt；
+- ME: 19bp的固定序列AGATGTGTATAAGAGA<span style="color:#43a047;">Y</span>AG；
+- 9bp：为Tn5酶打断后的插入片段的延伸序列。
+
+
 ## Installation
 
 1. Clone the repository:
@@ -141,6 +174,56 @@ bash sc_methy_workflow.sh \
 - **core**: Number of CPU cores
 - **filter_ch**: Filter reads that contain > n CH methylation sites.
 
+## Process Details
+### RNA数据处理流程
+RNA数据使用[SeekSoulTools](http://seeksoul.seekgene.com/en/v1.3.0/2.tutorial/1.rna/4.description.html)进行分析。具体的处理步骤请见官网的[Algorithms Overview](http://seeksoul.seekgene.com/en/v1.3.0/2.tutorial/1.rna/4.description.html#)。后续甲基化文库的细胞基于转录组文库判定的细胞barcode进行分析。
+
+### 甲基化数据处理流程
+#### Step 1: Preprocessing and Barcode Parsing
+**Barcode Extraction and Correction**
+根据结构设计，确定barcode所在序列位置，取出相应序列。当取出的barcode序列在白名单中时，我们认为它是有效barcode，计入有效barcode的reads数量；当barcode不在白名单中时，我们认为它是无效barcode。
+测序过程中，有一定几率发生测序错误。在提供有白名单的情况下，SeekSoulTools可以尝试barcode矫正。在启用矫正时，当无效barcode一个碱基错配（一个hamming distance）的序列存在于白名单中：
+* 只有唯一一个序列存在于白名单中：我们将这个无效barcode矫正为白名单中barcode；
+* 有多个序列存在于白名单中：我们将这个无效barcode改为read支持数量最多的序列。
+
+**UMI Extraction**
+根据结构设计，确定UMI所在序列位置，取出相应序列，不进行任何矫正。
+
+**Forward和Reverse链判定**
+按照位置，提取reads位置上对应17L和ME序列，共有7个碱基包含C或者转化后的T（下面标绿色）。使用其中最后两个位置上的C/T来判定，如果这两个位置全部为C则为reverse链reads，否则为forward链reads。
+Forward: <span style="color:#43a047;">T</span>gt<span style="color:#43a047;">TT</span>gt<span style="color:#43a047;">T</span>gttg<span style="color:#43a047;">T</span>t<span style="color:#43a047;">T</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">T</span>
+Reverse: <span style="color:#43a047;">C</span>gt<span style="color:#43a047;">CC</span>gt<span style="color:#43a047;">C</span>gttg<span style="color:#43a047;">C</span>t<span style="color:#43a047;">C</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">C</span>
+Reverse链就是我们在甲基化数据中常说的CTOT和CTOB链，forward链就是我们在甲基化数据中常说的OT和OB链。
+
+**C-T转化率**
+除了上述用于判定Forward和Reverse链判定的碱基，剩余的5个C/T碱基用于计算C-T转化率，公式如下：
+<div style="font-size: 0.8em;">
+
+$$
+    CT conversion = （Forward reads中5个位置上“T”碱基的总数 / Forward reads数*5）
+$$
+
+</div>
+
+**Filter Reads(Optional)**
+是通过统计Reads中非CpG的甲基化C的数量来过滤的，默认为>2，即read1/read2中检测到的非CpG的甲基化C的的数量大于2，该read pair被去掉。
+
+#### Step 2: Bismark Alignment and Sorting by name
+**Bismark Alignment and Sorting by name**
+使用Bismark进行甲基化数据的比对。我们修改了Bismark的代码，增加了--add_barcode和--add_umi参数，根据read name给bam加上CB 和 UR tag。CB为error-corrected barcode，UR为未纠错的 raw UMI。对于Forward链，Bismark中使用-X 1000参数进行比对，允许read1和read2 的insert size为1000bp。对于Reverse链，Bismark中使用--pbat 和-X 1000参数进行比对。
+比对完成后，使用samtools sort -n对bam文件进行排序，排序后的bam文件为后续分析的输入。
+
+#### Step 3: ALLCools analysis
+**Split by Cell Barcode**
+根据转录组识别到的cell barcode，将bam文件拆分成多个小文件，每个小文件包含一个cell的所有uniqly mapped reads。
+**Generate allc file**
+将每个单细胞的bam文件按照position排序，然后使用ALLCools bam-to-allc工具将每个cell的bam文件转换为allc文件。我们使用的是modified ALLCools，基于 UR-tag对每个C位点的reads进行UMI的矫正和去重，具体矫正和去重操作详见[seekgene仓库里的ALLCools](https://github.com/seekgene/ALLCools)。
+**Generate MCDS**
+使用allcools generate-dataset 将基因组按照chrom10k/20k/50k/100k/500k/1M bin划分，计算每个细胞在这些bins里的甲基化水平矩阵。
+
+#### Step 4: Reduction and Clustering
+使用allcools，默认基于chrom20k bins按照LSI算法对细胞进行降维分析。然后使用UMAP进行可视化。
+
 
 
 ## System Requirements
@@ -209,7 +292,7 @@ nextflow run -bg SeekSoulMethyl/nf/main.nf \
 # -c: nextflow configuration file. Must be modified according to your server configuration!!!!!
 # -profile: nextflow profile for aliyun k8s
 # --database_dir: reference genome database directory
-# --split_fastq: split fastq according to first n bases of barcode.
+# --split_fastq: To speed up the analysis process, split fastq according to first n bases of barcode. Default is 4.
 # --filter_ch: filter reads that contain > 2 CH methylation sites.
 # --chemistry: methylation chemistry (DD-MET3 or DD-MET5)
 ```
@@ -418,6 +501,7 @@ nextflow run SeekSoulMethyl/nf/methy_only.nf \
 - Choose `-profile aliyun_k8s` or `-profile docker`, and edit `nf/nextflow.config` for your infra
 - Heavy steps: Bismark/ALLCools need substantial CPU/RAM; defaults are set in `withName` blocks, scale up if needed (script/SeekSoulMethyl/nf/nextflow.config:313)
 
+
 ## FAQ
 - Samplesheet parsing error: ensure first column is `sample_id`, use absolute paths or `oss://`, comma-separate multiple files (script/SeekSoulMethyl/nf/main.nf:111)
 - Missing `${sample}.mcds`: check `ALLCOOLS_BAM_TO_ALLC` produced per-cell `*_allc.gz` and `chrom_size_path` is correct
@@ -427,5 +511,3 @@ nextflow run SeekSoulMethyl/nf/methy_only.nf \
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-
