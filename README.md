@@ -1,37 +1,37 @@
 # SeekSoulMethyl
 SeekSoulMethyl is a single-cell transcriptome + methylation dual-omics analysis pipeline designed for analyzing data from Beijing SeekGene Biotechnology Co., Ltd. single-cell transcriptome + methylation dual-omics kit.
 
-## 数据结构
-RNA-MET数据分为双标签数据和单标签数据。双标签数据对应的chemistry为DD-MET3，即同一个细胞的RNA和DNA甲基化数据的barcode标签不一致，且RNA转录组属于3‘转录组数据。单标签的数据对应的chemistry是DD-MET5，同一个细胞的RNA和DNA甲基化数据的barcode标签一致，且RNA转录组属于5‘转录组数据。下面详细描述一下双标签数据和单标签数据的DNA甲基化文库结构。
+## Data Structure
+RNA-MET data comes in two chemistry types. DD-MET3 (dual-label) means the RNA and DNA methylation data barcodes are different for the same cell, and the RNA library is 3′-end trancriptome. DD-MET5 (single-label) means the RNA and DNA methylation data barcodes are the same for the same cell, and the RNA library is 5′-end trancriptome. Below we describe the DNA methylation library structures for both chemistries.
 
-**DD-MET3 Methlytion Library Structure**
+**DD-MET3 Methylation Library Structure**
 <figure style="text-align: center;">
 <img src="./docs/DD-MET3_library_structure.png" alt="DD-MET3 Methylation Library" width="600" style="max-width: 100%; height: auto;" />
-<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">图 1. DD-MET3 甲基化文库结构示意图</figcaption>
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 1. DD-MET3 methylation library structure</figcaption>
 </figure>
 
-结构说明：
-- SP1/SP2：接头序列；
-- barcode：17bp的cell barcode；
-- 7F：7bp的连接序列；
-- 17L和ME：17bp的固定序列 <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt；
-- ME: 19bp的固定序列AGATGTGTATAAGAGA<span style="color:#43a047;">Y</span>AG；
-- 9bp：为Tn5酶打断后的插入片段的延伸序列。
+Structure notes:
+- SP1/SP2: Adapter sequences
+- barcode: 17 bp cell barcode
+- 7F: 7 bp linker sequence
+- 17L and ME: 17 bp fixed sequence <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt
+- ME: 19 bp fixed sequence AGATGTGTATAAGAGA<span style="color:#43a047;">Y</span>AG
+- 9 bp: extension sequence from the Tn5 insertion fragment
 
-**DD-MET5 Methlytion Library Structure**
+**DD-MET5 Methylation Library Structure**
 <figure style="text-align: center;">
 <img src="./docs/DD-MET5_library_structure.png" alt="DD-MET5 Methylation Library" width="600" style="max-width: 100%; height: auto;" />
-<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">图 2. DD-MET5 甲基化文库结构示意图</figcaption>
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 2. DD-MET5 methylation library structure</figcaption>
 </figure>
 
-结构说明：
-- SP1/SP2：接头序列；
-- barcode：17bp的cell barcode；
-- UMI: 12bp的UMI序列；
-- TSO：13bpTSO序列TTT<span style="color:#43a047;">Y</span>TTATATGGG；
-- 17L和ME：17bp的固定序列 <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt；
-- ME: 19bp的固定序列AGATGTGTATAAGAGA<span style="color:#43a047;">Y</span>AG；
-- 9bp：为Tn5酶打断后的插入片段的延伸序列。
+Structure notes:
+- SP1/SP2: Adapter sequences
+- barcode: 17 bp cell barcode
+- UMI: 12 bp UMI sequence
+- TSO: 13 bp TSO sequence TTT<span style="color:#43a047;">Y</span>TTATATGGG
+- 17L and ME: 17 bp fixed sequence <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt
+- ME: 19 bp fixed sequence AGATGTGTATAAGAGA<span style="color:#43a047;">Y</span>AG
+- 9 bp: extension sequence from the Tn5 insertion fragment
 
 
 ## Installation
@@ -175,54 +175,54 @@ bash sc_methy_workflow.sh \
 - **filter_ch**: Filter reads that contain > n CH methylation sites.
 
 ## Process Details
-### RNA数据处理流程
-RNA数据使用[SeekSoulTools](http://seeksoul.seekgene.com/en/v1.3.0/2.tutorial/1.rna/4.description.html)进行分析。具体的处理步骤请见官网的[Algorithms Overview](http://seeksoul.seekgene.com/en/v1.3.0/2.tutorial/1.rna/4.description.html#)。后续甲基化文库的细胞基于转录组文库判定的细胞barcode进行分析。
+### RNA Processing Workflow
+RNA data is analyzed using [SeekSoulTools](http://seeksoul.seekgene.com/en/v1.3.0/2.tutorial/1.rna/4.description.html). See the official Algorithms Overview for detailed steps. Cells used in the downstream methylation library are determined based on the RNA library cell barcodes.
 
-### 甲基化数据处理流程
+### Methylation Processing Workflow
 #### Step 1: Preprocessing and Barcode Parsing
-**Barcode Extraction and Correction**
-根据结构设计，确定barcode所在序列位置，取出相应序列。当取出的barcode序列在白名单中时，我们认为它是有效barcode，计入有效barcode的reads数量；当barcode不在白名单中时，我们认为它是无效barcode。
-测序过程中，有一定几率发生测序错误。在提供有白名单的情况下，SeekSoulTools可以尝试barcode矫正。在启用矫正时，当无效barcode一个碱基错配（一个hamming distance）的序列存在于白名单中：
-* 只有唯一一个序列存在于白名单中：我们将这个无效barcode矫正为白名单中barcode；
-* 有多个序列存在于白名单中：我们将这个无效barcode改为read支持数量最多的序列。
+**Barcode extraction and correction**
+Based on the designed structure, we locate the barcode in the read and extract the corresponding sequence. If the extracted barcode is in the whitelist, it is counted as a valid barcode; otherwise, it is considered invalid.
+Sequencing errors can occur. When a whitelist is provided, SeekSoulTools can attempt barcode correction. If correction is enabled and an invalid barcode has a one-base mismatch (Hamming distance = 1) from an entry in the whitelist:
+* If exactly one whitelist candidate matches: correct the invalid barcode to that whitelist barcode.
+* If multiple whitelist candidates match: correct to the candidate supported by the highest read count.
 
-**UMI Extraction**
-根据结构设计，确定UMI所在序列位置，取出相应序列，不进行任何矫正。
+**UMI extraction**
+UMI positions are read from the designed structure and extracted without correction.
 
-**Forward和Reverse链判定**
-按照位置，提取reads位置上对应17L和ME序列，共有7个碱基包含C或者转化后的T（下面标绿色）。使用其中最后两个位置上的C/T来判定，如果这两个位置全部为C则为reverse链reads，否则为forward链reads。
+**Forward and Reverse reads determination**
+From the positions corresponding to 17L and ME, there are 7 bases that can be C or converted T (highlighted below). Use the final two C/T positions for forward and reverse reads determination: both C indicates a reverse read; otherwise it is forward read.
 Forward: <span style="color:#43a047;">T</span>gt<span style="color:#43a047;">TT</span>gt<span style="color:#43a047;">T</span>gttg<span style="color:#43a047;">T</span>t<span style="color:#43a047;">T</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">T</span>
 Reverse: <span style="color:#43a047;">C</span>gt<span style="color:#43a047;">CC</span>gt<span style="color:#43a047;">C</span>gttg<span style="color:#43a047;">C</span>t<span style="color:#43a047;">C</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">C</span>
-Reverse链就是我们在甲基化数据中常说的CTOT和CTOB链，forward链就是我们在甲基化数据中常说的OT和OB链。
+Reverse reads correspond to CTOT/CTOB in methylation terminology; forward reads correspond to OT/OB.
 
-**C-T转化率**
-除了上述用于判定Forward和Reverse链判定的碱基，剩余的5个C/T碱基用于计算C-T转化率，公式如下：
+**C–T conversion rate**
+Aside from the two positions used for forward and reverse reads determination, the remaining five C/T bases are used to compute the C–T conversion rate:
 <div style="font-size: 0.8em;">
 
 $$
-    CT conversion = （Forward reads中5个位置上“T”碱基的总数 / Forward reads数*5）
+    \text{CT conversion} = \frac{\text{Total number of "T" across five positions in forward reads}}{\text{Number of forward reads} \times 5}
 $$
 
 </div>
 
-**Filter Reads(Optional)**
-是通过统计Reads中非CpG的甲基化C的数量来过滤的，默认为>2，即read1/read2中检测到的非CpG的甲基化C的的数量大于2，该read pair被去掉。
+**Filter reads (optional)**
+Filter based on the number of non-CpG methylated C bases in a read pair. By default, pairs with > 2 non-CpG methylated Cs detected in read1/read2 are removed.
 
-#### Step 2: Bismark Alignment and Sorting by name
-**Bismark Alignment and Sorting by name**
-使用Bismark进行甲基化数据的比对。我们修改了Bismark的代码，增加了--add_barcode和--add_umi参数，根据read name给bam加上CB 和 UR tag。CB为error-corrected barcode，UR为未纠错的 raw UMI。对于Forward链，Bismark中使用-X 1000参数进行比对，允许read1和read2 的insert size为1000bp。对于Reverse链，Bismark中使用--pbat 和-X 1000参数进行比对。
-比对完成后，使用samtools sort -n对bam文件进行排序，排序后的bam文件为后续分析的输入。
+#### Step 2: Bismark alignment and sorting by name
+**Alignment and tagging**
+We use Bismark for methylation alignment. Our modified Bismark adds `--add_barcode` and `--add_umi` to tag BAM files by read name with CB (error-corrected barcode) and UR (raw UMI). For forward-strand reads, we use `-X 1000` to allow insert sizes up to 1000 bp; for reverse-strand reads, we use `--pbat` and `-X 1000`.
+After alignment, sort BAMs by read name using `samtools sort -n`; the name-sorted BAMs serve as inputs for downstream analysis.
 
 #### Step 3: ALLCools analysis
-**Split by Cell Barcode**
-根据转录组识别到的cell barcode，将bam文件拆分成多个小文件，每个小文件包含一个cell的所有uniqly mapped reads。
-**Generate allc file**
-将每个单细胞的bam文件按照position排序，然后使用ALLCools bam-to-allc工具将每个cell的bam文件转换为allc文件。我们使用的是modified ALLCools，基于 UR-tag对每个C位点的reads进行UMI的矫正和去重，具体矫正和去重操作详见[seekgene仓库里的ALLCools](https://github.com/seekgene/ALLCools)。
+**Split by cell barcode**
+Split name-sorted BAMs by RNA-derived cell barcodes into per-cell BAM files, each containing uniquely mapped reads for one cell.
+**Generate ALLC files**
+Sort each per-cell BAM by position and convert to ALLC using ALLCools `bam-to-allc`. Our modified ALLCools performs UR-tag-based UMI correction and deduplication per C site; see the [SeekGene ALLCools repository](https://github.com/seekgene/ALLCools) for details.
 **Generate MCDS**
-使用allcools generate-dataset 将基因组按照chrom10k/20k/50k/100k/500k/1M bin划分，计算每个细胞在这些bins里的甲基化水平矩阵。
+Run `allcools generate-dataset` to bin the genome (chrom10k/20k/50k/100k/500k/1M) and compute per-cell methylation matrices.
 
-#### Step 4: Reduction and Clustering
-使用allcools，默认基于chrom20k bins按照LSI算法对细胞进行降维分析。然后使用UMAP进行可视化。
+#### Step 4: Reduction and clustering
+By default, perform dimensionality reduction with LSI on chrom20k bins using ALLCools, followed by UMAP visualization.
 
 
 
