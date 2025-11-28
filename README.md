@@ -211,10 +211,13 @@ We use Bismark for methylation alignment. Our modified [Bismark](https://github.
 After alignment, sort BAMs by read name using `samtools sort -n`; the name-sorted BAMs serve as inputs for downstream analysis.
 
 #### Step 3: ALLCools analysis
+
 **Split by cell barcode**
 Split name-sorted BAMs by RNA-derived cell barcodes into per-cell BAM files, each containing uniquely mapped reads for one cell.
+
 **Generate ALLC files**
 Sort each per-cell BAM by position and convert to ALLC using ALLCools `bam-to-allc`. Our modified ALLCools performs UR-tag-based UMI correction and deduplication per C site; see the [SeekGene ALLCools repository](https://github.com/seekgene/ALLCools) for details.
+
 **Generate MCDS**
 Run `allcools generate-dataset` to bin the genome (chrom10k/20k/50k/100k/500k/1M) and compute per-cell methylation matrices.
 
