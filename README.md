@@ -2,7 +2,7 @@
 SeekSoulMethyl is a single-cell transcriptome + methylation dual-omics analysis pipeline designed for analyzing data from Beijing SeekGene Biotechnology Co., Ltd. single-cell transcriptome + methylation dual-omics kit.
 
 ## Data Structure
-RNA-MET data comes in two chemistry types. DD-MET3 (dual-label) means the RNA and DNA methylation data barcodes are different for the same cell, and the RNA library is 3′-end trancriptome. DD-MET5 (single-label) means the RNA and DNA methylation data barcodes are the same for the same cell, and the RNA library is 5′-end trancriptome. Below we describe the DNA methylation library structures for both chemistries.
+RNA-MET data comes in two chemistry types. DD-MET3 (dual-label) means the RNA and DNA methylation data barcodes are different for the same cell, and the RNA library is 3′-end transcriptome. DD-MET5 (single-label) means the RNA and DNA methylation data barcodes are the same for the same cell, and the RNA library is 5′-end transcriptome. Below we describe the DNA methylation library structures for both chemistries.
 
 **DD-MET3 Methylation Library Structure**
 <figure style="text-align: center;">
