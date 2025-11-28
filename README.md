@@ -255,6 +255,7 @@ nextflow run SeekSoulMethyl/nf/main.nf \
 <img src="./docs/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl Pipeline" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. SeekSoulMethyl nextflow pipeline workflow</figcaption>
 </figure>
+
 ## Running with Nextflow
 
 1. Install nextflow:
@@ -504,7 +505,7 @@ nextflow run SeekSoulMethyl/nf/methy_only.nf \
 
 
 ## FAQ
-- Samplesheet parsing error: ensure first column is `sample_id`, use absolute paths or `oss://`, comma-separate multiple files (script/SeekSoulMethyl/nf/main.nf:111)
+- Samplesheet parsing error: ensure first column is `sample_id`, use absolute paths (script/SeekSoulMethyl/nf/main.nf:111)
 - Missing `${sample}.mcds`: check `ALLCOOLS_BAM_TO_ALLC` produced per-cell `*_allc.gz` and `chrom_size_path` is correct
 - Stuck at Bismark: verify reference indices and that `params.bismark_ref` is visible in the container
 - Resume runs: use `-resume` with the same `-w` work directory

@@ -225,9 +225,14 @@ nextflow run SeekSoulMethyl/nf/main.nf \
 <img src="./docs/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl Pipeline" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. SeekSoulMethyl nextflow pipeline 流程图</figcaption>
 </figure>
+
 ## 使用 Nextflow
 
 1. 安装 Nextflow 到同一环境。
+```bash
+conda install -n seeksoulmethyl -c bioconda nextflow
+```
+
 2. 准备包含绝对路径的 `samplelist.csv`：
 ```
 cat > samplelist.csv << EOF
@@ -314,7 +319,7 @@ profiles {
   - `${sample}_rna_methyl_report.html`（主流程）
 
 ## FAQ
-- `samplesheet` 解析错误：确保第一列为 `sample_id`，使用绝对路径或 `oss://`，多个文件请用逗号分隔。
+- `samplesheet` 解析错误：确保第一列为 `sample_id`，使用绝对路径。
 - 缺少 `${sample}.mcds`：检查 `ALLCOOLS_BAM_TO_ALLC` 是否生成每细胞 `*_allc.gz`，以及 `chrom_size_path` 是否正确。
 - Bismark 阶段卡住：确认参考索引是否正确，以及 `params.bismark_ref` 在容器内可见。
 - 断点续跑：使用 `-resume` 并保持相同 `-w` 工作目录。
