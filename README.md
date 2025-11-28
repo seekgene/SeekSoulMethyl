@@ -181,21 +181,25 @@ RNA data is analyzed using [SeekSoulTools](http://seeksoul.seekgene.com/en/v1.3.
 ### Methylation Processing Workflow
 #### Step 1: Preprocessing and Barcode Parsing
 **Barcode extraction and correction**
+
 Based on the designed structure, we locate the barcode in the read and extract the corresponding sequence. If the extracted barcode is in the whitelist, it is counted as a valid barcode; otherwise, it is considered invalid.
 Sequencing errors can occur. When a whitelist is provided, SeekSoulTools can attempt barcode correction. If correction is enabled and an invalid barcode has a one-base mismatch (Hamming distance = 1) from an entry in the whitelist:
 * If exactly one whitelist candidate matches: correct the invalid barcode to that whitelist barcode.
 * If multiple whitelist candidates match: correct to the candidate supported by the highest read count.
 
 **UMI extraction**
+
 UMI positions are read from the designed structure and extracted without correction.
 
 **Forward and Reverse reads determination**
+
 From the positions corresponding to 17L and ME, there are 7 bases that can be C or converted T (highlighted below). Use the final two C/T positions for forward and reverse reads determination: both C indicates a reverse read; otherwise it is forward read.
 Forward: <span style="color:#43a047;">T</span>gt<span style="color:#43a047;">TT</span>gt<span style="color:#43a047;">T</span>gttg<span style="color:#43a047;">T</span>t<span style="color:#43a047;">T</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">T</span>
 Reverse: <span style="color:#43a047;">C</span>gt<span style="color:#43a047;">CC</span>gt<span style="color:#43a047;">C</span>gttg<span style="color:#43a047;">C</span>t<span style="color:#43a047;">C</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">C</span>
 Reverse reads correspond to CTOT/CTOB in methylation terminology; forward reads correspond to OT/OB.
 
 **C–T conversion rate**
+
 Aside from the two positions used for forward and reverse reads determination, the remaining five C/T bases are used to compute the C–T conversion rate:
 <figure style="text-align: center;">
 <img src="./docs/CT_conversion.png" alt="CT conversion rate" width="600" style="max-width: 100%; height: auto;" />
@@ -203,31 +207,39 @@ Aside from the two positions used for forward and reverse reads determination, t
 </figure>
 
 **Artifact removal**
+
 Remove TSO/7F linker, 17L and ME sequences from Read1 according to their predefined positions in the library design.
 
 **Adapter trimming**
+
 Use cutadapt to remove ME adapter sequences introduced by R1/R2 read-through events (overlapping paired-end reads).
 
 **Trim 9 bp gaps introduced by Tn5 transposase**
+
 After removing adapters and other artificial sequences, we additionally trim the 9 bp gaps flanking the inserted fragment that are introduced by Tn5 transposition. These 9 bp regions can carry artificial methylation and spuriously elevate CH methylation adjacent to the insert boundaries, so they are removed prior to downstream analysis.
 
 **Filter reads (optional)**
+
 Filter based on the number of non-CpG methylated C bases in a read pair. By default, pairs with > 2 non-CpG methylated Cs detected in read1/read2 are removed. If you do not want to enable this filter, set filter_ch to 0.
 
 #### Step 2: Bismark alignment and sorting by name
 **Alignment and tagging**
+
 We use Bismark for methylation alignment. Our modified [Bismark](https://github.com/seekgene/Bismark.git) adds `--add_barcode` and `--add_umi` to tag BAM files by read name with CB (error-corrected barcode) and UR (raw UMI). For forward reads, we use `-X 1000` to allow insert sizes up to 1000 bp; for reverse reads, we use `--pbat` and `-X 1000`.
 After alignment, sort BAMs by read name using `samtools sort -n`; the name-sorted BAMs serve as inputs for downstream analysis.
 
 #### Step 3: ALLCools analysis
 
 **Split by cell barcode**
+
 Split name-sorted BAMs by RNA-derived cell barcodes into per-cell BAM files, each containing uniquely mapped reads for one cell.
 
 **Generate ALLC files**
+
 Sort each per-cell BAM by position and convert to ALLC using ALLCools `bam-to-allc`. Our modified ALLCools performs UR-tag-based UMI correction and deduplication per C site; see the [SeekGene ALLCools repository](https://github.com/seekgene/ALLCools) for details.
 
 **Generate MCDS**
+
 Run `allcools generate-dataset` to bin the genome (chrom10k/20k/50k/100k/500k/1M) and compute per-cell methylation matrices.
 
 #### Step 4: Reduction and clustering
