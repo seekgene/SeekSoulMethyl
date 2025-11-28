@@ -167,25 +167,33 @@ RNA 数据使用 SeekSoulTools 进行分析，细胞集合基于 RNA 文库识�
 
 ### 甲基化处理流程
 #### 步骤 1：预处理与条码解析
-**条码提取与纠正**：依据结构定位并提取条码，若条码在白名单内视为有效，否则视为无效。启用纠正后，若无效条码与白名单中某条码仅有 1 个碱基差（Hamming 距离 = 1），则：唯一候选时纠正为该条码；多候选时纠正为支持读数最多的条码。
+**条码提取与纠正**
+依据结构定位并提取barcode，若barcode在白名单内视为有效，否则启用纠正，若无效条码与白名单中某条码仅有 1 个碱基差（Hamming 距离 = 1），则：
+* 唯一候选时纠正为该barcode；
+* 多候选时纠正为reads支持数最多的barcode。
 
-**UMI 提取**：按结构定位并提取 UMI，不进行纠正。
+**UMI 提取**
+按结构定位并提取 UMI，不进行纠正。
 
-**正反链判定**：根据 17L 与 ME 的位置使用 7 个 C/T 位点，其中最后两个位点用于判定：两者均为 C 记为反链，否则为正链。反链对应 CTOT/CTOB，正链对应 OT/OB。
+**正反链判定**
+根据 17L 与 ME 对应的位置，有 7 个碱基可为 C 或转化后的 T（下方以高亮显示）。使用最后两个 C/T 位点进行正反链判定：
+两个位点均为 C 表示该 read 为reverse链；否则为forward链。
+Forward: <span style="color:#43a047;">T</span>gt<span style="color:#43a047;">TT</span>gt<span style="color:#43a047;">T</span>gttg<span style="color:#43a047;">T</span>t<span style="color:#43a047;">T</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">T</span>
+Reverse: <span style="color:#43a047;">C</span>gt<span style="color:#43a047;">CC</span>gt<span style="color:#43a047;">C</span>gttg<span style="color:#43a047;">C</span>t<span style="color:#43a047;">C</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">C</span>
+Reverse链在甲基化数据术语中对应 CTOT/CTOB；Forward链对应 OT/OB。
 
-**C–T 转化率**：除判定用的 2 个位点外，使用剩余 5 个 C/T 位点计算 C–T 转化率：
-<div style="font-size: 0.8em;">
+**C–T 转化率**
+除判定用的 2 个位点外，使用剩余 5 个 C/T 位点计算 C–T 转化率：
 
-$$
-    CT\ 转化率 = \frac{\text{Forward reads 中五个位点上的 "T" 总数}}{\text{Forward reads 数} \times 5}
-$$
+<figure style="text-align: center;">
+<img src="./docs/CT_conversion.png" alt="CT conversion rate" width="600" style="max-width: 100%; height: auto;" />
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. CT 转换率</figcaption>
+</figure>
 
-</div>
-
-**读取过滤（可选）**：按非 CpG 甲基化 C 的数量过滤读对，默认过滤 >2 的读对。
+**读取过滤（可选）**：按非 CpG 甲基化 C 的数量过滤reads。当read1/read2中非CpG的甲基化的C大于2是，则将该read pair 多虑掉。如果不想启用该过滤条件，将filter_ch设置为0。
 
 #### 步骤 2：Bismark 比对与按名称排序
-使用定制版 Bismark 进行比对，并写入 CB/UR 标签。正链使用 `-X 1000`（最大插入片段 1000 bp），反链使用 `--pbat` 与 `-X 1000`。比对后使用 `samtools sort -n` 按名称排序，作为后续输入。
+使用寻因仓库的 [Bismark](https://github.com/seekgene/Bismark.git) 进行比对，使用`--add_barcode`和`--add_umi`参数在BAM中写入 CB/UR 标签。Forward链使用 `-X 1000`（最大插入片段 1000 bp），Reverse链使用 `--pbat` 与 `-X 1000`。比对后使用 `samtools sort -n` 按名称排序，作为后续输入。
 
 #### 步骤 3：ALLCools 分析
 **按细胞条码拆分**：根据 RNA 识别的细胞条码，将名称排序后的 BAM 拆分为每细胞文件。
@@ -223,7 +231,7 @@ nextflow run SeekSoulMethyl/nf/main.nf \
 ```
 <figure style="text-align: center;">
 <img src="./docs/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl Pipeline" width="600" style="max-width: 100%; height: auto;" />
-<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. SeekSoulMethyl nextflow pipeline 流程图</figcaption>
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 4. SeekSoulMethyl nextflow pipeline 流程图</figcaption>
 </figure>
 
 ## 使用 Nextflow
@@ -307,16 +315,16 @@ profiles {
 ## 输出结构（按 outdir 布局）
 - `fastp/`：原始与条码解析后 FASTQ 的 QC 报告（html/json）
 - `${sample}/${sample}_exp/`：RNA 分析结果（过滤矩阵、聚类、差异表达等）
-- `${sample}/${sample}_methy/step1/`：条码解析与分片后的 FASTQ
+- `${sample}/${sample}_methy/step1/`：经过barcode纠错，adapter去除等操作后拆分的 FASTQ
 - `${sample}/${sample}_methy/step2/`：Bismark BAM 与报告
 - `${sample}/${sample}_methy/step3/`：
-  - `split_bams/` 与 `split_bams/merged/`：每细胞 BAM、合并 BAM、条码计数
-  - `allcools/` 与 `allcools_generate_datasets/`：每细胞 ALLC 与 `${sample}.mcds`
+  - `split_bams/` 与 `split_bams/merged/`：单个细胞 BAM文件、合并 BAM、mapped reads的计数
+  - `allcools/` 与 `allcools_generate_datasets/`：每个细胞 ALLC文件 与 `${sample}.mcds`
   - `${sample}_merge_allc.gz`、`*.CGN-Merge*`
-- `${sample}/${sample}_methy/step4/`：聚类图与 `*.h5ad`
+- `${sample}/${sample}_methy/step4/`：聚类结果
 - `${sample}/`：
   - `${sample}_methy_summary.json`、`${sample}_wgs_summary.csv`
-  - `${sample}_rna_methyl_report.html`（主流程）
+  - `${sample}_rna_methyl_report.html` 质控报告
 
 ## FAQ
 - `samplesheet` 解析错误：确保第一列为 `sample_id`，使用绝对路径。
