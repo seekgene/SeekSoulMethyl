@@ -202,12 +202,21 @@ Aside from the two positions used for forward and reverse reads determination, t
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. CT conversion rate</figcaption>
 </figure>
 
+**Artifact removal**
+Remove TSO/7F linker, 17L and ME sequences from Read1 according to their predefined positions in the library design.
+
+**Adapter trimming**
+Use cutadapt to remove ME adapter sequences introduced by R1/R2 read-through events (overlapping paired-end reads).
+
+**Trim 9 bp gaps introduced by Tn5 transposase**
+After removing adapters and other artificial sequences, we additionally trim the 9 bp gaps flanking the inserted fragment that are introduced by Tn5 transposition. These 9 bp regions can carry artificial methylation and spuriously elevate CH methylation adjacent to the insert boundaries, so they are removed prior to downstream analysis.
+
 **Filter reads (optional)**
 Filter based on the number of non-CpG methylated C bases in a read pair. By default, pairs with > 2 non-CpG methylated Cs detected in read1/read2 are removed. If you do not want to enable this filter, set filter_ch to 0.
 
 #### Step 2: Bismark alignment and sorting by name
 **Alignment and tagging**
-We use Bismark for methylation alignment. Our modified [Bismark](https://github.com/seekgene/Bismark.git) adds `--add_barcode` and `--add_umi` to tag BAM files by read name with CB (error-corrected barcode) and UR (raw UMI). For forward-strand reads, we use `-X 1000` to allow insert sizes up to 1000 bp; for reverse-strand reads, we use `--pbat` and `-X 1000`.
+We use Bismark for methylation alignment. Our modified [Bismark](https://github.com/seekgene/Bismark.git) adds `--add_barcode` and `--add_umi` to tag BAM files by read name with CB (error-corrected barcode) and UR (raw UMI). For forward reads, we use `-X 1000` to allow insert sizes up to 1000 bp; for reverse reads, we use `--pbat` and `-X 1000`.
 After alignment, sort BAMs by read name using `samtools sort -n`; the name-sorted BAMs serve as inputs for downstream analysis.
 
 #### Step 3: ALLCools analysis
