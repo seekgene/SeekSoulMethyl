@@ -224,10 +224,8 @@ Run `allcools generate-dataset` to bin the genome (chrom10k/20k/50k/100k/500k/1M
 #### Step 4: Reduction and clustering
 By default, perform dimensionality reduction with LSI on chrom20k bins using ALLCools, followed by UMAP visualization.
 
-
-
-## System Requirements
-
+### System Requirements
+If you use `sc_methy_workflow.sh`, the system requirements are as follows:
 - **CPU**: 64 cores (recommended)
 - **Memory**: 128GB RAM (recommended)
 - **Storage**: At least 500GB available space
@@ -253,7 +251,10 @@ nextflow run SeekSoulMethyl/nf/main.nf \
   --filter_ch 2 \
   --chemistry DD-MET3 > methy.log
 ```
-
+<figure style="text-align: center;">
+<img src="./docs/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl Pipeline" width="600" style="max-width: 100%; height: auto;" />
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. SeekSoulMethyl nextflow pipeline workflow</figcaption>
+</figure>
 ## Running with Nextflow
 
 1. Install nextflow:

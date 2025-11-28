@@ -195,7 +195,8 @@ $$
 #### 步骤 4：降维与聚类
 默认基于 chrom20k 分箱进行 LSI 降维，并使用 UMAP 可视化。
 
-## 系统环境要求
+### 系统环境要求
+如果使用 `sc_methy_workflow.sh`，系统环境要求如下：
 - CPU：建议 64 核
 - 内存：建议 128 GB RAM
 - 存储：建议剩余空间 ≥ 500 GB
@@ -220,7 +221,10 @@ nextflow run SeekSoulMethyl/nf/main.nf \
   --filter_ch 2 \
   --chemistry DD-MET3 > methy.log
 ```
-
+<figure style="text-align: center;">
+<img src="./docs/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl Pipeline" width="600" style="max-width: 100%; height: auto;" />
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. SeekSoulMethyl nextflow pipeline 流程图</figcaption>
+</figure>
 ## 使用 Nextflow
 
 1. 安装 Nextflow 到同一环境。
