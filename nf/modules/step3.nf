@@ -1,6 +1,7 @@
 // split bams
 process SPLIT_BAM_FILES {
     tag "$sample-SPLIT_BAM_FILES"
+    resourceLabels label: "SPLIT_BAM_FILES_${params.project}_${sample}"
     
     input:
     tuple val(sample), val(pair_id), path(bismark_sortn_bam), path(gex_barcodes)
@@ -27,6 +28,7 @@ process SPLIT_BAM_FILES {
 process MERGE_BISMARK_BAM {
     tag "$sample-BISMARK_ALIGNMENT_MERGE"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step3/split_bams/merged/"
+    resourceLabels label: "MERGE_BISMARK_BAM_${params.project}_${sample}"
 
     input:
     tuple val(sample), val(pair_id), path(forward_split_bams_dir), path(forward_filtered_barcodes), path(forward_filtered_barcode_reads_counts), path(reverse_split_bams_dir), path(reverse_filtered_barcodes), path(reverse_filtered_barcode_reads_counts)
@@ -44,17 +46,24 @@ process MERGE_BISMARK_BAM {
 
     # Get all BAM files in the forward directory
     forward_bams=(\$(find "${forward_split_bams_dir}/" -name "*.bam" | sort))
-            
-    
-    for forward_bam in "\${forward_bams[@]}"; do
-        full_barcode=\$(basename "\$forward_bam" | sed 's/\\(.*\\)\\.bam/\\1/')
-        reverse_bam=\$(find "${reverse_split_bams_dir}/" -name "\${full_barcode}.bam")
-        if [[ -f "\$reverse_bam" ]]; then
-            output_bam="${forward_split_bams_dir.baseName}_merged_fr_bam/\${full_barcode}.bam"
-            echo "Merging \$forward_bam and \$reverse_bam to \$output_bam"
-            samtools merge -n -@ ${task.cpus} -o "\$output_bam" "\$forward_bam" "\$reverse_bam"
-        else
-            echo "Warning: Corresponding reverse BAM file not found: *_reverse_\${full_barcode}.bam"
+    reverse_bams=(\$(find "${reverse_split_bams_dir}/" -name "*.bam" | sort))
+    declare -A fmap
+    declare -A rmap
+    for fb in "\${forward_bams[@]}"; do bn=\$(basename "\$fb" .bam); fmap["\$bn"]="\$fb"; done
+    for rb in "\${reverse_bams[@]}"; do bn=\$(basename "\$rb" .bam); rmap["\$bn"]="\$rb"; done
+    declare -A seen
+    for bc in "\${!fmap[@]}"; do seen["\$bc"]=1; done
+    for bc in "\${!rmap[@]}"; do if [[ -z "\${seen[\$bc]}" ]]; then seen["\$bc"]=1; fi; done
+    for bc in "\${!seen[@]}"; do
+        f="\${fmap[\$bc]:-}"
+        r="\${rmap[\$bc]:-}"
+        output_bam="${forward_split_bams_dir.baseName}_merged_fr_bam/\${bc}.bam"
+        if [[ -n "\$f" && -n "\$r" ]]; then
+            samtools merge -n -@ ${task.cpus} -o "\$output_bam" "\$f" "\$r"
+        elif [[ -n "\$f" ]]; then
+            cp "\$f" "\$output_bam"
+        elif [[ -n "\$r" ]]; then
+            cp "\$r" "\$output_bam"
         fi
     done
     
@@ -86,6 +95,7 @@ process MERGE_BISMARK_BAM {
 process ALLCOOLS_BAM_TO_ALLC {
     tag "$sample-ALLCOOLS_BAM_TO_ALLC"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step3/allcools/"
+    resourceLabels label: "ALLCOOLS_BAM_TO_ALLC_${params.project}_${sample}"
     
     input:
     tuple val(sample), val(pair_id), path(sc_merged_bam_dir), path(filtered_barcode)
@@ -114,6 +124,7 @@ process ALLCOOLS_BAM_TO_ALLC {
 process MERGE_FILTERED_BARCODE_READS_COUNTS {
     tag "$sample-MERGE_FILTERED_BARCODE_READS_COUNTS"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step3/split_bams/merged/"
+    resourceLabels label: "MERGE_FILTERED_BARCODE_READS_COUNTS_${params.project}_${sample}"
 
     input:
     tuple val(sample), path(merged_filtered_barcode), path(merged_filtered_barcode_reads_counts), path(allcools_allc_output)
@@ -136,6 +147,7 @@ process MERGE_FILTERED_BARCODE_READS_COUNTS {
 process ALLCOOLS_GENERATE_DATASETS {
     tag "$sample-ALLCOOLS_GENERATE_DATASETS"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step3/allcools_generate_datasets/"
+    resourceLabels label: "ALLCOOLS_GENERATE_DATASETS_${params.project}_${sample}"
     
     input:
     tuple val(sample), path(allcools), path(filtered_barcode), path(gene_bed)
@@ -189,6 +201,7 @@ process ALLCOOLS_GENERATE_DATASETS {
 process ALLCOOLS_SUBMERGE {
     tag "$sample-ALLCOOLS_SUBMERGE"
     //publishDir "${params.outdir}/${sample}_methy/step3/"
+    resourceLabels label: "ALLCOOLS_SUBMERGE_${params.project}_${sample}"
 
     input:
     tuple val(sample), val(pair_id), path(allcools_allc_output)
@@ -224,6 +237,7 @@ process ALLCOOLS_SUBMERGE {
 process ALLCOOLS_MERGE {
     tag "$sample-ALLCOOLS_MERGE"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step3/"
+    resourceLabels label: "ALLCOOLS_MERGE_${params.project}_${sample}"
 
     input:
     // Accept a collection of per-pair merged allc files for a sample
@@ -253,6 +267,7 @@ process ALLCOOLS_MERGE {
 process ALLCOOLS_EXTRACT {
     tag "$sample-ALLCOOLS_EXTRACT"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step3/"
+    resourceLabels label: "ALLCOOLS_EXTRACT_${params.project}_${sample}"
 
     input:
     tuple val(sample), path(allcools_merge_allc), path(allcools_merge_allc_tbi)
