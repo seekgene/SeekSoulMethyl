@@ -33,6 +33,7 @@ report-*.html
 timeline-*.html
 dag-*.html
 main_retry_spot.nf
+test.nf
 
 # Python
 __pycache__/
