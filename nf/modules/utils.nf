@@ -1,6 +1,7 @@
 process COUNTS_MAPPED_READS {
     tag "$sample-COUNTS_MAPPED_READS"
     //publishDir "${params.outdir}/${sample}_methy/step2/"
+    resourceLabels label: "COUNTS_MAPPED_READS_${params.project}_${sample}"
     
     input:
     tuple val(sample), val(pair_id), path(bismark_bam)
@@ -18,6 +19,7 @@ process COUNTS_MAPPED_READS {
 process ESTIMATED_CELLS {
     tag "$sample-ESTIMATED_CELLS"
     publishDir "${params.outdir}/${sample}_methy/step3/"
+    resourceLabels label: "ESTIMATED_CELLS_${params.project}_${sample}"
     
     input:
     tuple val(sample),val(pair_id), path(cb_aligned_reads_counts)
@@ -37,6 +39,7 @@ process GTF_TO_GENE_BED {
     tag "GTF_TO_GENE_BED"
     publishDir "${params.outdir}/"
     time "30m"
+    resourceLabels label: "GTF_TO_GENE_BED_${params.project}"
     
     output:
     path("geneslop2k.bed"), emit: gene_bed

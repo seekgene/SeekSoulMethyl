@@ -2,7 +2,7 @@
 
 /*
  * Single-cell RNA-seq and methylation analysis pipeline
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 
 nextflow.enable.dsl=2
@@ -36,6 +36,28 @@ if (params.chemistry == "DD-MET3") {
 }
 params.split_fastq = 4
 params.filter_ch = 2
+// Project name, 如果这个参数为空，则获取输出目录，project name在results之前或者/proj/目录后，例如/proj/project_name/2025-11-28-11-11/results，或者 /path/to/project_name/results
+if (!params.project || params.project.toString().trim() == '') {
+    def __outdir_clean = params.outdir?.toString()?.replaceAll('/+$','')
+    def __tokens = __outdir_clean.split('/').findAll { it != '' }
+    def __proj = 'project'
+    if (__tokens) {
+        def __idxProj = __tokens.indexOf('proj')
+        if (__idxProj != -1 && __tokens.size() > __idxProj + 1) {
+            __proj = __tokens[__idxProj + 1]
+        } else if (__tokens[-1] == 'results') {
+            def __prev = __tokens.size() >= 2 ? __tokens[-2] : null
+            if (__prev && (__prev ==~ /\d{4}-\d{2}-\d{2}(?:-\d{2}-\d{2}(?:-\d{2})?)?/)) {
+                __proj = __tokens.size() >= 3 ? __tokens[-3] : 'project'
+            } else {
+                __proj = __prev ?: 'project'
+            }
+        } else {
+            __proj = __tokens[-1]
+        }
+    }
+    params.project = __proj
+}
 // Help information
 params.help = false
 // Help message

@@ -4,6 +4,7 @@
 
 // compute cpg sites
 process COMPUTE_CPG_SITES {
+    resourceLabels label: "COMPUTE_CPG_SITES_${params.project}"
     tag "COMPUTE_CPG_SITES"
     publishDir "${params.outdir}/"
 
@@ -22,6 +23,8 @@ process COMPUTE_CPG_SITES {
 process FASTP_EXPRESSION_MULTI {
     tag "$sample-FASTP_EXPRESSION_MULTI-$group"
     publishDir "${params.outdir}/fastp"
+    resourceLabels label: "FASTP_EXPRESSION_MULTI_${params.project}_$sample"
+    
     
     input:
     tuple val(sample), val(group), val(exp_r1), val(exp_r2)
@@ -88,6 +91,7 @@ process FASTP_EXPRESSION_MULTI {
 process FASTP_METHYLATION_MULTI {
     tag "$sample-FASTP_METHYLATION_MULTI-$group"
     publishDir "${params.outdir}/fastp"
+    resourceLabels label: "FASTP_METHYLATION_MULTI_${params.project}_$sample"
     
     input:
     tuple val(sample), val(group), val(methy_r1), val(methy_r2)
@@ -156,6 +160,7 @@ process FASTP_METHYLATION_MULTI {
 process SEEKSOULTOOLS_RNA {
     tag "$sample-SEEKSOULTOOLS_RNA"
     publishDir "${params.outdir}/${sample}/${sample}_exp/"
+    resourceLabels label: "SEEKSOULTOOLS_RNA_${params.project}_$sample"
     
     input:
     tuple val(sample), path(exp_r1_list), path(exp_r2_list)
@@ -207,6 +212,7 @@ process SEEKSOULTOOLS_RNA {
 process METHYLATION_BARCODE_EXTRACTION {
     tag "$sample-METHYLATION_BARCODE_EXTRACTION"
     publishDir "${params.outdir}/${sample}/${sample}_methy/"
+    resourceLabels label: "METHYLATION_BARCODE_EXTRACTION_${params.project}_$sample"
     
     input:
     tuple val(sample), path(methy_r1_list), path(methy_r2_list)
@@ -255,6 +261,7 @@ process METHYLATION_BARCODE_EXTRACTION {
 process PARSE_FASTQ_FILES {
     tag "$sample-PARSE_FASTQ_FILES"
     publishDir "${params.outdir}/${sample}/${sample}_methy/"
+    resourceLabels label: "PARSE_FASTQ_FILES_${params.project}_$sample"
     
     input:
     tuple val(sample), path(forward_r1_files), path(forward_r2_files), path(reverse_r1_files), path(reverse_r2_files), path(summary_json)
@@ -319,6 +326,7 @@ process PARSE_FASTQ_FILES {
 // Create forward file pair distribution process
 process CREATE_FORWARD_PAIRS {
     tag "$sample-CREATE_FORWARD_PAIRS"
+    resourceLabels label: "CREATE_FORWARD_PAIRS_${params.project}_$sample"
     
     input:
     tuple val(sample), path(pairs_file), path(r1_fastq), path(r2_fastq)
@@ -343,6 +351,7 @@ process CREATE_FORWARD_PAIRS {
 // Create reverse file pair distribution process
 process CREATE_REVERSE_PAIRS {
     tag "$sample-CREATE_REVERSE_PAIRS"
+    resourceLabels label: "CREATE_REVERSE_PAIRS_${params.project}_$sample"
     
     input:
     tuple val(sample), path(pairs_file), path(r1_fastq), path(r2_fastq)
@@ -368,6 +377,7 @@ process CREATE_REVERSE_PAIRS {
 process FASTP_METHYLATION_BARCODE_EXTRACT {
     tag "$sample-FASTP_METHYLATION_BARCODE_EXTRACT"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step1/"
+    resourceLabels label: "FASTP_METHYLATION_BARCODE_EXTRACT_${params.project}_$sample"
    
     input:
     tuple val(sample), val(pair_id),path(methy_barcode_r1), path(methy_barcode_r2)
@@ -391,4 +401,3 @@ process FASTP_METHYLATION_BARCODE_EXTRACT {
     """
 
 }
-

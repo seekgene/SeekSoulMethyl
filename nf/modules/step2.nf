@@ -3,6 +3,7 @@
 process BISMARK_ALIGNMENT_FORWARD {
     tag "$sample-BISMARK_ALIGNMENT_FORWARD"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step2/bismark"
+    resourceLabels label: "BISMARK_ALIGNMENT_FORWARD_${params.project}_${sample}"
     
     input:
     tuple val(sample), val(pair_id), path(methy_forward_r1), path(methy_forward_r2)
@@ -31,6 +32,7 @@ process BISMARK_ALIGNMENT_FORWARD {
 process BISMARK_ALIGNMENT_REVERSE {
     tag "$sample-BISMARK_ALIGNMENT_REVERSE"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step2/bismark"
+    resourceLabels label: "BISMARK_ALIGNMENT_REVERSE_${params.project}_${sample}"
     
     input:
     tuple val(sample), val(pair_id), path(methy_reverse_r1), path(methy_reverse_r2)
@@ -61,6 +63,7 @@ process BISMARK_ALIGNMENT_REVERSE {
 process SORT_BAM_BY_NAME {
     tag "$sample-SORT_BAM_BY_NAME"
     //publishDir "${params.outdir}/${sample}_methy/step2/bismark/"
+    resourceLabels label: "SORT_BAM_BY_NAME_${params.project}_${sample}"
     
     input:
     tuple val(sample), val(pair_id), path(bismark_bam)

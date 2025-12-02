@@ -2,6 +2,7 @@
 process METHYLATION_SUMMARY {
     tag "$sample-METHYLATION_SUMMARY"
     publishDir "${params.outdir}/${sample}/${sample}_methy/"
+    resourceLabels label: "METHYLATION_SUMMARY_${params.project}_${sample}"
     
     input:
     tuple val(sample),path(bismark_forward_report), path(bismark_reverse_report), path(allcools_cells_csv_output), 
@@ -26,6 +27,7 @@ process METHYLATION_SUMMARY {
 process METHYLATION_LSI_PCA_CLUSTERING {
     tag "METHYLATION_LSI_PCA_CLUSTERING-$sample"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step4/", mode: "copy"
+    resourceLabels label: "METHYLATION_LSI_PCA_CLUSTERING_${params.project}_${sample}"
     
     input:
     tuple val(sample), path(mcds_file), path(filtered_barcode)
@@ -52,6 +54,7 @@ process METHYLATION_LSI_PCA_CLUSTERING {
 process MULTI_REPORT {
     tag "MULTI_REPORT-$sample"
     publishDir "${params.outdir}/${sample}/", mode: "copy"
+    resourceLabels label: "MULTI_REPORT_${params.project}_${sample}"
     
     input:
     tuple val(sample), path(gexjson), path(filtered_dir), 
