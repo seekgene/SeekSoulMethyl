@@ -664,8 +664,30 @@ python ${script_path}/step4_wgs_summary.py \
 	--genome_info_json ${methy_dir}/genome_cpg_sites.json
 log_info "Summary report generated"
 
-########################## Step 4.2: LSI/PCA dimensionality reduction and clustering ##########################
-log_info "Step 4.2: Running dimensionality reduction and clustering analysis..."
+########################## Step 4.2: Generate Multi Report ##########################
+log_info "Step 4.2: Generating multi-report..."
+
+python ${script_path}/step4_report_rna_met.py \
+    --gexjson ${exp_outdir}/${sample}/Analysis/${sample}_gex_summary.json \
+    --metjson ${methy_dir}/${sample}_summary.json \
+    --tsne_file ${exp_outdir}/${sample}/Analysis/step4/tsne_umi.xls \
+    --filtered_counts_file ${methy_dir}/filtered_barcode_reads_counts.csv \
+    --cells_file ${methy_dir}/${sample}_cells.csv \
+    --raw_dir ${exp_outdir}/${sample}/Analysis/step3/raw_feature_bc_matrix \
+    --counts_file ${exp_outdir}/${sample}/Analysis/step3/counts.xls \
+    --detail_file ${exp_outdir}/${sample}/Analysis/step3/detail.xls \
+    --gtf ${gtf} \
+    --filtered_dir ${exp_outdir}/${sample}/Analysis/step3/filtered_feature_bc_matrix \
+    --diff_data ${exp_outdir}/${sample}/Analysis/step4/FindAllMarkers.xls \
+    --whitelist_file ${cbcsv} \
+    --outdir ${outdir} \
+    --samplename ${sample} \
+    --rawname ${sample} \
+    --nf_config ${script_path}/../nextflow.config 
+log_info "Multi-report generated"
+
+########################## Step 4.3: LSI/PCA dimensionality reduction and clustering ##########################
+log_info "Step 4.3: Running dimensionality reduction and clustering analysis..."
 
 python ${script_path}/step4_allcools_PCA_cluster.py \
 	--mcds_path ${methy_dir}/step3/allcools_generate_datasets/${sample}.mcds \

@@ -53,7 +53,7 @@ process MERGE_BISMARK_BAM {
     for rb in "\${reverse_bams[@]}"; do bn=\$(basename "\$rb" .bam); rmap["\$bn"]="\$rb"; done
     declare -A seen
     for bc in "\${!fmap[@]}"; do seen["\$bc"]=1; done
-    for bc in "\${!rmap[@]}"; do if [[ -z "\${seen[\$bc]}" ]]; then seen["\$bc"]=1; fi; done
+    for bc in "\${!rmap[@]}"; do seen["\$bc"]=1; done
     for bc in "\${!seen[@]}"; do
         f="\${fmap[\$bc]:-}"
         r="\${rmap[\$bc]:-}"
