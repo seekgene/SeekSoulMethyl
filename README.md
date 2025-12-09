@@ -14,7 +14,7 @@ Structure notes:
 - SP1/SP2: Adapter sequences
 - barcode: 17 bp cell barcode
 - 7F: 7 bp linker sequence
-- 17L and ME: 17 bp fixed sequence <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt
+- 17L: 17 bp fixed sequence <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt
 - ME: 19 bp fixed sequence AGATGTGTATAAGAGA<span style="color:#43a047;">Y</span>AG
 - 9 bp: extension sequence from the Tn5 insertion fragment
 
@@ -29,7 +29,7 @@ Structure notes:
 - barcode: 17 bp cell barcode
 - UMI: 12 bp UMI sequence
 - TSO: 13 bp TSO sequence TTT<span style="color:#43a047;">Y</span>TTATATGGG
-- 17L and ME: 17 bp fixed sequence <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt
+- 17L: 17 bp fixed sequence <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt
 - ME: 19 bp fixed sequence AGATGTGTATAAGAGA<span style="color:#43a047;">Y</span>AG
 - 9 bp: extension sequence from the Tn5 insertion fragment
 

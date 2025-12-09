@@ -536,7 +536,7 @@ def report(gexjson, metjson,
     data_summary["MET"][2]["left"][0]["data"]["Estimated Number of Cells"] = f'{met_summary["cells"]["Estimated Number of Cells"]:,}'
     data_summary["MET"][2]["left"][0]["data"]["Genome Coverage Rate of Median Cell"] = f'{met_summary["cells"]["Genome Coverage rate of median cell"]:.2%}'
     data_summary["MET"][2]["left"][0]["data"]["CpGs of Median Cell"] = f'{int(met_summary["cells"]["CPGs of median cell"]):,}'
-    data_summary["MET"][2]["left"][0]["data"]["Read Pairs of Median Cell"] = f'{int(met_summary["cells"]["Reads of median cell"]):,}'
+    data_summary["MET"][2]["left"][0]["data"]["Read Pairs of Median Cell"] = f'{int(met_summary["cells"]["Reads of median cell"] / 2):,}'
     data_summary["MET"][2]["left"][0]["data"]["Saturation of Median Cell"] = f'{met_summary["cells"]["Saturation of median cell"]:.2%}'
     data_summary["MET"][2]["left"][0]["data"]["Fraction Read Pairs in Cells"] = f'{met_summary["cells"]["Fraction Reads in Cells"]:.2%}' 
     data_summary["MET"][2]["right"][0]["data"]["y"]['Cell Saturation'] = [ round(i*100, 2) for i in df["cell_saturation"].tolist()]
