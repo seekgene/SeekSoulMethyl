@@ -2,7 +2,7 @@
 
 /*
  * Single-cell RNA-seq and methylation analysis pipeline
- * Version: 1.0.2
+ * Version: 1.0.3
  */
 
 nextflow.enable.dsl=2
