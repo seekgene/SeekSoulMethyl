@@ -668,7 +668,7 @@ log_info "Summary report generated"
 log_info "Step 4.2: Generating multi-report..."
 
 python ${script_path}/step4_report_rna_met.py \
-    --gexjson ${exp_outdir}/${sample}/Analysis/${sample}_gex_summary.json \
+    --gexjson ${exp_outdir}/${sample}/Analysis/${sample}_summary.json \
     --metjson ${methy_dir}/${sample}_summary.json \
     --tsne_file ${exp_outdir}/${sample}/Analysis/step4/tsne_umi.xls \
     --filtered_counts_file ${methy_dir}/filtered_barcode_reads_counts.csv \
