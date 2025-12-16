@@ -1,8 +1,8 @@
 # SeekSoulMethyl
-SeekSoulMethyl is a single-cell transcriptome + methylation dual-omics analysis pipeline designed for analyzing data from Beijing SeekGene Biotechnology Co., Ltd. single-cell transcriptome + methylation dual-omics kit.
+SeekSoulMethyl is a single-cell transcriptome + methylation dual-omics analysis pipeline designed to analyze data generated using the Beijing SeekGene Biotechnology Co., Ltd. single-cell transcriptome + methylation dual-omics kit.
 
 ## Data Structure
-RNA-MET data comes in two chemistry types. DD-MET3 (dual-label) means the RNA and DNA methylation data barcodes are different for the same cell, and the RNA library is 3′-end transcriptome. DD-MET5 (single-label) means the RNA and DNA methylation data barcodes are the same for the same cell, and the RNA library is 5′-end transcriptome. Below we describe the DNA methylation library structures for both chemistries.
+RNA–MET data comes in two chemistries. DD-MET3 (dual-label) means the RNA and DNA methylation data barcodes are different for the same cell, and the RNA library is a 3′-end transcriptome library. DD-MET5 (single-label) means the RNA and DNA methylation data barcodes are the same for the same cell, and the RNA library is a 5′-end transcriptome library. Below we describe the DNA methylation library structures for both chemistries.
 
 **DD-MET3 Methylation Library Structure**
 <figure style="text-align: center;">
@@ -14,8 +14,8 @@ Structure notes:
 - SP1/SP2: Adapter sequences
 - barcode: 17 bp cell barcode
 - 7F: 7 bp linker sequence
-- 17L: 17 bp fixed sequence <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt
-- ME: 19 bp fixed sequence AGATGTGTATAAGAGA<span style="color:#43a047;">Y</span>AG
+- 17L: 17 bp fixed sequence <span style="color:#43a047;">C</span>gt<span style="color:#43a047;">C</span><span style="color:#43a047;">C</span>gt<span style="color:#43a047;">C</span>gttg<span style="color:#43a047;">C</span>t<span style="color:#43a047;">C</span>gt
+- ME: 19 bp fixed sequence AGATGTGTATAAGAGA<span style="color:#43a047;">C</span>AG
 - 9 bp: extension sequence from the Tn5 insertion fragment
 
 **DD-MET5 Methylation Library Structure**
@@ -28,11 +28,12 @@ Structure notes:
 - SP1/SP2: Adapter sequences
 - barcode: 17 bp cell barcode
 - UMI: 12 bp UMI sequence
-- TSO: 13 bp TSO sequence TTT<span style="color:#43a047;">Y</span>TTATATGGG
-- 17L: 17 bp fixed sequence <span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span><span style="color:#43a047;">Y</span>gt<span style="color:#43a047;">Y</span>gttg<span style="color:#43a047;">Y</span>t<span style="color:#43a047;">Y</span>gt
-- ME: 19 bp fixed sequence AGATGTGTATAAGAGA<span style="color:#43a047;">Y</span>AG
+- TSO: 13 bp TSO sequence TTT<span style="color:#43a047;">C</span>TTATATGGG
+- 17L: 17 bp fixed sequence <span style="color:#43a047;">C</span>gt<span style="color:#43a047;">C</span><span style="color:#43a047;">C</span>gt<span style="color:#43a047;">C</span>gttg<span style="color:#43a047;">C</span>t<span style="color:#43a047;">C</span>gt
+- ME: 19 bp fixed sequence AGATGTGTATAAGAGA<span style="color:#43a047;">C</span>AG
 - 9 bp: extension sequence from the Tn5 insertion fragment
 
+Since the enzymatic treatment converts unmethylated cytosines (C) to thymines (T), the C bases in SP1 and SP2 are methylated to prevent errors in the sequencing adapters during this conversion. Furthermore, the barcodes used for methylation data do not contain any C bases. In contrast, the C bases in 7F, 17L, and ME are not methylated and will be converted to T during the enzymatic process; we use these fixed sequences to calculate the C-to-T conversion rate.
 
 ## Installation
 
@@ -127,16 +128,24 @@ wget -dc -O XYRD-WTJW880-MET_S01_L001_R2_001.fastq.gz.md5 "https://seekgene-publ
 
 After cloning, the key Nextflow entry points and modules are:
 
-- `nf/main.nf`: Main workflow for RNA + methylation end-to-end processing (script/SeekSoulMethyl/nf/main.nf:1)
-- `nf/methy_only.nf`: Workflow for methylation-only data (script/SeekSoulMethyl/nf/methy_only.nf:1)
+- `nf/main.nf`: Main workflow for RNA + methylation end-to-end processing.
+- `nf/methy_only.nf`: Workflow for methylation-only data.
 - `nf/modules/`: Step-wise process modules:
-  - `step1.nf` preprocessing, QC, barcode extraction, RNA analysis
-  - `step2.nf` Bismark alignment and BAM sorting
-  - `step3.nf` per-cell BAM splitting, ALLC generation/merge, multi-scale datasets
-  - `step4.nf` summaries, dimensionality reduction, joint report
-  - `utils.nf` helpers for methylation-only workflow (reads counting and cell estimation)
-- `nf/bin/`: Helper scripts and resources (e.g., barcode whitelists)
-- `nf/nextflow.config`: Executors and resource configuration (script/SeekSoulMethyl/nf/nextflow.config:1)
+  - `step1.nf` preprocessing, QC, barcode extraction, RNA analysis.
+  - `step2.nf` Bismark alignment and BAM sorting.
+  - `step3.nf` per-cell BAM splitting, ALLC generation/merge, multi-scale datasets.
+  - `step4.nf` summaries, dimensionality reduction, joint report.
+  - `utils.nf` helpers for methylation-only workflow (reads counting and cell estimation).
+- `nf/bin/`: Helper scripts and resources (e.g., barcode whitelists).
+- `nf/nextflow.config`: Executors and resource configuration.
+- `sc_methy_workflow.sh`: Shell script to run the dual-omics analysis pipeline.
+
+We provide two methods for data analysis:
+
+1. **Shell Script**: Run the analysis pipeline directly via the `sc_methy_workflow.sh` script.
+2. **Nextflow Pipeline**: Run the Nextflow pipeline via `nf/main.nf`.
+
+Details of both methods are provided below.
 
 ## Usage
 
@@ -163,15 +172,15 @@ bash sc_methy_workflow.sh \
 
 ### Input Parameters:
 
-- **$1**: Single-cell transcriptome Read1 fastq file
-- **$2**: Single-cell transcriptome Read2 fastq file  
-- **$3**: Single-cell methylation Read1 fastq file
-- **$4**: Single-cell methylation Read2 fastq file
-- **sample**: Sample name
-- **outdir**: Output directory path
-- **database_dir**: Reference genome database path
+- **$1**: Single-cell transcriptome Read1 fastq file path.
+- **$2**: Single-cell transcriptome Read2 fastq file path.
+- **$3**: Single-cell methylation Read1 fastq file path.
+- **$4**: Single-cell methylation Read2 fastq file path.
+- **sample**: Sample name.
+- **outdir**: Output directory path.
+- **database_dir**: Reference genome database path.
 - **chemistry**: Methylation chemistry (DD-MET3 or DD-MET5). DD-MET3 is a dual-label dataset, meaning the RNA and DNA methylation data barcodes are different for the same cell, while DD-MET5 is single-label, meaning the RNA and DNA methylation data barcodes are the same for the same cell.
-- **core**: Number of CPU cores
+- **core**: Number of CPU cores.  
 - **filter_ch**: Filter reads that contain > n CH methylation sites.
 
 ## Process Details
@@ -182,28 +191,40 @@ RNA data is analyzed using [SeekSoulTools](http://seeksoul.seekgene.com/en/v1.3.
 #### Step 1: Preprocessing and Barcode Parsing
 **Barcode extraction and correction**
 
-Based on the designed structure, we locate the barcode in the read and extract the corresponding sequence. If the extracted barcode is in the whitelist, it is counted as a valid barcode; otherwise, it is considered invalid.
-Sequencing errors can occur. When a whitelist is provided, SeekSoulTools can attempt barcode correction. If correction is enabled and an invalid barcode has a one-base mismatch (Hamming distance = 1) from an entry in the whitelist:
+Based on the designed structure, we locate the barcode in the read and extract the corresponding sequence. If the extracted barcode is in the whitelist, it is counted as a valid barcode; otherwise, SeekSoulTools attempts barcode correction, if the barcode has a one-base mismatch (Hamming distance = 1) from an entry in the whitelist:
 * If exactly one whitelist candidate matches: correct the invalid barcode to that whitelist barcode.
 * If multiple whitelist candidates match: correct to the candidate supported by the highest read count.
+
+If correction fails, the read is discarded and considered a final invalid barcode read.
 
 **UMI extraction**
 
 UMI positions are read from the designed structure and extracted without correction.
 
-**Forward and Reverse reads determination**
-
-From the positions corresponding to 17L and ME, there are 7 bases that can be C or converted T (highlighted below). Use the final two C/T positions for forward and reverse reads determination: both C indicates a reverse read; otherwise it is forward read.
-Forward: <span style="color:#43a047;">T</span>gt<span style="color:#43a047;">TT</span>gt<span style="color:#43a047;">T</span>gttg<span style="color:#43a047;">T</span>t<span style="color:#43a047;">T</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">T</span>
-Reverse: <span style="color:#43a047;">C</span>gt<span style="color:#43a047;">CC</span>gt<span style="color:#43a047;">C</span>gttg<span style="color:#43a047;">C</span>t<span style="color:#43a047;">C</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">C</span>
-Reverse reads correspond to CTOT/CTOB in methylation terminology; forward reads correspond to OT/OB.
-
 **C–T conversion rate**
 
-Aside from the two positions used for forward and reverse reads determination, the remaining five C/T bases are used to compute the C–T conversion rate:
+We calculate the C-to-T conversion rate using the original C positions within the (7F), 17L, and ME sequences. Since these are fixed sequences prone to sequencing errors, we restrict the calculation to reads with verified structures:
+ - In DD-MET3, the 7F sequence must be `TTGCTGT` or `TTGTTGT`, the sequence spanning 17L and ME must be `GTAGATGTGTATAAGAGA`, and the bases at the last two original C positions must be T.
+ - In DD-MET5, the sequence spanning 17L and ME must be `GTAGATGTGTATAAGAGA`, and the bases at the last two original C positions must be T.
+
+For the retained reads, we extract the bases at the corresponding positions to calculate the C-to-T conversion rate:
+
 <figure style="text-align: center;">
 <img src="./docs/CT_conversion.png" alt="CT conversion rate" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. CT conversion rate</figcaption>
+</figure>
+
+**Forward and Reverse reads determination**
+
+From the positions corresponding to 17L and ME, there are 7 bases that can be C or converted T (highlighted below). We use the first and the last two C/T positions to determine forward vs. reverse reads: if all three positions are C, it indicates a reverse read; otherwise, it is a forward read.
+Forward: <span style="color:#43a047;">T</span>gt<span style="color:#43a047;">TT</span>gt<span style="color:#43a047;">T</span>gttg<span style="color:#43a047;">T</span>t<span style="color:#43a047;">T</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">T</span>
+Reverse: <span style="color:#43a047;">C</span>gt<span style="color:#43a047;">CC</span>gt<span style="color:#43a047;">C</span>gttg<span style="color:#43a047;">C</span>t<span style="color:#43a047;">C</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">C</span>
+Reverse reads correspond to CTOT/CTOB (reverse complement of the original strand) in methylation terminology; forward reads correspond to OT/OB (original strand).
+The "forward" or "reverse" determination is annotated in the read name.
+
+<figure style="text-align: center;">
+<img src="./docs/fr_determinate.png" alt="Forward and reverse reads determination" width="600" style="max-width: 100%; height: auto;" />
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 4. Forward and reverse reads determination</figcaption>
 </figure>
 
 **Artifact removal**
@@ -236,7 +257,14 @@ Split name-sorted BAMs by RNA-derived cell barcodes into per-cell BAM files, eac
 
 **Generate ALLC files**
 
-Sort each per-cell BAM by position and convert to ALLC using ALLCools `bam-to-allc`. Our modified ALLCools performs UR-tag-based UMI correction and deduplication per C site; see the [SeekGene ALLCools repository](https://github.com/seekgene/ALLCools) for details.
+Sort each per-cell BAM by position and convert to ALLC using ALLCools `bam-to-allc`. Our modified ALLCools performs UR-tag-based UMI correction and deduplication per C site.
+
+<figure style="text-align: center;">
+<img src="./docs/umi_correction_detailed_diagram_en.png" alt="UMI correction detailed diagram" width="600" style="max-width: 100%; height: auto;" />
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 5. UMI correction detailed diagram</figcaption>
+</figure>
+
+See the [SeekGene ALLCools repository](https://github.com/seekgene/ALLCools) for details.
 
 **Generate MCDS**
 
@@ -274,7 +302,7 @@ nextflow run SeekSoulMethyl/nf/main.nf \
 ```
 <figure style="text-align: center;">
 <img src="./docs/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl Pipeline" width="600" style="max-width: 100%; height: auto;" />
-<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 4. SeekSoulMethyl nextflow pipeline workflow</figcaption>
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 6. SeekSoulMethyl nextflow pipeline workflow</figcaption>
 </figure>
 
 ## Running with Nextflow
@@ -312,7 +340,7 @@ nextflow run -bg SeekSoulMethyl/nf/main.nf \
 # --outdir: final results directory
 # --samplesheet: input samplesheet file
 # -w: working directory for nextflow
-# -c: nextflow configuration file. Must be modified according to your server configuration!!!!!
+# -c: nextflow configuration file. Must be modified according to your server configuration.
 # -profile: nextflow profile for aliyun k8s
 # --database_dir: reference genome database directory
 # --split_fastq: To speed up the analysis process, split fastq according to first n bases of barcode. Default is 4.
