@@ -204,7 +204,9 @@ UMI positions are read from the designed structure and extracted without correct
 **C–T conversion rate**
 
 We calculate the C-to-T conversion rate using the original C positions within 17L and ME sequences. Since these are fixed sequences prone to sequencing errors, we restrict the calculation to reads with verified structures:
+
  - In DD-MET3, the 7F sequence must be `TTGCTGT` or `TTGTTGT`, the sequence spanning 17L and ME must be `GTAGATGTGTATAAGAGA`, and the bases at the last two original C positions must be T.
+ 
  - In DD-MET5, the sequence spanning 17L and ME must be `GTAGATGTGTATAAGAGA`, and the bases at the last two original C positions must be T.
 
 For the retained reads, we extract the bases at the corresponding positions to calculate the C-to-T conversion rate:
@@ -242,6 +244,8 @@ After removing adapters and other artificial sequences, we additionally trim the
 **Filter reads (optional)**
 
 Filter based on the number of non-CpG methylated C bases in a read pair. By default, pairs with > 2 non-CpG methylated Cs detected in read1/read2 are removed. If you do not want to enable this filter, set filter_ch to 0.
+
+This filtering strategy is based on findings by Lu et al. [1], which suggest that nicks in synthesized adapters can trigger Bst polymerase nick translation. This activity incorporates 5-methyl-dCTPs, leading to completely unconverted reads that appear as artificial methylation signals.
 
 #### Step 2: Bismark alignment and sorting by name
 **Alignment and tagging**
@@ -562,3 +566,8 @@ nextflow run SeekSoulMethyl/nf/methy_only.nf \
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## References
+
+[1] Lu X, Yuan Y, et al. Improved tagmentation-based whole-genome bisulfite sequencing for input DNA from less than 100 mammalian cells. Epigenomics. 2015;7(1):47-56. doi:10.2217/epi.14.76.
+> "Furthermore, by manually checking the reads, we found a part of the reads were completely unconverted. We suspected that a nick in the synthesized adapters will cause the whole fragment displaced with incorporation of 5-methyl-dCTPs due to nick translation activity of Bst polymerase."
