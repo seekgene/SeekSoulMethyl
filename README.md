@@ -216,6 +216,9 @@ For the retained reads, we extract the bases at the corresponding positions to c
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. CT conversion rate</figcaption>
 </figure>
 
+> [!NOTE]
+> The above filtering steps are used only for calculating the C-to-T conversion rate; reads that do not meet these criteria are not filtered out from the final output FASTQ files.
+
 **Forward and Reverse reads determination**
 
 From the positions corresponding to 17L and ME, there are 7 bases that can be C or converted T (highlighted below). We use the first and the last two C/T positions to determine forward vs. reverse reads: if all three positions are C, it indicates a reverse read; otherwise, it is a forward read.
