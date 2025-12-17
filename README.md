@@ -14,8 +14,8 @@ Structure notes:
 - SP1/SP2: Adapter sequences
 - barcode: 17 bp cell barcode
 - 7F: 7 bp linker sequence
-- 17L: 17 bp fixed sequence <span style="color:#43a047;">C</span>gt<span style="color:#43a047;">C</span><span style="color:#43a047;">C</span>gt<span style="color:#43a047;">C</span>gttg<span style="color:#43a047;">C</span>t<span style="color:#43a047;">C</span>gt
-- ME: 19 bp fixed sequence AGATGTGTATAAGAGA<span style="color:#43a047;">C</span>AG
+- 17L: 17 bp fixed sequence **C**gt**CC**gt**C**gttg**C**t**C**gt
+- ME: 19 bp fixed sequence AGATGTGTATAAGAGA**C**AG
 - 9 bp: extension sequence from the Tn5 insertion fragment
 
 **DD-MET5 Methylation Library Structure**
@@ -28,9 +28,9 @@ Structure notes:
 - SP1/SP2: Adapter sequences
 - barcode: 17 bp cell barcode
 - UMI: 12 bp UMI sequence
-- TSO: 13 bp TSO sequence TTT<span style="color:#43a047;">C</span>TTATATGGG
-- 17L: 17 bp fixed sequence <span style="color:#43a047;">C</span>gt<span style="color:#43a047;">C</span><span style="color:#43a047;">C</span>gt<span style="color:#43a047;">C</span>gttg<span style="color:#43a047;">C</span>t<span style="color:#43a047;">C</span>gt
-- ME: 19 bp fixed sequence AGATGTGTATAAGAGA<span style="color:#43a047;">C</span>AG
+- TSO: 13 bp TSO sequence TTT**C**TTATATGGG
+- 17L: 17 bp fixed sequence **C**gt**CC**gt**C**gttg**C**t**C**gt
+- ME: 19 bp fixed sequence AGATGTGTATAAGAGA**C**AG
 - 9 bp: extension sequence from the Tn5 insertion fragment
 
 Since the enzymatic treatment converts unmethylated cytosines (C) to thymines (T), the C bases in SP1 and SP2 are methylated to prevent errors in the sequencing adapters during this conversion. Furthermore, the barcodes used for methylation data do not contain any C bases. In contrast, the C bases in 7F, 17L, and ME are not methylated and will be converted to T during the enzymatic process; we use these fixed sequences to calculate the C-to-T conversion rate.
@@ -217,8 +217,8 @@ For the retained reads, we extract the bases at the corresponding positions to c
 **Forward and Reverse reads determination**
 
 From the positions corresponding to 17L and ME, there are 7 bases that can be C or converted T (highlighted below). We use the first and the last two C/T positions to determine forward vs. reverse reads: if all three positions are C, it indicates a reverse read; otherwise, it is a forward read.
-Forward: <span style="color:#43a047;">T</span>gt<span style="color:#43a047;">TT</span>gt<span style="color:#43a047;">T</span>gttg<span style="color:#43a047;">T</span>t<span style="color:#43a047;">T</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">T</span>
-Reverse: <span style="color:#43a047;">C</span>gt<span style="color:#43a047;">CC</span>gt<span style="color:#43a047;">C</span>gttg<span style="color:#43a047;">C</span>t<span style="color:#43a047;">C</span>gtAGATGTGTATAAGAGA<span style="color:#43a047;">C</span>
+Forward: **T**gt**TT**gt**T**gttg**T**t**T**gtAGATGTGTATAAGAGA**T**
+Reverse: **C**gt**CC**gt**C**gttg**C**t**C**gtAGATGTGTATAAGAGA**C**
 Reverse reads correspond to CTOT/CTOB (reverse complement of the original strand) in methylation terminology; forward reads correspond to OT/OB (original strand).
 The "forward" or "reverse" determination is annotated in the read name.
 
