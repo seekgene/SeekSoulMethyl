@@ -203,7 +203,7 @@ UMI positions are read from the designed structure and extracted without correct
 
 **C–T conversion rate**
 
-We calculate the C-to-T conversion rate using the original C positions within the (7F), 17L, and ME sequences. Since these are fixed sequences prone to sequencing errors, we restrict the calculation to reads with verified structures:
+We calculate the C-to-T conversion rate using the original C positions within 17L and ME sequences. Since these are fixed sequences prone to sequencing errors, we restrict the calculation to reads with verified structures:
  - In DD-MET3, the 7F sequence must be `TTGCTGT` or `TTGTTGT`, the sequence spanning 17L and ME must be `GTAGATGTGTATAAGAGA`, and the bases at the last two original C positions must be T.
  - In DD-MET5, the sequence spanning 17L and ME must be `GTAGATGTGTATAAGAGA`, and the bases at the last two original C positions must be T.
 
