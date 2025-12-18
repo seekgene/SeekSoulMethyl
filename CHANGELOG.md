@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.4]
+### Changed
+- Updated the C-T conversion rate algorithm.
+
 ## [1.0.3]
 
 ### Fixed

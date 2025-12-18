@@ -201,6 +201,19 @@ If correction fails, the read is discarded and considered a final invalid barcod
 
 UMI positions are read from the designed structure and extracted without correction.
 
+**Forward and Reverse reads determination**
+
+From the positions corresponding to 17L and ME, there are 7 bases that can be C or converted T (highlighted below). We use the first and the last two C/T positions to determine forward vs. reverse reads: if all three positions are C, it indicates a reverse read; otherwise, it is a forward read.
+Forward: **T**gt**TT**gt**T**gttg**T**t**T**gtAGATGTGTATAAGAGA**T**
+Reverse: **C**gt**CC**gt**C**gttg**C**t**C**gtAGATGTGTATAAGAGA**C**
+Reverse reads correspond to CTOT/CTOB (reverse complement of the original strand) in methylation terminology; forward reads correspond to OT/OB (original strand).
+The "forward" or "reverse" determination is annotated in the read name.
+
+<figure style="text-align: center;">
+<img src="./docs/fr_determinate.png" alt="Forward and reverse reads determination" width="600" style="max-width: 100%; height: auto;" />
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 4. Forward and reverse reads determination</figcaption>
+</figure>
+
 **C–T conversion rate**
 
 We calculate the C-to-T conversion rate using the original C positions within 17L and ME sequences. Since these are fixed sequences prone to sequencing errors, we restrict the calculation to reads with verified structures:
@@ -218,19 +231,6 @@ For the retained reads, we extract the bases at the corresponding positions to c
 
 > [!NOTE]
 > The above filtering steps are used only for calculating the C-to-T conversion rate; reads that do not meet these criteria are not filtered out from the final output FASTQ files.
-
-**Forward and Reverse reads determination**
-
-From the positions corresponding to 17L and ME, there are 7 bases that can be C or converted T (highlighted below). We use the first and the last two C/T positions to determine forward vs. reverse reads: if all three positions are C, it indicates a reverse read; otherwise, it is a forward read.
-Forward: **T**gt**TT**gt**T**gttg**T**t**T**gtAGATGTGTATAAGAGA**T**
-Reverse: **C**gt**CC**gt**C**gttg**C**t**C**gtAGATGTGTATAAGAGA**C**
-Reverse reads correspond to CTOT/CTOB (reverse complement of the original strand) in methylation terminology; forward reads correspond to OT/OB (original strand).
-The "forward" or "reverse" determination is annotated in the read name.
-
-<figure style="text-align: center;">
-<img src="./docs/fr_determinate.png" alt="Forward and reverse reads determination" width="600" style="max-width: 100%; height: auto;" />
-<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 4. Forward and reverse reads determination</figcaption>
-</figure>
 
 **Artifact removal**
 
