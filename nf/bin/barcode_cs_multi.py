@@ -822,8 +822,8 @@ def calculate_ct_conversion_rate(r1, stat_Dict, positions=None, chemistry="DD-ME
         # Combine sequence and quality values
         allseq = ''.join(bases)
         # Now both modes have 7 positions, handle uniformly
-        countseq = allseq[:5]  # First 5 positions for counting
-        insert = bases[-2] + bases[-1]  # Second-to-last and last positions as insert sequence
+        countseq = allseq[1:5]  # First 5 positions for counting
+        insert = bases[0] + bases[-2] + bases[-1]  # First and   Second-to-last and last positions as insert sequence
         allqua = ''.join(qualities)
         
         # Calculate average quality value
@@ -831,7 +831,7 @@ def calculate_ct_conversion_rate(r1, stat_Dict, positions=None, chemistry="DD-ME
         
         # Only perform conversion rate calculation when average quality >= 30
         if average_quality >= 30:
-            if insert == 'CC': 
+            if insert == 'CCC': 
                 # CC insert type: calculate C and T conversion rates
                 B_count_C = countseq.count('C')
                 B_count_T = countseq.count('T')
@@ -839,7 +839,7 @@ def calculate_ct_conversion_rate(r1, stat_Dict, positions=None, chemistry="DD-ME
                     stat_Dict["line_B"] += 1
                     stat_Dict["B_all_C"] += B_count_C
                     
-            elif insert == 'TT':
+            elif insert == 'TTT':
                 # TT insert type: calculate T and C conversion rates
                 A_count_T = countseq.count('T')
                 A_count_C = countseq.count('C')
@@ -1467,9 +1467,11 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
     stat.data["stat"]["chemistry"] = chemistry
     stat.data["stat"]["gexname"] = samplename
     # ct_mean = A_all_T / (5 * line_A)
-    stat.data["stat"]["ct_mean"] = stat.data["stat"]["A_all_T"] / (5 * stat.data["stat"]["line_A"])
+    #stat.data["stat"]["ct_mean"] = stat.data["stat"]["A_all_T"] / (5 * stat.data["stat"]["line_A"])
+    stat.data["stat"]["ct_mean"] = stat.data["stat"]["A_all_T"] / (4 * stat.data["stat"]["line_A"])
     # cc_mean = B_all_C / (5 * line_B)
-    stat.data["stat"]["cc_mean"] = stat.data["stat"]["B_all_C"] / (5 * stat.data["stat"]["line_B"])
+    #stat.data["stat"]["cc_mean"] = stat.data["stat"]["B_all_C"] / (5 * stat.data["stat"]["line_B"])
+    stat.data["stat"]["cc_mean"] = stat.data["stat"]["B_all_C"] / (4 * stat.data["stat"]["line_B"])
     # rate_7f = num_7f / total
     stat.data["stat"]["rate_7f"] = stat.data["stat"]["num_7f"] / stat.data["stat"]["total"]
     # rate_17lme = num_17lme / total
