@@ -211,7 +211,7 @@ The "forward" or "reverse" determination is annotated in the read name.
 
 <figure style="text-align: center;">
 <img src="./docs/fr_determinate.png" alt="Forward and reverse reads determination" width="600" style="max-width: 100%; height: auto;" />
-<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 4. Forward and reverse reads determination</figcaption>
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. Forward and reverse reads determination</figcaption>
 </figure>
 
 **C–T conversion rate**
@@ -226,7 +226,7 @@ For the retained reads, we extract the bases at the corresponding positions to c
 
 <figure style="text-align: center;">
 <img src="./docs/CT_conversion.png" alt="CT conversion rate" width="600" style="max-width: 100%; height: auto;" />
-<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. CT conversion rate</figcaption>
+<figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 4. CT conversion rate</figcaption>
 </figure>
 
 > [!NOTE]
