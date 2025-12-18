@@ -204,8 +204,11 @@ UMI positions are read from the designed structure and extracted without correct
 **Forward and Reverse reads determination**
 
 From the positions corresponding to 17L and ME, there are 7 bases that can be C or converted T (highlighted below). We use the first and the last two C/T positions to determine forward vs. reverse reads: if all three positions are C, it indicates a reverse read; otherwise, it is a forward read.
-Forward: **T**gt**TT**gt**T**gttg**T**t**T**gtAGATGTGTATAAGAGA**T**
-Reverse: **C**gt**CC**gt**C**gttg**C**t**C**gtAGATGTGTATAAGAGA**C**
+
+- Forward:  **T**gt**TT**gt**T**gttg**T**t**T**gtAGATGTGTATAAGAGA**T**
+
+- Reverse:  **C**gt**CC**gt**C**gttg**C**t**C**gtAGATGTGTATAAGAGA**C**
+
 Reverse reads correspond to CTOT/CTOB (reverse complement of the original strand) in methylation terminology; forward reads correspond to OT/OB (original strand).
 The "forward" or "reverse" determination is annotated in the read name.
 
