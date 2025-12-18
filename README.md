@@ -191,7 +191,7 @@ RNA data is analyzed using [SeekSoulTools](http://seeksoul.seekgene.com/en/v1.3.
 #### Step 1: Preprocessing and Barcode Parsing
 **Barcode extraction and correction**
 
-Based on the designed structure, we locate the barcode in the read and extract the corresponding sequence. If the extracted barcode is in the whitelist, it is counted as a valid barcode; otherwise, SeekSoulTools attempts barcode correction, if the barcode has a one-base mismatch (Hamming distance = 1) from an entry in the whitelist:
+Based on the designed structure, we locate the barcode in the read and extract the corresponding sequence. If the extracted barcode is in the whitelist, it is counted as a valid barcode; otherwise, SeekSoulMethyl attempts barcode correction, if the barcode has a one-base mismatch (Hamming distance = 1) from an entry in the whitelist:
 * If exactly one whitelist candidate matches: correct the invalid barcode to that whitelist barcode.
 * If multiple whitelist candidates match: correct to the candidate supported by the highest read count.
 
