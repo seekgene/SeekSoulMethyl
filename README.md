@@ -221,9 +221,9 @@ The "forward" or "reverse" determination is annotated in the read name.
 
 We calculate the C-to-T conversion rate using the original C positions within 17L and ME sequences. Since these are fixed sequences prone to sequencing errors, we restrict the calculation to reads with verified structures:
 
- - In DD-MET3, the 7F sequence must be `TTGCTGT` or `TTGTTGT`, the sequence spanning 17L and ME must be `GTAGATGTGTATAAGAGA`, and the bases at the last two original C positions must be T.
+ - In DD-MET3, the 7F sequence must be `TTGCTGT` or `TTGTTGT`, the sequence spanning 17L and ME must be `GTAGATGTGTATAAGAGA`, and the bases at first and the last two original C positions must be T.
  
- - In DD-MET5, the sequence spanning 17L and ME must be `GTAGATGTGTATAAGAGA`, and the bases at the last two original C positions must be T.
+ - In DD-MET5, the sequence spanning 17L and ME must be `GTAGATGTGTATAAGAGA`, and the bases at the first and last two original C positions must be T.
 
 For the retained reads, we extract the bases at the corresponding positions to calculate the C-to-T conversion rate:
 
@@ -278,7 +278,7 @@ See the [SeekGene ALLCools repository](https://github.com/seekgene/ALLCools) for
 
 **Generate MCDS**
 
-Run `allcools generate-dataset` to bin the genome (chrom10k/20k/50k/100k/500k/1M) and compute per-cell methylation matrices.
+Run `allcools generate-dataset` to bin the genome (chrom10k/20k/50k/100k/500k/1M/geneslop2k) and compute per-cell methylation matrices. Geneslop2k bins are defined as 2k bp flanking each gene.
 
 #### Step 4: Reduction and clustering
 By default, perform dimensionality reduction with LSI on chrom20k bins using ALLCools, followed by UMAP visualization.
