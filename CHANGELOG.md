@@ -2,16 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.4]
+## [1.0.5] 2025-12-22
+### Changed
+- Updated barcode whitelist.
+
+## [1.0.4] 2025-12-18
 ### Changed
 - Updated the C-T conversion rate algorithm.
 
-## [1.0.3]
-
+## [1.0.3] 2025-12-09
 ### Fixed
 - Fixed a metric reporting issue in `rna_methyl_report.html` and `rna_methy_summary.csv` where values were incorrectly displayed as read numbers instead of read pairs (persisted in v1.0.1 and v1.0.2).
 
-## [1.0.2]
+## [1.0.2] 2025-12-02
 
 ### Added
 - Added a `project` parameter to tag each process with project-specific information.
@@ -19,7 +22,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Fixed a bug where cells containing only reverse reads or only forward reads were incorrectly filtered out.
 
-## [1.0.1]
+## [1.0.1] 2025-11-21
 
 ### Changed
 - Updated workflow version from 1.0.0 to 1.0.1 in `nextflow.config`.
@@ -28,7 +31,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Added a summary CSV file (`rna_methy_summary.csv`) containing the same metrics as the HTML report, saved in the same output directory.
 
-## [1.0.0]
+## [1.0.0] 2025-10-31
 
 ### Added
 - Initial release of the SeekSoulMethyl pipeline for single-cell transcriptome and methylation dual-omics analysis.
