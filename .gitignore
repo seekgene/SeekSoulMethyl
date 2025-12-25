@@ -135,14 +135,16 @@ node_modules/
 reference.json
 build_ref.sh
 
+# Other unused files
 oss_list_r1r2_from_csv.sh
 Dockerfile
 benchmark_mcds_read_speed.py
+batch_single_cell_bam.py
+
 seekgene_cellline_demo_download.md
 seekgene_cellline_demo_download.html
 seekgene_pbmc_demo_download.md
 seekgene_pbmc_demo_download.html
 seekgene_demo_download.*
-
 WTJW880_data.md
 README.rst

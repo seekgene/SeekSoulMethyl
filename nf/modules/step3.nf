@@ -87,7 +87,7 @@ process MERGE_BISMARK_BAM {
         }
     }' *_filtered_barcode_reads_counts.csv > ${forward_split_bams_dir.baseName}_merge_filtered_barcode_reads_counts.csv
     
-    echo "BAM file merging, barcode deduplication and reads_counts aggregation completed"
+    echo "BAM file merging, reads_counts aggregation completed"
     """
 }
 

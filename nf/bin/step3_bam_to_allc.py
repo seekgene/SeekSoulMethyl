@@ -34,11 +34,11 @@ def run_allcools(args) -> str:
         other_args = '--convert_bam_strandness'
     if tag:
         other_args += f' --tag {tag}'
-    samtools_sort_cmd = (f'samtools sort -o {outdir}/{barcode}_dedup_sort.bam {bam};')
-    samtools_index_cmd = (f'samtools index {outdir}/{barcode}_dedup_sort.bam;')
+    samtools_sort_cmd = (f'samtools sort -o {outdir}/{barcode}_sort.bam {bam};')
+    samtools_index_cmd = (f'samtools index {outdir}/{barcode}_sort.bam;')
     bam_to_allc_cmd = (
         f'allcools bam-to-allc '
-        f'--bam_path {outdir}/{barcode}_dedup_sort.bam '
+        f'--bam_path {outdir}/{barcode}_sort.bam '
         f'--reference_fasta {genome_fa} '
         f'--output_path {outdir}/{barcode}_allc {other_args} '
         f'--save_count_df;'

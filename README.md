@@ -6,7 +6,7 @@ RNA–MET data comes in two chemistries. DD-MET3 (dual-label) means the RNA and 
 
 **DD-MET3 Methylation Library Structure**
 <figure style="text-align: center;">
-<img src="./docs/DD-MET3_library_structure.png" alt="DD-MET3 Methylation Library" width="600" style="max-width: 100%; height: auto;" />
+<img src="./docs/images/DD-MET3_library_structure.png" alt="DD-MET3 Methylation Library" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 1. DD-MET3 methylation library structure</figcaption>
 </figure>
 
@@ -20,7 +20,7 @@ Structure notes:
 
 **DD-MET5 Methylation Library Structure**
 <figure style="text-align: center;">
-<img src="./docs/DD-MET5_library_structure.png" alt="DD-MET5 Methylation Library" width="600" style="max-width: 100%; height: auto;" />
+<img src="./docs/images/DD-MET5_library_structure.png" alt="DD-MET5 Methylation Library" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 2. DD-MET5 methylation library structure</figcaption>
 </figure>
 
@@ -181,7 +181,7 @@ bash sc_methy_workflow.sh \
 - **database_dir**: Reference genome database path.
 - **chemistry**: Methylation chemistry (DD-MET3 or DD-MET5). DD-MET3 is a dual-label dataset, meaning the RNA and DNA methylation data barcodes are different for the same cell, while DD-MET5 is single-label, meaning the RNA and DNA methylation data barcodes are the same for the same cell.
 - **core**: Number of CPU cores.  
-- **filter_ch**: Filter reads that contain > n CH methylation sites.
+- **filter_ch**: Filter reads that contain > n CH methylation sites. If you do not want to enable this filter, set filter_ch to 0.
 
 ## Process Details
 ### RNA Processing Workflow
@@ -213,7 +213,7 @@ Reverse reads correspond to CTOT/CTOB (reverse complement of the original strand
 The "forward" or "reverse" determination is annotated in the read name.
 
 <figure style="text-align: center;">
-<img src="./docs/fr_determinate.png" alt="Forward and reverse reads determination" width="600" style="max-width: 100%; height: auto;" />
+<img src="./docs/images/fr_determinate.png" alt="Forward and reverse reads determination" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. Forward and reverse reads determination</figcaption>
 </figure>
 
@@ -228,7 +228,7 @@ We calculate the C-to-T conversion rate using the original C positions within 17
 For the retained reads, we extract the bases at the corresponding positions to calculate the C-to-T conversion rate:
 
 <figure style="text-align: center;">
-<img src="./docs/CT_conversion.png" alt="CT conversion rate" width="600" style="max-width: 100%; height: auto;" />
+<img src="./docs/images/CT_conversion.png" alt="CT conversion rate" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 4. CT conversion rate</figcaption>
 </figure>
 
@@ -274,7 +274,7 @@ Split name-sorted BAMs by RNA-derived cell barcodes into per-cell BAM files, eac
 Sort each per-cell BAM by position and convert to ALLC using ALLCools `bam-to-allc`. Our modified ALLCools performs UR-tag-based UMI correction and deduplication per C site.
 
 <figure style="text-align: center;">
-<img src="./docs/umi_correction_detailed_diagram_en.png" alt="UMI correction detailed diagram" width="600" style="max-width: 100%; height: auto;" />
+<img src="./docs/images/umi_correction_detailed_diagram_en.png" alt="UMI correction detailed diagram" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 5. UMI correction detailed diagram</figcaption>
 </figure>
 
@@ -315,7 +315,7 @@ nextflow run SeekSoulMethyl/nf/main.nf \
   --chemistry DD-MET3 > methy.log
 ```
 <figure style="text-align: center;">
-<img src="./docs/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl Pipeline" width="600" style="max-width: 100%; height: auto;" />
+<img src="./docs/images/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl Pipeline" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 6. SeekSoulMethyl nextflow pipeline workflow</figcaption>
 </figure>
 

@@ -22,7 +22,11 @@ params.genomefa = "${params.database_dir}/fasta/genome.fa"
 params.gtf = "${params.database_dir}/genes/genes.gtf"
 params.bismark_ref = "${params.database_dir}/fasta/"
 params.chrom_size_path_full = "${params.database_dir}/bed/chr_len.bed"
-params.chrom_size_path = "${params.database_dir}/bed/chr_nochrM.bed"
+if (!file("${params.database_dir}/bed/chr_nochrM.bed").exists()) {
+    params.chrom_size_path = params.chrom_size_path_full
+} else {
+    params.chrom_size_path = "${params.database_dir}/bed/chr_nochrM.bed"
+}
 params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
 params.chemistry = "DD-MET3"
 if (params.chemistry == "DD-MET3") {

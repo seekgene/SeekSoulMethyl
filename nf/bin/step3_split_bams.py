@@ -33,8 +33,8 @@ def count_reads(bam: str, samplename: str, outdir: str, max_cells: int = 12000) 
             # Extract barcode from read name (format: barcode_other_info)
             barcode = read.query_name.split('_')[0]
             # Only count read2 to avoid double counting paired reads
-            if read.is_read1:
-                continue
+            #if read.is_read1:
+            #    continue
             barcode_counts[barcode] = barcode_counts.get(barcode, 0) + 1
         
         bam_file.close()
