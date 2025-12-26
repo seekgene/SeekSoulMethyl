@@ -1,15 +1,15 @@
 # How to Obtain Single-Cell BAM Files
 
-To accelerate methylation data analysis, we split FASTQ files at the FASTQ stage according to the first several bases of the error-corrected cell barcode. By default we use the first 4 bases, but this length can be configured (for example 1 or 2 bases); the actual length used can be inferred from the file names.
+To accelerate methylation data analysis, we split FASTQ files at the FASTQ processing stage according to the first several bases of the error-corrected cell barcode. By default we use the first 4 bases, but this length can be configured (for example 1 or 2 bases); the actual length used can be inferred from the file names.
 
-While splitting FASTQ by barcode, we also distinguish reads from the original strand and the complementary strand. Because the bismark alignment parameters differ between these two strands, we further split the FASTQ files into forward FASTQ and reverse FASTQ on top of the barcode-based splitting.
+While splitting FASTQ by barcode, we also distinguish reads from the original strand (OT/OB) and the complementary strand (CTOT/CTOB). Because the Bismark alignment parameters differ between these two strands, we further split the FASTQ files into forward FASTQ and reverse FASTQ on top of the barcode-based splitting.
 
-The BAM files we provide are bismark alignment results generated from the above splitting scheme. If you want to obtain single-cell BAM files, follow the steps below.
+The final BAM files we provide are Bismark alignment results generated from the above splitting scheme. If you want to obtain single-cell BAM files, follow the steps below.
 
 >[!Note]
->If you have analyzed the data using our SeekSoulMethyl pipeline yourself, the complete single-cell BAM files are stored in the directory `${sample}/${sample}_methy/step3/split_bams/`. You do not need to perform the following operations.
+>If you have analyzed the data using the SeekSoulMethyl pipeline, the single-cell BAM files are automatically generated and stored in the directory `${sample}/${sample}_methy/step3/split_bams/`. You do not need to perform the following operations manually.
 
-**step1 Sort each BAM file by read name (name-sort)**
+**Step 1: Sort each BAM file by read name (name-sort)**
 
 ```shell
 # ....
@@ -18,7 +18,7 @@ samtools sort -n -o WTJW969_reverse_TTTG_1_bismark_bt2_pe_sortn.bam WTJW969_reve
 #....
 ```
 
-**step2 Split single-cell BAM files from each name-sorted BAM**
+**Step 2: Split single-cell BAM files from each name-sorted BAM**
 
 [step3_split_bams.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/step3_split_bams.py)
 
@@ -70,11 +70,11 @@ python step3_split_bams.py \
 #...
 ```
 
-**step3 Merge forward and reverse BAM files for each single cell**
+**Step 3: Merge forward and reverse BAM files for each single cell**
 
-In most cases, each cell has both forward and reverse reads. Therefore, to obtain a complete single-cell BAM, you need to merge the forward and reverse BAM files for the same cell into one BAM.
+Typically, each cell contains both forward and reverse reads. Therefore, you must merge the forward and reverse BAM files to obtain the complete BAM file for that cell.
 
-After step2, using the sample `WTJW969_forward_TTTG_1_bismark_bt2_pe_sortn.bam` as an example, `step3_split_bams.py` will automatically create a subdirectory under the specified `outdir`:
+After Step 2, using the sample `WTJW969_forward_TTTG_1_bismark_bt2_pe_sortn.bam` as an example, `step3_split_bams.py` will automatically create a subdirectory under the specified `outdir`:
 
 - forward: `./WTJW969_forward_TTTG_1/`
 - reverse: `./WTJW969_reverse_TTTG_1/`
@@ -147,3 +147,41 @@ awk -F ',' '{
 
 echo "BAM file merging, reads_counts aggregation completed"
 ```
+
+## Batch Processing
+
+If you need to process multiple files in batches, we recommend using the script [batch_single_cell_bam.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/utils/batch_single_cell_bam.py). This script has been optimized to support parallel merging (fully utilizing multi-core CPUs) and resume capability (breakpoint continuation).
+
+```shell
+python batch_single_cell_bam.py \
+--assay_type DD-MET5 \
+--bam_dir /path/to/bismark/ \
+--outdir /path/to/output/ \
+--gex_barcodes /path/to/filtered_feature_bc_matrix/barcodes.tsv.gz \
+--threads 4 \
+--parallel_jobs 8
+
+# assay_type: Data type, DD-MET5 or DD-MET3
+# bam_dir: Directory containing all BAM files
+# outdir: Output directory for results
+# gex_barcodes: RNA filtered_feature_bc_matrix/barcodes.tsv.gz file
+# threads: Number of threads per task, default is 4
+# parallel_jobs: Number of parallel tasks (affects concurrency of sorting, splitting, and merging steps), default is 8
+```
+
+`--bam_dir` is the input directory with the following structure:
+```text
+/path/to/bismark/
+├── WTJW969_forward_AAAG_1_bismark_bt2_pe.bam
+├── WTJW969_forward_AAAT_1_bismark_bt2_pe.bam
+├── WTJW969_forward_AAGA_1_bismark_bt2_pe.bam
+├── ...
+├── WTJW969_reverse_TTGT_1_bismark_bt2_pe.bam
+├── WTJW969_reverse_TTTA_1_bismark_bt2_pe.bam
+└── WTJW969_reverse_TTTG_1_bismark_bt2_pe.bam
+```
+
+After execution, the single-cell BAM files will be stored in the `/path/to/output/split_bam` directory.
+
+>[!Note]
+>Using a server with 32 CPUs and 32GB RAM, splitting BAM files for 2196 cells takes approximately 2h 23m.

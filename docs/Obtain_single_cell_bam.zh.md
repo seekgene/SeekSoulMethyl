@@ -1,16 +1,15 @@
 # 如何获取单个细胞的 BAM 文件
 
-为了加快甲基化数据分析速度，我们在 FASTQ 阶段就按照细胞 barcode（barcode已完成纠错） 的前若干个碱基拆分 FASTQ 文件。默认使用前 4 个碱基，但具体长度可以根据流程参数设置为 1 个或 2 个碱基，实际使用的长度可以从文件名中判断。
+为了加速甲基化数据分析，我们在 FASTQ 处理阶段会根据已纠错的细胞 barcode 的前若干个碱基（默认为 4 个，也可配置为 1 或 2 个）对文件进行拆分。实际拆分长度可直接从文件名中识别。
 
-在按 barcode 拆分 FASTQ 的同时，我们还会区分原始链和互补链的 reads。因为原始链和互补链在 bismark 比对过程中使用的参数不同，所以在上述拆分规则的基础上，会进一步将 FASTQ 拆分为 forward FASTQ 和 reverse FASTQ 文件。
+同时，由于 Bismark 比对时原始链（OT/OB）和互补链（CTOT/CTOB）需要不同的参数，我们会在拆分 barcode 的基础上，进一步将 reads 分流为 forward FASTQ 和 reverse FASTQ 文件。
 
-
-最终我们释放的 BAM 文件，就是在上述拆分基础上，经 bismark 比对后得到的结果。如果用户需要获取单个细胞的 BAM 文件，可以按照以下步骤操作：
+最终交付的 BAM 文件即为上述拆分后的 FASTQ 经 Bismark 比对生成的。若您需要获取单细胞的 BAM 文件，请按照以下步骤操作：
 
 >[!Note]
->如果您自己使用我们的SeekSoulMethyl分析了数据，完整的单个细胞的bam文件存储在 `${sample}/${sample}_methy/step3/split_bams/` 目录下，无需进行以下操作。
+>如果您在自己的服务器上使用 SeekSoulMethyl 流程分析了数据，单细胞 BAM 文件已自动生成并存储于 `${sample}/${sample}_methy/step3/split_bams/` 目录下，无需手动执行以下操作。
 
-**step1 将每个 BAM 按照 read 名称进行排序（name-sort）**
+**Step 1: 将每个 BAM 按照 read 名称进行排序（name-sort）**
 
 ```shell
 # ....
@@ -19,7 +18,7 @@ samtools sort -n -o WTJW969_reverse_TTTG_1_bismark_bt2_pe_sortn.bam WTJW969_reve
 #....
 ```
 
-**step2 从每个排序后的 BAM 文件中拆分出单细胞 BAM 文件**
+**Step 2: 从每个排序后的 BAM 文件中拆分出单细胞 BAM 文件**
 
 [step3_split_bams.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/step3_split_bams.py)
 
@@ -71,9 +70,9 @@ python step3_split_bams.py \
 #...
 ```
 
-**step3 合并单个细胞的 forward 和 reverse BAM 文件**
+**Step 3: 合并单个细胞的 forward 和 reverse BAM 文件**
 
-一般每个细胞既有 forward 也有 reverse 的 reads，因此需要将 forward 和 reverse 的 BAM 文件合并成一个 BAM，才是完整的单细胞 BAM 文件。
+通常每个细胞同时包含 forward 和 reverse 的 reads，因此必须将两者合并，才能得到该细胞完整的 BAM 文件。
 
 以上步骤完成后，以样本名 `WTJW969_forward_TTTG_1_bismark_bt2_pe_sortn.bam` 为例，`step3_split_bams.py` 会在指定 `outdir` 下自动创建一个子目录：
 
@@ -148,3 +147,38 @@ awk -F ',' '{
 
 echo "BAM file merging, reads_counts aggregation completed"
 ```
+## 批量处理
+如果您需要批量处理多个文件，推荐使用脚本 [batch_single_cell_bam.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/utils/batch_single_cell_bam.py)。该脚本已优化，支持并行合并（充分利用多核 CPU）及断点续跑功能。
+
+```shell
+python batch_single_cell_bam.py \
+--assay_type DD-MET5 \
+--bam_dir /path/to/bismark/ \
+--outdir /path/to/output/ \
+--gex_barcodes /path/to/filtered_feature_bc_matrix/barcodes.tsv.gz \
+--threads 4 \
+--parallel_jobs 8
+
+# assay_type：数据类型， DD-MET5或者DD-MET3
+# bam_dir：包含所有bam的目录
+# outdir：结果输出目录
+# gex_barcodes：转录组数据的filtered_feature_bc_matrix/barcodes.tsv.gz文件
+# threads：每个任务的线程数，默认4
+# parallel_jobs：并行任务数（影响排序、拆分及合并步骤的并发度），默认 8
+```
+
+`--bam_dir`为输入目录，结构如下：
+```text
+/path/to/bismark/
+├── WTJW969_forward_AAAG_1_bismark_bt2_pe.bam
+├── WTJW969_forward_AAAT_1_bismark_bt2_pe.bam
+├── WTJW969_forward_AAGA_1_bismark_bt2_pe.bam
+├── ...
+├── WTJW969_reverse_TTGT_1_bismark_bt2_pe.bam
+├── WTJW969_reverse_TTTA_1_bismark_bt2_pe.bam
+└── WTJW969_reverse_TTTG_1_bismark_bt2_pe.bam
+```
+以上执行完成后，单个细胞的bam文件存储在`/path/to/output/split_bam`目录下
+
+>[!Note]
+>使用32CPU，32GB的服务器拆分2196个细胞的BAM文件，用时大概2h23m。
