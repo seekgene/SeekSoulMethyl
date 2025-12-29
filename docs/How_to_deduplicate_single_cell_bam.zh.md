@@ -84,4 +84,4 @@ python step2_umi_tools_dedup.py \
 ```
 
 **输出**：
-去重后的 BAM 文件将存储在 `$outdir/umi_tools_swapflags_dedup_bam/` 目录下，文件名后缀为 `.swapflags.dedup.bam`。这些文件即为最终去重后的单细胞 BAM 文件。
+去重后的 BAM 文件将存储在 `$outdir/umi_tools_swapflags_dedup_bam/` 目录下，文件名后缀为 `.dedup.bam`。这些文件即为最终去重后的单细胞 BAM 文件。

@@ -84,4 +84,4 @@ python step2_umi_tools_dedup.py \
 ```
 
 **Output**:
-The deduplicated BAM files will be stored in the `$outdir/umi_tools_swapflags_dedup_bam/` directory, with the suffix `.swapflags.dedup.bam`. These files are the final deduplicated single-cell BAM files.
+The deduplicated BAM files will be stored in the `$outdir/umi_tools_swapflags_dedup_bam/` directory, with the suffix `.dedup.bam`. These files are the final deduplicated single-cell BAM files.
