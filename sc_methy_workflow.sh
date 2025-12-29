@@ -208,7 +208,6 @@ genomefa=$database_dir/fasta/genome.fa  # Reference genome fasta file
 gtf=$database_dir/genes/genes.gtf       # Gene annotation file
 genomebed=$database_dir/bed/chr_len.bed # Chromosome length file
 chrom_size_path=$database_dir/bed/chr_nochrM.bed  # Chromosome length file without mitochondria
-annofile=$database_dir/bed/chr_100kbins_anno.bed  # 100kb bins annotation file
 bismark_genome=$database_dir/fasta      # bismark genome index directory
 
 # Set barcode whitelist files
@@ -447,26 +446,50 @@ fi
 # Merge forward and reverse BAM files for each barcode
 log_info "Merging BAM files for each barcode..."
 merged_count=0
-for forward_bam in ${forward_bams_dir}/*.bam; do
-    if [ -f "$forward_bam" ]; then
-        barcode=$(basename ${forward_bam} .bam)
-        reverse_bam="${reverse_bams_dir}/${barcode}.bam"
-        
-        if [ -f "$reverse_bam" ]; then
-            output_bam="${methy_dir}/step3/split_bams/merged/merged_fr_bam/${barcode}.bam"
-            samtools merge -n -@ 4 -o "$output_bam" "$forward_bam" "$reverse_bam"
-            merged_count=$((merged_count + 1))
-            
-            # Log progress every 100 barcodes
-            if [ $((merged_count % 100)) -eq 0 ]; then
-                log_info "Merged $merged_count barcodes..."
-            fi
-        else
-            log_warning "Corresponding reverse BAM not found for: ${barcode}"
-        fi
+
+declare -A fmap
+declare -A rmap
+declare -A all_barcodes
+
+# Collect forward BAMs
+for f in "${forward_bams_dir}"/*.bam; do
+    if [[ -f "$f" ]]; then
+        bc=$(basename "$f" .bam)
+        fmap["$bc"]="$f"
+        all_barcodes["$bc"]=1
     fi
 done
-log_info "BAM merging completed. Total merged: $merged_count barcodes"
+
+# Collect reverse BAMs
+for r in "${reverse_bams_dir}"/*.bam; do
+    if [[ -f "$r" ]]; then
+        bc=$(basename "$r" .bam)
+        rmap["$bc"]="$r"
+        all_barcodes["$bc"]=1
+    fi
+done
+
+for barcode in "${!all_barcodes[@]}"; do
+    f_bam="${fmap[$barcode]}"
+    r_bam="${rmap[$barcode]}"
+    output_bam="${methy_dir}/step3/split_bams/merged/merged_fr_bam/${barcode}.bam"
+    
+    if [[ -n "$f_bam" && -n "$r_bam" ]]; then
+        samtools merge -n -@ 4 -o "$output_bam" "$f_bam" "$r_bam"
+    elif [[ -n "$f_bam" ]]; then
+        cp "$f_bam" "$output_bam"
+    elif [[ -n "$r_bam" ]]; then
+        cp "$r_bam" "$output_bam"
+    fi
+    
+    merged_count=$((merged_count + 1))
+    
+    # Log progress every 100 barcodes
+    if [ $((merged_count % 100)) -eq 0 ]; then
+        log_info "Processed $merged_count barcodes..."
+    fi
+done
+log_info "BAM merging/copying completed. Total processed: $merged_count barcodes"
 
 # Merge and deduplicate filtered_barcode files
 log_info "Merging filtered barcode lists..."

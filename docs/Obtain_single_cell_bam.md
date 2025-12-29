@@ -1,10 +1,10 @@
 # How to Obtain Single-Cell BAM Files
 
-To accelerate methylation data analysis, we split FASTQ files at the FASTQ processing stage according to the first several bases of the error-corrected cell barcode. By default we use the first 4 bases, but this length can be configured (for example 1 or 2 bases); the actual length used can be inferred from the file names.
-
-While splitting FASTQ by barcode, we also distinguish reads from the original strand (OT/OB) and the complementary strand (CTOT/CTOB). Because the Bismark alignment parameters differ between these two strands, we further split the FASTQ files into forward FASTQ and reverse FASTQ on top of the barcode-based splitting.
-
-The final BAM files we provide are Bismark alignment results generated from the above splitting scheme. If you want to obtain single-cell BAM files, follow the steps below.
+To accelerate methylation data analysis, we split FASTQ files at the FASTQ processing stage according to the first several bases of the error-corrected cell barcode. By default, we use the first 4 bases, but this length can be configured (e.g., 1 or 2 bases); the actual length used can be inferred from the file names.
+ 
+In addition, since Bismark alignment requires different parameters for the original strand (OT/OB) and the complementary strand (CTOT/CTOB), we further split the reads into Forward FASTQ and Reverse FASTQ files based on the barcode splitting.
+ 
+The final BAM files provided are the Bismark alignment results generated from these split FASTQ files. If you need to obtain single-cell BAM files, please follow the steps below:
 
 >[!Note]
 >If you have analyzed the data using the SeekSoulMethyl pipeline, the single-cell BAM files are automatically generated and stored in the directory `${sample}/${sample}_methy/step3/split_bams/`. You do not need to perform the following operations manually.
@@ -70,9 +70,9 @@ python step3_split_bams.py \
 #...
 ```
 
-**Step 3: Merge forward and reverse BAM files for each single cell**
-
-Typically, each cell contains both forward and reverse reads. Therefore, you must merge the forward and reverse BAM files to obtain the complete BAM file for that cell.
+**Step 3: Merge Forward and Reverse BAM Files for Each Single Cell**
+ 
+Typically, each cell contains both Forward and Reverse reads. Therefore, you must merge the two to obtain the complete BAM file for that cell.
 
 After Step 2, using the sample `WTJW969_forward_TTTG_1_bismark_bt2_pe_sortn.bam` as an example, `step3_split_bams.py` will automatically create a subdirectory under the specified `outdir`:
 
@@ -150,7 +150,7 @@ echo "BAM file merging, reads_counts aggregation completed"
 
 ## Batch Processing
 
-If you need to process multiple files in batches, we recommend using the script [batch_single_cell_bam.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/utils/batch_single_cell_bam.py). This script has been optimized to support parallel merging (fully utilizing multi-core CPUs) and resume capability (breakpoint continuation).
+If you need to process multiple files in batches, we highly recommend using the script [batch_single_cell_bam.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/utils/batch_single_cell_bam.py).Before using it, please ensure that you have downloaded [step3_split_bams.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/step3_split_bams.py) and placed it in the same directory as `batch_single_cell_bam.py` or in its parent directory.
 
 ```shell
 python batch_single_cell_bam.py \

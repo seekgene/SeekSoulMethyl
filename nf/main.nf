@@ -2,7 +2,7 @@
 
 /*
  * Single-cell RNA-seq and methylation analysis pipeline
- * Version: 1.0.5
+ * Version: 1.0.6
  */
 
 nextflow.enable.dsl=2
@@ -269,51 +269,26 @@ workflow {
         .groupTuple(by: 0)
         .map { t -> tuple(t[0], t[1].size()) }
 
-    // Assemble cleaned file lists per sample, and emit immediately
-    def exp_counts = [:]
-    def methy_counts = [:]
-    exp_group_counts.subscribe { v -> exp_counts[v[0].toString()] = v[1] }
-    methy_group_counts.subscribe { v -> methy_counts[v[0].toString()] = v[1] }
-
-    def exp_acc_r1 = [:]
-    def exp_acc_r2 = [:]
+    // Assemble cleaned file lists per sample using groupTuple with groupKey
     exp_clean_pairs = exp_clean_multi.rna_fastp_multi_data
-        .map { t ->
-            def sample = t[0].toString()
-            def r1 = t[2]
-            def r2 = t[3]
-            if (!exp_acc_r1.containsKey(sample)) { exp_acc_r1[sample] = []; exp_acc_r2[sample] = [] }
-            exp_acc_r1[sample] << r1
-            exp_acc_r2[sample] << r2
-            def expected = (exp_counts[sample] ?: 1) as Integer
-            if ((exp_acc_r1[sample].size() as Integer) >= expected) {
-                def out = tuple(sample, exp_acc_r1[sample], exp_acc_r2[sample])
-                exp_acc_r1.remove(sample); exp_acc_r2.remove(sample)
-                return out
-            }
-            return null
+        .combine(exp_group_counts, by: 0)
+        .map { sample_id, group_id, r1, r2, count ->
+            tuple(groupKey(sample_id, count), r1, r2)
         }
-        .filter { it != null }
+        .groupTuple()
+        .map { sample_key, r1_list, r2_list ->
+            tuple(sample_key.toString(), r1_list, r2_list)
+        }
 
-    def methy_acc_r1 = [:]
-    def methy_acc_r2 = [:]
     methy_clean_pairs = methy_clean_multi.methy_fastp_multi_data
-        .map { t ->
-            def sample = t[0].toString()
-            def r1 = t[2]
-            def r2 = t[3]
-            if (!methy_acc_r1.containsKey(sample)) { methy_acc_r1[sample] = []; methy_acc_r2[sample] = [] }
-            methy_acc_r1[sample] << r1
-            methy_acc_r2[sample] << r2
-            def expected = (methy_counts[sample] ?: 1) as Integer
-            if ((methy_acc_r1[sample].size() as Integer) >= expected) {
-                def out = tuple(sample, methy_acc_r1[sample], methy_acc_r2[sample])
-                methy_acc_r1.remove(sample); methy_acc_r2.remove(sample)
-                return out
-            }
-            return null
+        .combine(methy_group_counts, by: 0)
+        .map { sample_id, group_id, r1, r2, count ->
+            tuple(groupKey(sample_id, count), r1, r2)
         }
-        .filter { it != null }
+        .groupTuple()
+        .map { sample_key, r1_list, r2_list ->
+            tuple(sample_key.toString(), r1_list, r2_list)
+        }
 
     // RNA expression analysis with multi-group inputs
     rna_results = SEEKSOULTOOLS_RNA(exp_clean_pairs)

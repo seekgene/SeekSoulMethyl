@@ -301,8 +301,11 @@ def main():
     script_dir = Path(__file__).parent.parent
     step3_script = script_dir / "step3_split_bams.py"
     if not step3_script.exists():
-        logger.error(f"step3_split_bams.py not found at {step3_script}")
-        sys.exit(1)
+        script_dir = Path(__file__).parent
+        step3_script = script_dir / "step3_split_bams.py"
+        if not step3_script.exists():
+            logger.error(f"step3_split_bams.py not found at {step3_script}")
+            sys.exit(1)
         
     Path(args.outdir).mkdir(parents=True, exist_ok=True)
     

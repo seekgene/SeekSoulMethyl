@@ -148,7 +148,7 @@ awk -F ',' '{
 echo "BAM file merging, reads_counts aggregation completed"
 ```
 ## 批量处理
-如果您需要批量处理多个文件，推荐使用脚本 [batch_single_cell_bam.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/utils/batch_single_cell_bam.py)。该脚本已优化，支持并行合并（充分利用多核 CPU）及断点续跑功能。
+如果您需要批量处理多个文件，推荐使用脚本 [batch_single_cell_bam.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/utils/batch_single_cell_bam.py)。在使用前，请确保已下载 [step3_split_bams.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/step3_split_bams.py)，并将其置于 `batch_single_cell_bam.py` 同级目录或上一级目录中。
 
 ```shell
 python batch_single_cell_bam.py \
