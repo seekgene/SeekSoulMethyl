@@ -2,7 +2,7 @@
 
 /*
  * Single-cell RNA-seq and methylation analysis pipeline
- * Version: 1.0.0
+ * Version: 1.0.6
  */
 
 nextflow.enable.dsl=2
@@ -21,7 +21,12 @@ params.genomeDir = "${params.database_dir}/star"
 params.genomefa = "${params.database_dir}/fasta/genome.fa"
 params.gtf = "${params.database_dir}/genes/genes.gtf"
 params.bismark_ref = "${params.database_dir}/fasta/"
-params.chrom_size_path = "${params.database_dir}/bed/chr_nochrM.bed"
+params.chrom_size_path_full = "${params.database_dir}/bed/chr_len.bed"
+if (!file("${params.database_dir}/bed/chr_nochrM.bed").exists()) {
+    params.chrom_size_path = params.chrom_size_path_full
+} else {
+    params.chrom_size_path = "${params.database_dir}/bed/chr_nochrM.bed"
+}
 params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
 params.chemistry = "DD-MET3"
 if (params.chemistry == "DD-MET3") {
@@ -35,6 +40,28 @@ if (params.chemistry == "DD-MET3") {
 }
 params.split_fastq = 4
 params.filter_ch = 2
+// Project name, 如果这个参数为空，则获取输出目录，project name在results之前或者/proj/目录后，例如/proj/project_name/2025-11-28-11-11/results，或者 /path/to/project_name/results
+if (!params.project || params.project.toString().trim() == '') {
+    def __outdir_clean = params.outdir?.toString()?.replaceAll('/+$','')
+    def __tokens = __outdir_clean.split('/').findAll { it != '' }
+    def __proj = 'project'
+    if (__tokens) {
+        def __idxProj = __tokens.indexOf('proj')
+        if (__idxProj != -1 && __tokens.size() > __idxProj + 1) {
+            __proj = __tokens[__idxProj + 1]
+        } else if (__tokens[-1] == 'results') {
+            def __prev = __tokens.size() >= 2 ? __tokens[-2] : null
+            if (__prev && (__prev ==~ /\d{4}-\d{2}-\d{2}(?:-\d{2}-\d{2}(?:-\d{2})?)?/)) {
+                __proj = __tokens.size() >= 3 ? __tokens[-3] : 'project'
+            } else {
+                __proj = __prev ?: 'project'
+            }
+        } else {
+            __proj = __tokens[-1]
+        }
+    }
+    params.project = __proj
+}
 // Help information
 params.help = false
 // Help message
@@ -103,7 +130,8 @@ include {
 include {
     COUNTS_MAPPED_READS as COUNTS_MAPPED_READS_F;
     COUNTS_MAPPED_READS as COUNTS_MAPPED_READS_R;
-    ESTIMATED_CELLS
+    ESTIMATED_CELLS;
+    GTF_TO_GENE_BED
 } from './modules/utils'
 
 // Helper: build a stable per-sample grouping key (avoid name clash with Nextflow's groupKey aggregator)
@@ -198,6 +226,9 @@ workflow {
     
     // Total CG sites in genome
     cpg_sites = COMPUTE_CPG_SITES()
+
+    // Generate gene bed file
+    gene_bed = GTF_TO_GENE_BED()
     
     // Build per-group tuples (no merging; each group goes through fastp)
     methy_groups = input_ch.map { sample_id, files ->
@@ -222,31 +253,16 @@ workflow {
         .groupTuple(by: 0)
         .map { t -> tuple(t[0], t[1].size()) }
 
-    // Assemble cleaned file lists per sample, and emit immediately
-    def exp_counts = [:]
-    def methy_counts = [:]
-    
-    methy_group_counts.subscribe { v -> methy_counts[v[0].toString()] = v[1] }
-
-    def methy_acc_r1 = [:]
-    def methy_acc_r2 = [:]
+    // Assemble cleaned file lists per sample using groupTuple with groupKey
     methy_clean_pairs = methy_clean_multi.methy_fastp_multi_data
-        .map { t ->
-            def sample = t[0].toString()
-            def r1 = t[2]
-            def r2 = t[3]
-            if (!methy_acc_r1.containsKey(sample)) { methy_acc_r1[sample] = []; methy_acc_r2[sample] = [] }
-            methy_acc_r1[sample] << r1
-            methy_acc_r2[sample] << r2
-            def expected = (methy_counts[sample] ?: 1) as Integer
-            if ((methy_acc_r1[sample].size() as Integer) >= expected) {
-                def out = tuple(sample, methy_acc_r1[sample], methy_acc_r2[sample])
-                methy_acc_r1.remove(sample); methy_acc_r2.remove(sample)
-                return out
-            }
-            return null
+        .combine(methy_group_counts, by: 0)
+        .map { sample_id, group_id, r1, r2, count ->
+            tuple(groupKey(sample_id, count), r1, r2)
         }
-        .filter { it != null }
+        .groupTuple()
+        .map { sample_key, r1_list, r2_list ->
+            tuple(sample_key.toString(), r1_list, r2_list)
+        }
 
     
 
@@ -429,7 +445,8 @@ workflow {
         }
         .combine(
         merged_counts.merged_filtered_barcode_reads_counts
-        .map{it -> tuple(it[0], it[1])}, by: 0))
+        .map{it -> tuple(it[0], it[1])}, by: 0)
+        .combine(gene_bed.gene_bed))
     if (params.split_fastq > 0) {
         // Run allcools merge for split dataset
         allc_submerge = ALLCOOLS_SUBMERGE(allc_generated.allcools_allc_output)
