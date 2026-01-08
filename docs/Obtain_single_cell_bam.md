@@ -181,7 +181,7 @@ python batch_single_cell_bam.py \
 └── WTJW969_reverse_TTTG_1_bismark_bt2_pe.bam
 ```
 
-After execution, the single-cell BAM files will be stored in the `/path/to/output/split_bam` directory.
+After execution, the single-cell BAM files will be stored in the `/path/to/output/merged_fr_bam` directory.
 
 >[!Note]
 >Using a server with 32 CPUs and 32GB RAM, splitting BAM files for 2196 cells takes approximately 2h 23m.

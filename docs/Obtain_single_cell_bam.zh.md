@@ -148,7 +148,7 @@ awk -F ',' '{
 echo "BAM file merging, reads_counts aggregation completed"
 ```
 ## 批量处理
-如果您需要批量处理多个文件，推荐使用脚本 [batch_single_cell_bam.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/utils/batch_single_cell_bam.py)。在使用前，请确保已下载 [step3_split_bams.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/step3_split_bams.py)，并将其置于 `batch_single_cell_bam.py` 同级目录或上一级目录中。
+如果您需要批量处理多个bam，推荐使用脚本 [batch_single_cell_bam.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/utils/batch_single_cell_bam.py)。在使用前，请确保已下载 [step3_split_bams.py](https://github.com/seekgene/SeekSoulMethyl/blob/nf_rna_methy/nf/bin/step3_split_bams.py)，并将其置于 `batch_single_cell_bam.py` 同级目录或上一级目录中。
 
 ```shell
 python batch_single_cell_bam.py \
@@ -178,7 +178,7 @@ python batch_single_cell_bam.py \
 ├── WTJW969_reverse_TTTA_1_bismark_bt2_pe.bam
 └── WTJW969_reverse_TTTG_1_bismark_bt2_pe.bam
 ```
-以上执行完成后，单个细胞的bam文件存储在`/path/to/output/split_bam`目录下
+以上执行完成后，单个细胞的bam文件存储在`/path/to/output/merged_fr_bam`目录下
 
 >[!Note]
 >使用32CPU，32GB的服务器拆分2196个细胞的BAM文件，用时大概2h23m。
