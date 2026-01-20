@@ -158,11 +158,13 @@ process ALLCOOLS_GENERATE_DATASETS {
     script:
     def cores = Math.max(1, task.cpus - 2)
     """
-    set -e      
-    ls */*_allc.gz | while read id; do
-        barcode=`basename \${id%%_allc.gz}`;
-        echo "\${barcode}\t\${id}" >> allc_file_path.txt
-    done
+    set -e  
+    # Optimized: Use find to avoid "Argument list too long" and pure bash for speed
+    find -L . -name "*_allc.gz" | sort | while read id; do
+        tmp=\${id%%_allc.gz}
+        barcode=\${tmp##*/}
+        echo "\${barcode}\t\${id}"
+    done > allc_file_path.txt
     
     # Generate regions and quantifiers parameters dynamically
     REGIONS_PARAMS=""

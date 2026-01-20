@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [1.0.7] 2026-01-20
+### Fixed
+- Fixed a bug in the `step3` module where the `allc_file_path.txt` file was not being generated correctly.
+
 ## [1.0.6] 2025-12-30
 ### Changed
 - Updated nextflow.config
