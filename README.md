@@ -169,6 +169,20 @@ bash sc_methy_workflow.sh \
 --core 64 \
 --filter_ch 2
 ```
+If a sample has multiple datasets, separate file paths with commas. Ensure that the FASTQ files are listed in the correct order for each dataset.
+```shell
+bash sc_methy_workflow.sh \
+/path/to/WTJW969_E_L003_R1.fq.gz,/path/to/WTJW969_E_L004_R1.fq.gz \
+/path/to/WTJW969_E_L003_R2.fq.gz,/path/to/WTJW969_E_L004_R2.fq.gz \
+/path/to/WTJW969_Met_L000_R1.fq.gz,/path/to/WTJW969_Met_L001_R1.fq.gz,/path/to/WTJW969_Met_L002_R1.fq.gz,/path/to/WTJW969_Met_L003_R1.fq.gz,/path/to/WTJW969_Met_L004_R1.fq.gz \
+/path/to/WTJW969_Met_L000_R2.fq.gz,/path/to/WTJW969_Met_L001_R2.fq.gz,/path/to/WTJW969_Met_L002_R2.fq.gz,/path/to/WTJW969_Met_L003_R2.fq.gz,/path/to/WTJW969_Met_L004_R2.fq.gz \
+--sample WTJW969 \
+--outdir /path/to/results \
+--database_dir /path/to/human-reference-GRCh38 \
+--chemistry DD-MET5 \
+--core 64 \
+--filter_ch 2
+```
 
 ### Input Parameters:
 
@@ -336,6 +350,16 @@ EOF
 # expression_r2: Single-cell transcriptome Read2 fastq file
 # methylation_r1: Single-cell methylation Read1 fastq file
 # methylation_r2: Single-cell methylation Read2 fastq file
+```
+
+If you have multiple sets of data for a single sample, such as WTJW969, you can add multiple rows in the samplesheet, with each row representing a set of data.
+```text
+sample_id,expression_r1,expression_r2,methylation_r1,methylation_r2
+WTJW969,/path/to/WTJW969_E_L003_R1.fq.gz,/path/to/WTJW969_E_L003_R2.fq.gz,/path/to/WTJW969_Met_L000_R1.fq.gz,/path/to/WTJW969_Met_L000_R2.fq.gz
+WTJW969,/path/to/WTJW969_E_L004_R1.fq.gz,/path/to/WTJW969_E_L004_R2.fq.gz,/path/to/WTJW969_Met_L001_R1.fq.gz,/path/to/WTJW969_Met_L001_R2.fq.gz
+WTJW969,,,/path/to/WTJW969_Met_L002_R1.fq.gz,/path/to/WTJW969_Met_L002_R2.fq.gz
+WTJW969,,,/path/to/WTJW969_Met_L003_R1.fq.gz,/path/to/WTJW969_Met_L003_R2.fq.gz
+WTJW969,,,/path/to/WTJW969_Met_L004_R1.fq.gz,/path/to/WTJW969_Met_L004_R2.fq.gz
 ```
 
 3. Run the pipeline:

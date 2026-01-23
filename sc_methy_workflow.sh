@@ -57,10 +57,10 @@ Usage:
       [--filter_ch <filter_channel>] \\
 
 Positional parameters (required):
-  exp_fq1         Single-cell transcriptome Read1 fastq file
-  exp_fq2         Single-cell transcriptome Read2 fastq file
-  methy_fq1       Single-cell methylation Read1 fastq file
-  methy_fq2       Single-cell methylation Read2 fastq file
+  exp_fq1         Single-cell transcriptome Read1 fastq file (comma-separated for multiple files)
+  exp_fq2         Single-cell transcriptome Read2 fastq file (comma-separated for multiple files)
+  methy_fq1       Single-cell methylation Read1 fastq file (comma-separated for multiple files)
+  methy_fq2       Single-cell methylation Read2 fastq file (comma-separated for multiple files)
 
 Named parameters:
   --sample        Sample name (required)
@@ -164,11 +164,14 @@ if [ "$chemistry" != "DD-MET5" ] && [ "$chemistry" != "DD-MET3" ]; then
 fi
 
 # Validate input files
-for file in "$exp_fq1" "$exp_fq2" "$methy_fq1" "$methy_fq2"; do
-    if [ ! -f "$file" ]; then
-        log_error "Input file does not exist: $file"
-        exit 1
-    fi
+for file_list in "$exp_fq1" "$exp_fq2" "$methy_fq1" "$methy_fq2"; do
+    IFS=',' read -ra files <<< "$file_list"
+    for file in "${files[@]}"; do
+        if [ ! -f "$file" ]; then
+            log_error "Input file does not exist: $file"
+            exit 1
+        fi
+    done
 done
 
 # Validate database directory
@@ -234,31 +237,84 @@ gexcb=$exp_outdir/${sample}/Analysis/step3/filtered_feature_bc_matrix/barcodes.t
 # Use fastp software to perform quality control on raw data, filter out low-quality reads to obtain clean data
 log_info "Step 1: Starting data quality control with fastp..."
 mkdir -p ${outdir}/fastp
-exp_fq1_clean=${outdir}/fastp/$(basename ${exp_fq1})
-exp_fq2_clean=${outdir}/fastp/$(basename ${exp_fq2})
+exp_fq1_clean=${outdir}/fastp/${sample}_exp_R1_clean.fq.gz
+exp_fq2_clean=${outdir}/fastp/${sample}_exp_R2_clean.fq.gz
+# Prepare input files (handle multiple comma-separated files)
+IFS=',' read -ra exp_fq1_files <<< "$exp_fq1"
+IFS=',' read -ra exp_fq2_files <<< "$exp_fq2"
+if [ ${#exp_fq1_files[@]} -ne ${#exp_fq2_files[@]} ]; then
+    log_error "Transcriptome R1/R2 file count mismatch: ${#exp_fq1_files[@]} vs ${#exp_fq2_files[@]}"
+    exit 1
+fi
+if [ ${#exp_fq1_files[@]} -eq 1 ]; then
+    exp_fq1_merge=${exp_fq1_files[0]}
+    exp_fq2_merge=${exp_fq2_files[0]}
+else
+    exp_fq1_merge=${outdir}/fastp/${sample}_exp_R1_merged.fq.gz
+    exp_fq2_merge=${outdir}/fastp/${sample}_exp_R2_merged.fq.gz
+    if ! zcat "${exp_fq1_files[@]}" | gzip -c > "${exp_fq1_merge}"; then
+        log_error "Transcriptome R1 merge failed: ${exp_fq1_merge}"
+        exit 1
+    fi
+    if ! zcat "${exp_fq2_files[@]}" | gzip -c > "${exp_fq2_merge}"; then
+        log_error "Transcriptome R2 merge failed: ${exp_fq2_merge}"
+        exit 1
+    fi
+fi
+
 fastp \
-    -i ${exp_fq1} \
-    -I ${exp_fq2} \
+    -i ${exp_fq1_merge} \
+    -I ${exp_fq2_merge} \
     -o ${exp_fq1_clean} \
     -O ${exp_fq2_clean} \
     --cut_tail --cut_tail_window_size 1 --cut_tail_mean_quality 3  --unqualified_percent_limit 80 --n_base_limit 10  --length_required 60 --max_len1 60 --max_len2 0 \
-    -j ${outdir}/fastp/$(basename ${exp_fq1})_fastp.json \
-    -h ${outdir}/fastp/$(basename ${exp_fq1})_fastp.html \
+    -j ${outdir}/fastp/${sample}_exp_fastp.json \
+    -h ${outdir}/fastp/${sample}_exp_fastp.html \
     --thread ${core}
+if [ ${#exp_fq1_files[@]} -gt 1 ]; then
+    rm -f "${exp_fq1_merge}" "${exp_fq2_merge}"
+fi
 log_info "Transcriptome QC completed"
 
 # Perform quality control on methylation data
-methy_fq1_clean=${outdir}/fastp/$(basename ${methy_fq1})
-methy_fq2_clean=${outdir}/fastp/$(basename ${methy_fq2})
+methy_fq1_clean=${outdir}/fastp/${sample}_methy_R1_clean.fq.gz
+methy_fq2_clean=${outdir}/fastp/${sample}_methy_R2_clean.fq.gz
+
+# Prepare input files (handle multiple comma-separated files)
+IFS=',' read -ra methy_fq1_files <<< "$methy_fq1"
+IFS=',' read -ra methy_fq2_files <<< "$methy_fq2"
+if [ ${#methy_fq1_files[@]} -ne ${#methy_fq2_files[@]} ]; then
+    log_error "Methylation R1/R2 file count mismatch: ${#methy_fq1_files[@]} vs ${#methy_fq2_files[@]}"
+    exit 1
+fi
+if [ ${#methy_fq1_files[@]} -eq 1 ]; then
+    methy_fq1_merge=${methy_fq1_files[0]}
+    methy_fq2_merge=${methy_fq2_files[0]}
+else
+    methy_fq1_merge=${outdir}/fastp/${sample}_methy_R1_merged.fq.gz
+    methy_fq2_merge=${outdir}/fastp/${sample}_methy_R2_merged.fq.gz
+    if ! zcat "${methy_fq1_files[@]}" | gzip -c > "${methy_fq1_merge}"; then
+        log_error "Methylation R1 merge failed: ${methy_fq1_merge}"
+        exit 1
+    fi
+    if ! zcat "${methy_fq2_files[@]}" | gzip -c > "${methy_fq2_merge}"; then
+        log_error "Methylation R2 merge failed: ${methy_fq2_merge}"
+        exit 1
+    fi
+fi
+
 fastp \
-    -i ${methy_fq1} \
-    -I ${methy_fq2} \
+    -i ${methy_fq1_merge} \
+    -I ${methy_fq2_merge} \
     -o ${methy_fq1_clean} \
     -O ${methy_fq2_clean} \
-    -j ${outdir}/fastp/$(basename ${methy_fq1})_fastp.json \
-    -h ${outdir}/fastp/$(basename ${methy_fq1})_fastp.html \
+    -j ${outdir}/fastp/${sample}_methy_fastp.json \
+    -h ${outdir}/fastp/${sample}_methy_fastp.html \
     --cut_tail --cut_tail_window_size 1 --cut_tail_mean_quality 3  --unqualified_percent_limit 80 --n_base_limit 10  --length_required 60 --disable_adapter_trimming \
     --thread ${core}
+if [ ${#methy_fq1_files[@]} -gt 1 ]; then
+    rm -f "${methy_fq1_merge}" "${methy_fq2_merge}"
+fi
 log_info "Methylation QC completed"
 
 ########################## Step 2: Transcriptome and Methylation Barcode Processing ##########################
