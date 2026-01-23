@@ -352,7 +352,7 @@ EOF
 # methylation_r2: Single-cell methylation Read2 fastq file
 ```
 
-If you have multiple sets of data for a single sample, such as WTJW969, you can add multiple rows in the samplesheet, with each row representing a set of data.
+If a single sample has multiple datasets and the transcriptome and methylation FASTQ counts do not match (e.g., WTJW969), add multiple rows to the samplesheet, with each row representing one dataset.
 ```text
 sample_id,expression_r1,expression_r2,methylation_r1,methylation_r2
 WTJW969,/path/to/WTJW969_E_L003_R1.fq.gz,/path/to/WTJW969_E_L003_R2.fq.gz,/path/to/WTJW969_Met_L000_R1.fq.gz,/path/to/WTJW969_Met_L000_R2.fq.gz
