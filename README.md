@@ -1,8 +1,8 @@
 # SeekSoulMethyl
-SeekSoulMethyl is a single-cell transcriptome + methylation dual-omics analysis pipeline designed to analyze data generated using the Beijing SeekGene Biotechnology Co., Ltd. single-cell transcriptome + methylation dual-omics kit.
+SeekSoulMethyl is a single-cell transcriptome + methylation analysis pipeline designed to analyze data generated using the Beijing SeekGene BioSciences Co., Ltd. SeekOne DD Single Cell Multiome Methylation + RNA kit.
 
 ## Data Structure
-RNA–MET data comes in two chemistries. DD-MET3 (dual-label) means the RNA and DNA methylation data barcodes are different for the same cell, and the RNA library is a 3′-end transcriptome library. DD-MET5 (single-label) means the RNA and DNA methylation data barcodes are the same for the same cell, and the RNA library is a 5′-end transcriptome library. Below we describe the DNA methylation library structures for both chemistries.
+ SeekOne DD Single Cell Multiome Methylation + RNA kit comes in two chemistries. DD-MET3 (dual-label) means the RNA and DNA methylation data barcodes are different for the same cell, and the RNA library is a 3′-end transcriptome library. DD-MET5 (single-label) means the RNA and DNA methylation data barcodes are the same for the same cell, and the RNA library is a 5′-end transcriptome library. Below we describe the DNA methylation library structures for both chemistries.
 
 **DD-MET3 Methylation Library Structure**
 <figure style="text-align: center;">
@@ -128,10 +128,10 @@ wget -dc -O XYRD-WTJW880-MET_S01_L001_R2_001.fastq.gz.md5 "https://seekgene-publ
 
 After cloning, the key Nextflow entry points and modules are:
 
-- `nf/main.nf`: Main workflow for RNA + methylation end-to-end processing.
+- `nf/main.nf`: Main workflow for transcriptome + methylation end-to-end processing.
 - `nf/methy_only.nf`: Workflow for methylation-only data.
 - `nf/modules/`: Step-wise process modules:
-  - `step1.nf` preprocessing, QC, barcode extraction, RNA analysis.
+  - `step1.nf` preprocessing, QC, barcode extraction, transcriptome analysis.
   - `step2.nf` Bismark alignment and BAM sorting.
   - `step3.nf` per-cell BAM splitting, ALLC generation/merge, multi-scale datasets.
   - `step4.nf` summaries, dimensionality reduction, joint report.
@@ -198,8 +198,8 @@ bash sc_methy_workflow.sh \
 - **filter_ch**: Filter reads that contain > n CH methylation sites. If you do not want to enable this filter, set filter_ch to 0.
 
 ## Process Details
-### RNA Processing Workflow
-RNA data is analyzed using [SeekSoulTools](http://seeksoul.seekgene.com/en/v1.3.0/2.tutorial/1.rna/4.description.html). See the official Algorithms Overview for detailed steps. Cells used in the downstream methylation library are determined based on the RNA library cell barcodes.
+### Transcriptome Processing Workflow
+Transcriptome data is analyzed using [SeekSoulTools](http://seeksoul.seekgene.com/en/v1.3.0/2.tutorial/1.rna/4.description.html). See the official Algorithms Overview for detailed steps. Cells used in the downstream methylation library are determined based on the transcriptome library cell barcodes.
 
 ### Methylation Processing Workflow
 #### Step 1: Preprocessing and Barcode Parsing
@@ -544,20 +544,20 @@ This section describes each Nextflow process with inputs, core logic, key parame
   - Action: `step4_allcools_PCA_cluster.py --var_dim chrom20k --reduc lsi`
   - Output: `*.h5ad`, `*.pdf`, `*.png`
 
-- RNA+MET joint report: `MULTI_REPORT` (script/SeekSoulMethyl/nf/modules/step4.nf:52)
-  - Action: `step4_report_rna_met.py` integrates RNA and methylation outputs
+- Transcriptome+Methylation joint report: `MULTI_REPORT` (script/SeekSoulMethyl/nf/modules/step4.nf:52)
+  - Action: `step4_report_rna_met.py` integrates transcriptome and methylation outputs
   - Output: `${sample}_rna_methyl_report.html`, `${sample}_rna_met.json`
 
 ## Outputs (by outdir structure)
 - `fastp/`: QC reports for raw and post-barcode FASTQs (html/json)
-- `${sample}/${sample}_exp/`: RNA analysis directory with filtered matrix, clustering, DE results
-- `${sample}/${sample}_methy/step1/`: barcode-parsed and sharded FASTQs
+- `${sample}/${sample}_exp/`: Transcriptome analysis directory with filtered matrix, clustering, DE results
+- `${sample}/${sample}_methy/step1/`: Barcode-parsed and sharded FASTQs
 - `${sample}/${sample}_methy/step2/`: Bismark BAMs and reports
 - `${sample}/${sample}_methy/step3/`:
-  - `split_bams/` and `split_bams/merged/`: per-cell BAMs, merged BAMs, barcode counts
-  - `allcools/` and `allcools_generate_datasets/`: per-cell ALLCs and `${sample}.mcds`
+  - `split_bams/` and `split_bams/merged/`: Per-cell BAMs, merged BAMs, barcode counts
+  - `allcools/` and `allcools_generate_datasets/`: Per-cell ALLCs and `${sample}.mcds`
   - `${sample}_merge_allc.gz`, `*.CGN-Merge*`
-- `${sample}/${sample}_methy/step4/`: clustering plots and `*.h5ad`
+- `${sample}/${sample}_methy/step4/`: Clustering plots and `*.h5ad`
 - `${sample}/`:
   - `${sample}_methy_summary.json`, `${sample}_wgs_summary.csv`
   - `${sample}_rna_methyl_report.html` (if running the main workflow)
@@ -580,7 +580,7 @@ nextflow run SeekSoulMethyl/nf/methy_only.nf \
 
 ## Key parameters and tips
 - `--database_dir`: reference directory with `fasta/genome.fa`, `genes/genes.gtf`, `star/`, `bed/chr_nochrM.bed` (script/SeekSoulMethyl/nf/main.nf:19)
-- `--chemistry`: `DD-MET3` or `DD-MET5`; also sets RNA chemistry and barcode whitelist (script/SeekSoulMethyl/nf/main.nf:27)
+- `--chemistry`: `DD-MET3` or `DD-MET5`; also sets transcriptome chemistry and barcode whitelist (script/SeekSoulMethyl/nf/main.nf:27)
 - `--split_fastq`: shard by the first n barcode bases (default 4; increases parallelism but adds scheduling/merge overhead) (script/SeekSoulMethyl/nf/main.nf:36)
 - `--filter_ch`: filter reads with > n CH methylation sites (default 2) (script/SeekSoulMethyl/nf/modules/step1.nf:241)
 - The samplesheet header must be `sample_id` (script/SeekSoulMethyl/nf/main.nf:116)
