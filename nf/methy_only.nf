@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 /*
- * Single-cell RNA-seq and methylation analysis pipeline
+ * SeekOne DD Single Cell Methylation analysis pipeline
  * Version: 1.0.6
  */
 

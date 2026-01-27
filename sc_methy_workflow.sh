@@ -1,6 +1,6 @@
 #!/bin/bash
-# SeekSoul Single-cell Transcriptome + Methylation Dual-omics Analysis Pipeline
-# Applicable for analyzing single-cell transcriptome + methylation dual-omics reagent kit products from Beijing SeekSoul Biotechnology Co., Ltd.
+# SeekOne DD Single Cell Multiome Methylation + RNA Analysis Pipeline
+# Applicable for analyzing SeekOne DD Single Cell Multiome Methylation + RNA kit products from Beijing SeekGene BioSciences Co., Ltd.
 # 
 # Usage:
 #   sc_methy_workflow.sh <exp_fq1> <exp_fq2> <methy_fq1> <methy_fq2> \
@@ -45,7 +45,7 @@ log_error() {
 # Help function
 show_help() {
     cat << EOF
-SeekSoul Single-cell Transcriptome + Methylation Dual-omics Analysis Pipeline
+SeekOne DD Single Cell Multiome Methylation + RNA Analysis Pipeline
 
 Usage:
   $0 <exp_fq1> <exp_fq2> <methy_fq1> <methy_fq2> \\
