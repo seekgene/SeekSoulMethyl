@@ -586,7 +586,7 @@ nextflow run SeekSoulMethyl/nf/methy_only.nf \
 - The samplesheet header must be `sample_id` (script/SeekSoulMethyl/nf/main.nf:116)
 
 ## Execution environment and resources
-- Recommended container image: `registry-vpc.cn-beijing.aliyuncs.com/seekgene/seeksoulmethyl:1.1.0` (script/SeekSoulMethyl/nf/nextflow.config:69)
+- Recommended container image: `registry.cn-beijing.aliyuncs.com/seekgene/seeksoulmethyl:1.1.2` (script/SeekSoulMethyl/nf/nextflow.config:69)
 - Choose `-profile aliyun_k8s` or `-profile docker`, and edit `nf/nextflow.config` for your infra
 - Heavy steps: Bismark/ALLCools need substantial CPU/RAM; defaults are set in `withName` blocks, scale up if needed (script/SeekSoulMethyl/nf/nextflow.config:313)
 
