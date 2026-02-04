@@ -147,3 +147,6 @@ seekgene_pbmc_demo_download.html
 seekgene_pbmc_demo_download.en.html
 seekgene_pbmc_demo_download.en.md
 seekgene_demo_download.*
+
+dev_related/
+sc_methy_workflow_dev.sh
