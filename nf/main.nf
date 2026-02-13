@@ -116,6 +116,8 @@ include {
     MERGE_FILTERED_BARCODE_READS_COUNTS;
     ALLCOOLS_BAM_TO_ALLC;
     ALLCOOLS_GENERATE_DATASETS;
+    ALLCOOLS_GENERATE_DATASETS_PART;
+    MERGE_MCDS;
     ALLCOOLS_SUBMERGE;
     ALLCOOLS_MERGE;
     ALLCOOLS_EXTRACT
@@ -435,21 +437,37 @@ workflow {
     )
     
     
-    // Run allcools generate datasets
-    allcools_datasets = ALLCOOLS_GENERATE_DATASETS(
-        allc_generated.allcools_allc_output
-        .combine(pair_counts_per_sample, by: 0)
-        .map { sample_id, pair_id, allc_data, pair_count -> 
-            tuple(groupKey(sample_id, pair_count), allc_data)
-        }
-        .groupTuple()
-        .map { group_key, allc_list -> 
-            tuple(group_key.toString(), allc_list)
-        }
-        .combine(
-        merged_counts.merged_filtered_barcode_reads_counts
-        .map{it -> tuple(it[0], it[1])}, by: 0)
-        .combine(gene_bed.gene_bed))
+    if (params.split_fastq && params.split_fastq.toInteger() > 0) {
+        allcools_datasets_part = ALLCOOLS_GENERATE_DATASETS_PART(
+            allc_generated.allcools_allc_output
+                .combine(pair_counts_per_sample, by: 0)
+                .map { sample_id, pair_id, allc_data, pair_count ->
+                    tuple(groupKey(sample_id, pair_count).toString(), pair_id, allc_data)
+                }
+                .combine(gene_bed.gene_bed)
+        )
+        
+        allcools_datasets = MERGE_MCDS(
+            allcools_datasets_part.allcools_generate_datasets_part
+                .map { sample_id, pair_id, mcds_part -> tuple(sample_id, mcds_part) }
+                .groupTuple(by: 0)
+        )
+    } else {
+        allcools_datasets_input = allc_generated.allcools_allc_output
+            .combine(sc_bismark_merge_bam.merged_filtered_barcode, by: [0,1])
+            .combine(pair_counts_per_sample, by: 0)
+            .map { sample_id, pair_id, allc_data, filtered_barcode, pair_count ->
+                tuple(groupKey(sample_id, pair_count), allc_data, filtered_barcode)
+            }
+            .groupTuple()
+            .combine(gene_bed.gene_bed)
+            .map { sample_key, allc_dirs, filtered_barcodes, gene_bed_path ->
+                def filtered_barcode = filtered_barcodes instanceof List ? filtered_barcodes[0] : filtered_barcodes
+                tuple(sample_key.toString(), allc_dirs, filtered_barcode, gene_bed_path)
+            }
+        
+        allcools_datasets = ALLCOOLS_GENERATE_DATASETS(allcools_datasets_input)
+    }
     if (params.split_fastq > 0) {
         // Run allcools merge for split dataset
         allc_submerge = ALLCOOLS_SUBMERGE(allc_generated.allcools_allc_output)

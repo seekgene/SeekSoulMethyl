@@ -269,19 +269,26 @@ def parse_cell_info(cells_reads_csv: str, cells_allc_metric_csv: str) -> dict:
     cells_reads.index = cells_reads["barcode"]
     print(cells_allc_metric_csv, flush = True)
     cells_allc_metrics = pd.read_csv(cells_allc_metric_csv, index_col=0, header = 0, sep = ",").sort_values(by = "genome_cov", ascending = False)
-    # Sort cells_allc_metrics by genome_cov in descending order, get genome_cov, cell_saturation, total_cpg_number of the cell with max genome_cov. Then get reads_counts from cells_reads based on barcode
-    max_genome_cov_cell = cells_allc_metrics.iloc[0]
+    cells_allc_metrics["barcode"] = cells_allc_metrics.index.to_series().astype(str).str.replace("_allc.gz", "", regex=False)
+    aligned_cells = cells_allc_metrics[cells_allc_metrics["barcode"].isin(cells_reads.index)].copy()
+    if aligned_cells.shape[0] == 0:
+        aligned_cells = cells_allc_metrics.copy()
+    aligned_cells = aligned_cells.sort_values(by="genome_cov", ascending=False)
+
+    def safe_reads(bc: str) -> int:
+        return int(cells_reads.loc[bc, "reads_counts"]) if bc in cells_reads.index else 0
+
+    max_genome_cov_cell = aligned_cells.iloc[0]
     max_genome_cov = max_genome_cov_cell["genome_cov"]
     max_cell_saturation = max_genome_cov_cell["cell_saturation"]
     max_total_cpg_number = max_genome_cov_cell["total_cpg_number"]
-    max_reads_counts = cells_reads.loc[re.sub("_allc.gz", "", max_genome_cov_cell.name), "reads_counts"]
+    max_reads_counts = safe_reads(str(max_genome_cov_cell.get("barcode", max_genome_cov_cell.name)))
     
-    # Sort cells_allc_metrics by genome_cov in descending order, get genome_cov, cell_saturation, total_cpg_number of the median genome_cov cell. Then get reads_counts from cells_reads based on barcode
-    median_genome_cov_cell = cells_allc_metrics.iloc[len(cells_allc_metrics) // 2]
+    median_genome_cov_cell = aligned_cells.iloc[len(aligned_cells) // 2]
     median_genome_cov = median_genome_cov_cell["genome_cov"]
     median_cell_saturation = median_genome_cov_cell["cell_saturation"]
     median_total_cpg_number = median_genome_cov_cell["total_cpg_number"]
-    median_reads_counts = cells_reads.loc[re.sub("_allc.gz", "", median_genome_cov_cell.name), "reads_counts"]
+    median_reads_counts = safe_reads(str(median_genome_cov_cell.get("barcode", median_genome_cov_cell.name)))
     
     cell_info = {
         "Estimated Number of Cells": cells_reads.shape[0],
