@@ -151,3 +151,5 @@ seekgene_demo_download.*
 dev_related/
 sc_methy_workflow_dev.sh
 step3_compare_mcds.py
+.trae/
+**/.trae/
