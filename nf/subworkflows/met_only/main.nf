@@ -9,38 +9,40 @@ nextflow.enable.dsl=2
 
 // Parameter definitions
 
-// Input parameters
-params.samplesheet = null
-
-// Output directory
-params.outdir = "./results"
+params.samplesheet = params.samplesheet ?: null
+params.outdir = params.outdir ?: "./results"
     
 // Database file paths
-params.database_dir = ""
-params.genomeDir = "${params.database_dir}/star"
-params.genomefa = "${params.database_dir}/fasta/genome.fa"
-params.gtf = "${params.database_dir}/genes/genes.gtf"
-params.bismark_ref = "${params.database_dir}/fasta/"
-params.chrom_size_path_full = "${params.database_dir}/bed/chr_len.bed"
-if (!file("${params.database_dir}/bed/chr_nochrM.bed").exists()) {
-    params.chrom_size_path = params.chrom_size_path_full
-} else {
-    params.chrom_size_path = "${params.database_dir}/bed/chr_nochrM.bed"
+params.database_dir = params.database_dir ?: ""
+
+def _isNullLike = { v ->
+    if (v == null) return true
+    def s = v.toString().trim()
+    return s == '' || s.equalsIgnoreCase('null')
 }
-params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
-params.chemistry = "DD-MET3"
+
+if (_isNullLike(params.genomeDir)) params['genomeDir'] = "${params.database_dir}/star"
+if (_isNullLike(params.genomefa)) params['genomefa'] = "${params.database_dir}/fasta/genome.fa"
+if (_isNullLike(params.gtf)) params['gtf'] = "${params.database_dir}/genes/genes.gtf"
+if (_isNullLike(params.bismark_ref)) params['bismark_ref'] = "${params.database_dir}/fasta/"
+if (_isNullLike(params.chrom_size_path_full)) params['chrom_size_path_full'] = "${params.database_dir}/bed/chr_len.bed"
+if (_isNullLike(params.chrom_size_path)) {
+    def __nochrM = "${params.database_dir}/bed/chr_nochrM.bed"
+    params['chrom_size_path'] = file(__nochrM).exists() ? __nochrM : params.chrom_size_path_full
+}
+if (_isNullLike(params.methy_barcode_wl)) params['methy_barcode_wl'] = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
+
+params.chemistry = params.chemistry ?: "DD-MET3"
 if (params.chemistry == "DD-MET3") {
-    params.exp_chemistry = "DDV2"
-    params.cbcsv = "${projectDir}/bin/barcodes/DD-M_bUCB3_whitelist.csv"
-    params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
+    if (_isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DDV2"
+    if (_isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/DD-M_bUCB3_whitelist.csv"
 }else if (params.chemistry == "DD-MET5") {
-    params.exp_chemistry = "DD-MET5"
-    params.cbcsv = "${projectDir}/bin/barcodes/ME5_bUCB3_whitelist.csv"
-    params.methy_barcode_wl = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
+    if (_isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DD-MET5"
+    if (_isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/ME5_bUCB3_whitelist.csv"
 }
-params.split_fastq = 4
-params.filter_ch = 2
-// Project name, 如果这个参数为空，则获取输出目录，project name在results之前或者/proj/目录后，例如/proj/project_name/2025-11-28-11-11/results，或者 /path/to/project_name/results
+params.split_fastq = params.split_fastq ?: 4
+params.filter_ch = params.filter_ch ?: 2
+
 if (!params.project || params.project.toString().trim() == '') {
     def __outdir_clean = params.outdir?.toString()?.replaceAll('/+$','')
     def __tokens = __outdir_clean.split('/').findAll { it != '' }
@@ -62,8 +64,7 @@ if (!params.project || params.project.toString().trim() == '') {
     }
     params.project = __proj
 }
-// Help information
-params.help = false
+params.help = params.help ?: false
 // Help message
 def helpMessage() {
     log.info"""
@@ -73,17 +74,6 @@ def helpMessage() {
     Batch sample analysis:
         nextflow run main.nf --samplesheet samples.csv --outdir results --database_dir refdata-cellranger-arc-GRCh38-2024-A
     """.stripIndent()
-}
-
-// Display help information
-if (params.help) {
-    helpMessage()
-    exit 0
-}
-
-// Parameter validation
-if (!params.samplesheet) {
-    error "Error: --samplesheet parameter must be provided"
 }
 
 include {
@@ -99,7 +89,7 @@ include {
    FASTP_METHYLATION_BARCODE_EXTRACT as FASTP_METHYLATION_BARCODE_EXTRACT_F;
    FASTP_METHYLATION_BARCODE_EXTRACT as FASTP_METHYLATION_BARCODE_EXTRACT_R
   
-} from './modules/step1'
+} from '../../modules/step1'
 
 include {
    BISMARK_ALIGNMENT_FORWARD;
@@ -107,7 +97,7 @@ include {
    SORT_BAM_BY_NAME as SORT_BAM_BY_NAME_F;
    SORT_BAM_BY_NAME as SORT_BAM_BY_NAME_R;
    
-} from './modules/step2'
+} from '../../modules/step2'
 
 include {
     SPLIT_BAM_FILES as SPLIT_BAM_FILES_F;
@@ -119,20 +109,20 @@ include {
     ALLCOOLS_SUBMERGE;
     ALLCOOLS_MERGE;
     ALLCOOLS_EXTRACT
-} from './modules/step3'
+} from '../../modules/step3'
 
 include {
     METHYLATION_SUMMARY;
     METHYLATION_LSI_PCA_CLUSTERING;
     MULTI_REPORT
-} from './modules/step4'
+} from '../../modules/step4'
 
 include {
     COUNTS_MAPPED_READS as COUNTS_MAPPED_READS_F;
     COUNTS_MAPPED_READS as COUNTS_MAPPED_READS_R;
     ESTIMATED_CELLS;
     GTF_TO_GENE_BED
-} from './modules/utils'
+} from '../../modules/utils'
 
 // Helper: build a stable per-sample grouping key (avoid name clash with Nextflow's groupKey aggregator)
 def sampleGroupKey(sample_id, pair_count) {
@@ -220,7 +210,14 @@ def create_input_channel() {
 /*
  * Workflow definition
  */
-workflow {
+workflow METHY_ONLY {
+    if (params.help) {
+        helpMessage()
+        exit 0
+    }
+    if (!params.samplesheet) {
+        error "Error: --samplesheet parameter must be provided"
+    }
     // Create input channel
     input_ch = create_input_channel()
     
@@ -529,18 +526,4 @@ workflow {
        .combine(merged_counts.allcools_cells_csv_output, by: 0)
     )
     */
-}
-
-/*
-* Workflow completion information
-*/
-workflow.onComplete {
-    log.info "Pipeline completed at: $workflow.complete"
-    log.info "Execution status: ${ workflow.success ? 'OK' : 'failed' }"
-    log.info "Execution duration: $workflow.duration"
-    log.info "Total samples processed: ${workflow.success ? 'All samples completed successfully' : 'Some samples failed'}"
-}
-
-workflow.onError {
-    log.error "Pipeline execution stopped with the following message: $workflow.errorMessage"
 }

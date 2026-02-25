@@ -12,24 +12,30 @@ params.sample = params.sample ?: null
 params.force_cell_number = params.force_cell_number ?: null
 
 params.database_dir = params.database_dir ?: ""
-params.genomeDir = params.genomeDir ?: "${params.database_dir}/star"
-params.genomefa = params.genomefa ?: "${params.database_dir}/fasta/genome.fa"
-params.gtf = params.gtf ?: "${params.database_dir}/genes/genes.gtf"
-params.bismark_ref = params.bismark_ref ?: "${params.database_dir}/fasta/"
-params.chrom_size_path_full = params.chrom_size_path_full ?: "${params.database_dir}/bed/chr_len.bed"
-if (!file("${params.database_dir}/bed/chr_nochrM.bed").exists()) {
-    params.chrom_size_path = params.chrom_size_path ?: params.chrom_size_path_full
-} else {
-    params.chrom_size_path = params.chrom_size_path ?: "${params.database_dir}/bed/chr_nochrM.bed"
+
+def _isNullLike = { v ->
+    if (v == null) return true
+    def s = v.toString().trim()
+    return s == '' || s.equalsIgnoreCase('null')
+}
+
+if (_isNullLike(params.genomeDir)) params['genomeDir'] = "${params.database_dir}/star"
+if (_isNullLike(params.genomefa)) params['genomefa'] = "${params.database_dir}/fasta/genome.fa"
+if (_isNullLike(params.gtf)) params['gtf'] = "${params.database_dir}/genes/genes.gtf"
+if (_isNullLike(params.bismark_ref)) params['bismark_ref'] = "${params.database_dir}/fasta/"
+if (_isNullLike(params.chrom_size_path_full)) params['chrom_size_path_full'] = "${params.database_dir}/bed/chr_len.bed"
+if (_isNullLike(params.chrom_size_path)) {
+    def __nochrM = "${params.database_dir}/bed/chr_nochrM.bed"
+    params['chrom_size_path'] = file(__nochrM).exists() ? __nochrM : params.chrom_size_path_full
 }
 
 params.chemistry = params.chemistry ?: "DD-MET3"
 if (params.chemistry == "DD-MET3") {
-    params.exp_chemistry = params.exp_chemistry ?: "DDV2"
-    params.cbcsv = params.cbcsv ?: "${projectDir}/bin/barcodes/DD-M_bUCB3_whitelist.csv"
+    if (_isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DDV2"
+    if (_isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/DD-M_bUCB3_whitelist.csv"
 } else if (params.chemistry == "DD-MET5") {
-    params.exp_chemistry = params.exp_chemistry ?: "DD-MET5"
-    params.cbcsv = params.cbcsv ?: "${projectDir}/bin/barcodes/ME5_bUCB3_whitelist.csv"
+    if (_isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DD-MET5"
+    if (_isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/ME5_bUCB3_whitelist.csv"
 }
 
 params.split_fastq = params.split_fastq ?: 4
@@ -41,9 +47,6 @@ include {
     RUN_RNA_FORCE;
     STAGE_METHY_ASSETS;
     STAGE_BISMARK_ASSETS;
-} from './modules/force_cell_custom'
-
-include {
     FORCE_CELL_BARCODE_DIFF;
     FORCE_CELL_PREPARE_WORKDIR;
     FORCE_CELL_APPLY_ALLOCOOLS_CHANGES;
@@ -52,10 +55,10 @@ include {
     FORCE_CELL_RECOMPUTE_CELLS_METRICS;
     FORCE_CELL_UPDATE_FILTERED_READS_COUNTS;
     FORCE_CELL_MERGE_AND_SUBSET_MCDS;
-} from './modules/force_cell_methy_force'
+} from '../../modules/force_cell_custom'
 
-include { COMPUTE_CPG_SITES } from './modules/step1'
-include { SORT_BAM_BY_NAME as SORT_BAM_BY_NAME_F; SORT_BAM_BY_NAME as SORT_BAM_BY_NAME_R } from './modules/step2'
+include { COMPUTE_CPG_SITES } from '../../modules/step1'
+include { SORT_BAM_BY_NAME as SORT_BAM_BY_NAME_F; SORT_BAM_BY_NAME as SORT_BAM_BY_NAME_R } from '../../modules/step2'
 include {
     SPLIT_BAM_FILES as SPLIT_BAM_FILES_F;
     SPLIT_BAM_FILES as SPLIT_BAM_FILES_R;
@@ -67,9 +70,9 @@ include {
     ALLCOOLS_SUBMERGE;
     ALLCOOLS_MERGE;
     ALLCOOLS_EXTRACT
-} from './modules/step3'
-include { METHYLATION_SUMMARY; METHYLATION_LSI_PCA_CLUSTERING; MULTI_REPORT } from './modules/step4'
-include { GTF_TO_GENE_BED } from './modules/utils'
+} from '../../modules/step3'
+include { METHYLATION_SUMMARY; METHYLATION_LSI_PCA_CLUSTERING; MULTI_REPORT } from '../../modules/step4'
+include { GTF_TO_GENE_BED } from '../../modules/utils'  
 
 
 def _parseBismarkStrand = { String baseName ->
@@ -94,7 +97,7 @@ def _fileNotEmpty = { filePath ->
     return f.length() > 0
 }
 
-workflow {
+workflow FORCE_CELL {
     if (!params.pre_analysis_path || !params.pre_outdir) {
         error "Error: --pre_analysis_path (and/or --pre_outdir) must be provided"
     }
@@ -108,7 +111,7 @@ workflow {
     def __outdir_clean = (params.outdir ?: '').toString().replaceAll('/+$','')
     def __pre_outdir_clean = (params.pre_outdir ?: '').toString().replaceAll('/+$','')
     if (__outdir_clean && __pre_outdir_clean && __outdir_clean == __pre_outdir_clean) {
-        error "Error: force 输出目录(--outdir)不允许与上一批次 results 目录(--pre_outdir)一致"
+        error "Error: force_cell --outdir must not be the same as the previous results directory (--pre_outdir)"
     }
 
     def samples = params.sample.toString().split(',').collect { it.trim() }.findAll { it }
@@ -403,19 +406,4 @@ workflow {
                 tuple(sample, gexjson, filtered_dir, raw_dir, counts_xls, detail_xls, tsne_file, rna_diff, methyjson, methy_filtered_counts, methy_cells)
             }
     )
-}
-
-
-/*
-* Workflow completion information
-*/
-workflow.onComplete {
-    log.info "Pipeline completed at: $workflow.complete"
-    log.info "Execution status: ${ workflow.success ? 'OK' : 'failed' }"
-    log.info "Execution duration: $workflow.duration"
-    log.info "Total samples processed: ${workflow.success ? 'All samples completed successfully' : 'Some samples failed'}"
-}
-
-workflow.onError {
-    log.error "Pipeline execution stopped with the following message: $workflow.errorMessage"
 }

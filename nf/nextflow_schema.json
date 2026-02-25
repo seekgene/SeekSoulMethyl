@@ -1,84 +1,212 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/nextflow-rna-methy-omics-data-analysis//nextflow_schema.json",
-  "title": "nextflow-rna-methy-omics-data-analysis pipeline parameters",
-  "description": "Nextflow SeekGene RNA-MET data analysis pipeline",
-  "type": "object",
-  "$defs": {
-    "input_output_options": {
-      "title": "Input/output options",
-      "type": "object",
-      "fa_icon": "fas fa-terminal",
-      "description": "Define where the pipeline should find input data and save output data.",
-      "required": ["outdir"],
-      "properties": {
-        "outdir": {
-          "type": "string",
-          "format": "directory-path",
-          "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-          "fa_icon": "fas fa-folder-open"
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nextflow-rna-methy-omics-data-analysis//nextflow_schema.json",
+    "title": "nextflow-rna-methy-omics-data-analysis pipeline parameters",
+    "description": "Nextflow SeekGene RNA-MET data analysis pipeline",
+    "type": "object",
+    "$defs": {
+        "input_output_options": {
+            "title": "Input/output options",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Define where the pipeline should find input data and save output data.",
+            "required": ["outdir"],
+            "properties": {
+                "outdir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
+                    "default": "./results",
+                    "fa_icon": "fas fa-folder-open"
+                }
+            }
         }
-      }
+    },
+    "allOf": [{
+            "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "if": {
+                "properties": {
+                    "workflow": {
+                        "enum": ["rna_met", "methy_only"]
+                    }
+                },
+                "required": ["workflow"]
+            },
+            "then": {
+                "required": ["samplesheet", "database_dir"]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "workflow": {
+                        "const": "force_cell"
+                    }
+                },
+                "required": ["workflow"]
+            },
+            "then": {
+                "required": ["pre_analysis_path", "sample", "force_cell_number"]
+            }
+        }
+    ],
+    "properties": {
+        "workflow": {
+            "type": "string",
+            "title": "Workflow",
+            "default": "rna_met",
+            "enum": ["rna_met", "methy_only", "force_cell"],
+            "description": "Select which sub-workflow to run. Accepted values: rna_met | methy_only | force_cell."
+        },
+        "samplesheet": {
+            "type": "string",
+            "title": "Samplesheet",
+            "format": "file-path",
+            "description": "CSV samplesheet file path."
+        },
+        "seeksoultools_path": {
+            "type": "string",
+            "deprecated": true,
+            "description": "Deprecated/unused parameter (not referenced by this pipeline)."
+        },
+        "database_dir": {
+            "type": "string",
+            "title": "Database Directory",
+            "format": "directory-path",
+            "default": "",
+            "description": "Reference database root directory. Used to derive genomeDir/genomefa/gtf/bismark_ref/bed paths."
+        },
+        "genomeDir": {
+            "type": "string",
+            "title": "STAR Genome Directory",
+            "format": "directory-path",
+            "default": null,
+            "description": "STAR index directory. If not set, derived from database_dir."
+        },
+        "genomefa": {
+            "type": "string",
+            "title": "Genome FASTA",
+            "format": "file-path",
+            "default": null,
+            "description": "Genome FASTA file. If not set, derived from database_dir."
+        },
+        "gtf": {
+            "type": "string",
+            "title": "GTF",
+            "format": "file-path",
+            "default": null,
+            "description": "Gene annotation GTF. If not set, derived from database_dir."
+        },
+        "bismark_ref": {
+            "type": "string",
+            "title": "Bismark Reference Directory",
+            "format": "directory-path",
+            "default": null,
+            "description": "Bismark reference directory. If not set, derived from database_dir."
+        },
+        "chrom_size_path_full": {
+            "type": "string",
+            "title": "Chrom Sizes (Full)",
+            "format": "file-path",
+            "default": null,
+            "description": "Chromosome size BED path (full). If not set, derived from database_dir."
+        },
+        "chrom_size_path": {
+            "type": "string",
+            "title": "Chrom Sizes",
+            "format": "file-path",
+            "default": null,
+            "description": "Chromosome size BED path. If not set, derived from database_dir (prefers chr_nochrM.bed when exists)."
+        },
+        "cbcsv": {
+            "type": "string",
+            "title": "Cell Barcode CSV",
+            "format": "file-path",
+            "default": null,
+            "description": "Cell barcode whitelist CSV. Default depends on chemistry."
+        },
+        "methy_barcode_wl": {
+            "type": "string",
+            "title": "Methylation Barcode Whitelist",
+            "format": "file-path",
+            "default": null,
+            "description": "Methylation barcode whitelist file path."
+        },
+        "chemistry": {
+            "type": "string",
+            "title": "Chemistry",
+            "default": "DD-MET3",
+            "enum": ["DD-MET3", "DD-MET5"],
+            "description": "Library chemistry. Controls defaults for exp_chemistry and cbcsv."
+        },
+        "exp_chemistry": {
+            "type": "string",
+            "title": "Expression Chemistry",
+            "default": null,
+            "enum": ["DDV2", "DD-MET5"],
+            "description": "Expression chemistry. If not set, derived from chemistry."
+        },
+        "split_fastq": {
+            "type": "integer",
+            "default": 4,
+            "minimum": 0,
+            "description": "Split FASTQ into N chunks. Use 0 to disable splitting."
+        },
+        "filter_ch": {
+            "type": "integer",
+            "default": 2,
+            "minimum": 0,
+            "description": "Filter CH context threshold."
+        },
+        "project": {
+            "type": "string",
+            "title": "Project Name",
+            "default": null,
+            "description": "Project name. If empty, inferred from outdir in rna_met/methy_only."
+        },
+        "help": {
+            "type": "boolean",
+            "title": "Help",
+            "default": false,
+            "description": "Print help message and exit."
+        },
+        "pre_analysis_path": {
+            "type": "string",
+            "title": "Pre-analysis Path",
+            "format": "directory-path",
+            "default": null,
+            "description": "Required for force_cell workflow. Can be a local path or an OSS URI (oss://...)."
+        },
+        "pre_outdir": {
+            "type": "string",
+            "title": "Pre-analysis Outdir",
+            "format": "directory-path",
+            "default": null,
+            "description": "Optional for force_cell workflow. If not set, derived from pre_analysis_path."
+        },
+        "sample": {
+            "type": "string",
+            "title": "Samples",
+            "default": null,
+            "description": "Samples to force (comma-separated), used by force_cell workflow."
+        },
+        "force_cell_number": {
+            "title": "Force Cell Number",
+            "default": null,
+            "description": "Force-cell map. Provide either a JSON object (recommended) or a JSON string. Example: {\"sampleA\": 5000, \"sampleB\": 6000}.",
+            "oneOf": [{
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer",
+                        "minimum": 0
+                    }
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        }
     }
-  },
-  "allOf": [
-    {
-      "$ref": "#/$defs/input_output_options"
-    }
-  ],
-  "properties": {
-    "samplesheet": {
-      "type": "string"
-    },
-    "seeksoultools_path": {
-      "type": "string"
-    },
-    "database_dir": {
-      "type": "string"
-    },
-    "genomeDir": {
-      "type": "string"
-    },
-    "genomefa": {
-      "type": "string"
-    },
-    "gtf": {
-      "type": "string"
-    },
-    "bismark_ref": {
-      "type": "string"
-    },
-    "chrom_size_path": {
-      "type": "string"
-    },
-    "cbcsv": {
-      "type": "string"
-    },
-    "methy_barcode_wl": {
-      "type": "string"
-    },
-    "chemistry": {
-      "type": "string"
-    },
-    "exp_chemistry": {
-      "type": "string"
-    },
-    "split_fastq": {
-      "type": "integer",
-      "default": 4,
-      "minimum": 1
-    },
-    "filter_ch": {
-      "type": "integer",
-      "default": 2,
-      "minimum": 0
-    }
-  },
-  "required": [
-    "database_dir",
-    "samplesheet",
-    "chemistry",
-    "split_fastq",
-    "filter_ch"
-  ]
 }
