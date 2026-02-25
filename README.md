@@ -128,8 +128,11 @@ wget -dc -O XYRD-WTJW880-MET_S01_L001_R2_001.fastq.gz.md5 "https://seekgene-publ
 
 After cloning, the key Nextflow entry points and modules are:
 
-- `nf/main.nf`: Main workflow for transcriptome + methylation end-to-end processing.
-- `nf/methy_only.nf`: Workflow for methylation-only data.
+- `nf/main.nf`: Top-level entry. Select sub-workflow via `--workflow` (`rna_met`, `methy_only`, `force_cell`).
+- `nf/subworkflows/`: Workflow definitions:
+  - `rna_met/main.nf`: Transcriptome + methylation end-to-end processing.
+  - `met_only/main.nf`: Methylation-only workflow.
+  - `forcecell/main.nf`: Force-cell workflow (recomputes/updates results using previous outputs).
 - `nf/modules/`: Step-wise process modules:
   - `step1.nf` preprocessing, QC, barcode extraction, transcriptome analysis.
   - `step2.nf` Bismark alignment and BAM sorting.
@@ -138,6 +141,7 @@ After cloning, the key Nextflow entry points and modules are:
   - `utils.nf` helpers for methylation-only workflow (reads counting and cell estimation).
 - `nf/bin/`: Helper scripts and resources (e.g., barcode whitelists).
 - `nf/nextflow.config`: Executors and resource configuration.
+- `nf/nextflow_schema.json`: Pipeline parameter schema.
 - `sc_methy_workflow.sh`: Shell script to run the dual-omics analysis pipeline.
 
 We provide two methods for data analysis:
@@ -453,98 +457,98 @@ References:
 
 ## Nextflow Step-by-Step Details
 
-This section describes each Nextflow process with inputs, core logic, key parameters, and outputs for troubleshooting and interpretation. The workflow is defined in `nf/main.nf` (script/SeekSoulMethyl/nf/main.nf:1) and processes are implemented in `nf/modules/*.nf`.
+This section describes each Nextflow process with inputs, core logic, key parameters, and outputs for troubleshooting and interpretation. The workflow is defined in `nf/main.nf` and processes are implemented in `nf/modules/*.nf`.
 
 ### Step 1: Preprocessing and Barcode Parsing (step1.nf)
-- Compute genome-wide CpG count: `COMPUTE_CPG_SITES` (script/SeekSoulMethyl/nf/modules/step1.nf:6)
+- Compute genome-wide CpG count: `COMPUTE_CPG_SITES`
   - Input: `params.genomefa`, `params.chrom_size_path`
   - Action: run `count_cg_sites.py` to count CpG sites
   - Output: `genome_cg_info.json`
 
-- Expression FASTQ QC (multi-group): `FASTP_EXPRESSION_MULTI` (script/SeekSoulMethyl/nf/modules/step1.nf:22)
+- Expression FASTQ QC (multi-group): `FASTP_EXPRESSION_MULTI`
   - Input: paired FASTQs per sample (groups G1/G2/...)
   - Action: `fastp` trimming and QC
   - Output: cleaned `*_expression_clean_R1/2.fastq.gz`, `*.html`, `*.json`
 
-- Methylation FASTQ QC (multi-group): `FASTP_METHYLATION_MULTI` (script/SeekSoulMethyl/nf/modules/step1.nf:88)
+- Methylation FASTQ QC (multi-group): `FASTP_METHYLATION_MULTI`
   - Input: paired FASTQs per sample (groups G1/G2/...)
   - Action: `fastp` QC (adapter detection disabled, trimming as per pipeline)
   - Output: cleaned `*_methylation_clean_R1/2.fastq.gz`, `*.html`, `*.json`
 
-- RNA alignment and quantification: `SEEKSOULTOOLS_RNA` (script/SeekSoulMethyl/nf/modules/step1.nf:156)
+- RNA alignment and quantification: `SEEKSOULTOOLS_RNA`
   - Input: cleaned expression R1/R2 lists
   - Action: `seeksoultools rna run` (STAR mapping, counting, filtering, clustering, DE)
   - Output: `Analysis/step3/filtered_feature_bc_matrix/` etc.
 
-- Methylation barcode parsing: `METHYLATION_BARCODE_EXTRACTION` (script/SeekSoulMethyl/nf/modules/step1.nf:206)
+- Methylation barcode parsing: `METHYLATION_BARCODE_EXTRACTION`
   - Input: cleaned methylation R1/R2 lists, whitelist `params.methy_barcode_wl`
   - Action: run `barcode_cs_multi.py` to parse/correct cell barcodes and UMIs by `params.chemistry`; optional `--split_fastq n` to shard reads by first n barcode bases
   - Output: `step1/${sample}_forward_*{1,2}.fq.gz`, `step1/${sample}_reverse_*{1,2}.fq.gz`, `${sample}_methy_summary.json`, optional `${sample}_barcode_stats.txt`
 
-- Build forward/reverse pairing lists: `PARSE_FASTQ_FILES` (script/SeekSoulMethyl/nf/modules/step1.nf:255)
+- Build forward/reverse pairing lists: `PARSE_FASTQ_FILES`
   - Input: forward/reverse FASTQ sets
   - Action: scan `step1/` and pair files by identifiers
   - Output: `forward_pairs.txt`, `reverse_pairs.txt`
 
-- Post-barcode-extraction QC: `FASTP_METHYLATION_BARCODE_EXTRACT` (script/SeekSoulMethyl/nf/modules/step1.nf:368)
+- Post-barcode-extraction QC: `FASTP_METHYLATION_BARCODE_EXTRACT`
   - Input: paired sub-FASTQs
   - Action: `fastp` QC
   - Output: per-pair `*.html`, `*.json`
 
 ### Step 2: Bismark alignment and BAM sorting (step2.nf)
-- Forward-strand alignment: `BISMARK_ALIGNMENT_FORWARD` (script/SeekSoulMethyl/nf/modules/step2.nf:3)
+- Forward-strand alignment: `BISMARK_ALIGNMENT_FORWARD`
   - Key flags: `--add_barcode`, `--add_umi`; max insert size `-X 1000`
   - Output: `*_bismark_bt2_pe.bam`, `*_bismark_bt2_PE_report.txt`
 
-- Reverse (PBAT) alignment: `BISMARK_ALIGNMENT_REVERSE` (script/SeekSoulMethyl/nf/modules/step2.nf:31)
+- Reverse (PBAT) alignment: `BISMARK_ALIGNMENT_REVERSE`
   - Key flags: `--pbat`, `--add_barcode`, `--add_umi`
   - Output: same as above
 
-- Sort by read name: `SORT_BAM_BY_NAME` (script/SeekSoulMethyl/nf/modules/step2.nf:61)
+- Sort by read name: `SORT_BAM_BY_NAME`
   - Action: `samtools sort -n`
   - Output: `*_sortbyname.bam`
 
 ### Step 3: Per-cell split, ALLC generation/merge, dataset building (step3.nf)
-- Split BAMs by cell barcode: `SPLIT_BAM_FILES` (script/SeekSoulMethyl/nf/modules/step3.nf:1)
+- Split BAMs by cell barcode: `SPLIT_BAM_FILES`
   - Input: name-sorted BAM and GEX barcodes `barcodes.tsv.gz`
   - Action: run `step3_split_bams.py` to split by cell barcode and keep shared cells only
   - Output: per-cell BAM dir, `*_filtered_barcode`, `*_filtered_barcode_reads_counts.csv`
 
-- Merge forward/reverse per-cell BAMs and counts: `MERGE_BISMARK_BAM` (script/SeekSoulMethyl/nf/modules/step3.nf:27)
+- Merge forward/reverse per-cell BAMs and counts: `MERGE_BISMARK_BAM`
   - Action: `samtools merge -n` per matching cell; merge/deduplicate barcodes and read counts
   - Output: `*_merged_fr_bam/`, `*_merge_filtered_barcode`, `*_merge_filtered_barcode_reads_counts.csv`
 
-- Generate per-cell ALLC: `ALLCOOLS_BAM_TO_ALLC` (script/SeekSoulMethyl/nf/modules/step3.nf:86)
+- Generate per-cell ALLC: `ALLCOOLS_BAM_TO_ALLC`
   - Action: run `step3_bam_to_allc.py` (custom ALLCools), UR-based dedup and methylation quantification
   - Output: per-cell `*_allc.gz` and index
 
-- Merge cell metrics: `MERGE_FILTERED_BARCODE_READS_COUNTS` (script/SeekSoulMethyl/nf/modules/step3.nf:114)
+- Merge cell metrics: `MERGE_FILTERED_BARCODE_READS_COUNTS`
   - Action: merge barcodes and read counts, create `${sample}_cells.csv` and `.json`
   - Output: `filtered_barcode`, `filtered_barcode_reads_counts.csv`, `${sample}_cells.{csv,json}`
 
-- Build multi-scale dataset: `ALLCOOLS_GENERATE_DATASETS` (script/SeekSoulMethyl/nf/modules/step3.nf:136)
+- Build multi-scale dataset: `ALLCOOLS_GENERATE_DATASETS`
   - Action: `allcools generate-dataset` for chrom10k/20k/50k/100k/500k/1M, metrics like `count` and `hypo-score`
   - Output: `${sample}.mcds`
 
-- Merge ALLC (when sharded): `ALLCOOLS_SUBMERGE` (script/SeekSoulMethyl/nf/modules/step3.nf:188), `ALLCOOLS_MERGE` (script/SeekSoulMethyl/nf/modules/step3.nf:223)
+- Merge ALLC (when sharded): `ALLCOOLS_SUBMERGE`, `ALLCOOLS_MERGE`
   - Action: merge per-shard/per-sample ALLCs
   - Output: `${sample}_merge_allc.gz` and index
 
-- Extract CG context ALLC: `ALLCOOLS_EXTRACT` (script/SeekSoulMethyl/nf/modules/step3.nf:252)
+- Extract CG context ALLC: `ALLCOOLS_EXTRACT`
   - Action: `allcools extract-allc --mc_contexts CGN --strandness merge`
   - Output: `*.CGN-Merge*`
 
-(Methylation-only workflow `methy_only.nf` additionally includes `COUNTS_MAPPED_READS` and `ESTIMATED_CELLS` for read-count-based cell estimation and barcode filtering, see script/SeekSoulMethyl/nf/modules/utils.nf:1 and :17)
+(Methylation-only workflow `methy_only.nf` additionally includes `COUNTS_MAPPED_READS` and `ESTIMATED_CELLS` for read-count-based cell estimation and barcode filtering)
 
 ### Step 4: Summary, DR & joint report (step4.nf)
-- Methylation summary: `METHYLATION_SUMMARY` (script/SeekSoulMethyl/nf/modules/step4.nf:2)
+- Methylation summary: `METHYLATION_SUMMARY`
   - Action: `step4_wgs_summary.py` aggregates Bismark reports, cell metrics and CpG stats to produce `${sample}_methy_summary.json` and `${sample}_wgs_summary.csv`
 
-- LSI/PCA clustering and visualization: `METHYLATION_LSI_PCA_CLUSTERING` (script/SeekSoulMethyl/nf/modules/step4.nf:26)
+- LSI/PCA clustering and visualization: `METHYLATION_LSI_PCA_CLUSTERING`
   - Action: `step4_allcools_PCA_cluster.py --var_dim chrom20k --reduc lsi`
   - Output: `*.h5ad`, `*.pdf`, `*.png`
 
-- Transcriptome+Methylation joint report: `MULTI_REPORT` (script/SeekSoulMethyl/nf/modules/step4.nf:52)
+- Transcriptome+Methylation joint report: `MULTI_REPORT`
   - Action: `step4_report_rna_met.py` integrates transcriptome and methylation outputs
   - Output: `${sample}_rna_methyl_report.html`, `${sample}_rna_met.json`
 
@@ -561,12 +565,13 @@ This section describes each Nextflow process with inputs, core logic, key parame
 - `${sample}/`:
   - `${sample}_methy_summary.json`, `${sample}_wgs_summary.csv`
   - `${sample}_rna_methyl_report.html` (if running the main workflow)
-- Nextflow run artifacts (as configured by `-c nf/nextflow.config`): `execution_report.html`, `execution_timeline.html`, `pipeline_dag.html`, `execution_trace.txt` (script/SeekSoulMethyl/nf/nextflow.config:17)
+- Nextflow run artifacts (as configured by `-c nf/nextflow.config`): `execution_report.html`, `execution_timeline.html`, `pipeline_dag.html`, `execution_trace.txt` 
 
 ## Methylation-only workflow (test version, currently not recommended for use)
 Use the simplified workflow when you only have methylation reads:
 ```bash
-nextflow run SeekSoulMethyl/nf/methy_only.nf \
+nextflow run SeekSoulMethyl/nf/main.nf \
+  --workflow methy_only \
   --outdir /path/to/results \
   --samplesheet samplelist.csv \
   -w /path/to/work \
@@ -579,20 +584,20 @@ nextflow run SeekSoulMethyl/nf/methy_only.nf \
 ```
 
 ## Key parameters and tips
-- `--database_dir`: reference directory with `fasta/genome.fa`, `genes/genes.gtf`, `star/`, `bed/chr_nochrM.bed` (script/SeekSoulMethyl/nf/main.nf:19)
-- `--chemistry`: `DD-MET3` or `DD-MET5`; also sets transcriptome chemistry and barcode whitelist (script/SeekSoulMethyl/nf/main.nf:27)
-- `--split_fastq`: shard by the first n barcode bases (default 4; increases parallelism but adds scheduling/merge overhead) (script/SeekSoulMethyl/nf/main.nf:36)
-- `--filter_ch`: filter reads with > n CH methylation sites (default 2) (script/SeekSoulMethyl/nf/modules/step1.nf:241)
-- The samplesheet header must be `sample_id` (script/SeekSoulMethyl/nf/main.nf:116)
+- `--database_dir`: reference directory with `fasta/genome.fa`, `genes/genes.gtf`, `star/`, `bed/chr_nochrM.bed` 
+- `--chemistry`: `DD-MET3` or `DD-MET5`; also sets transcriptome chemistry and barcode whitelist 
+- `--split_fastq`: shard by the first n barcode bases (default 4; increases parallelism but adds scheduling/merge overhead) 
+- `--filter_ch`: filter reads with > n CH methylation sites (default 2) 
+- The samplesheet header must be `sample_id`
 
 ## Execution environment and resources
-- Recommended container image: `registry.cn-beijing.aliyuncs.com/seekgene/seeksoulmethyl:1.1.2` (script/SeekSoulMethyl/nf/nextflow.config:69)
+- Recommended container image: `registry.cn-beijing.aliyuncs.com/seekgene/seeksoulmethyl:1.1.2` 
 - Choose `-profile aliyun_k8s` or `-profile docker`, and edit `nf/nextflow.config` for your infra
-- Heavy steps: Bismark/ALLCools need substantial CPU/RAM; defaults are set in `withName` blocks, scale up if needed (script/SeekSoulMethyl/nf/nextflow.config:313)
+- Heavy steps: Bismark/ALLCools need substantial CPU/RAM; defaults are set in `withName` blocks, scale up if needed 
 
 
 ## FAQ
-- Samplesheet parsing error: ensure first column is `sample_id`, use absolute paths (script/SeekSoulMethyl/nf/main.nf:111)
+- Samplesheet parsing error: ensure first column is `sample_id`, use absolute paths
 - Missing `${sample}.mcds`: check `ALLCOOLS_BAM_TO_ALLC` produced per-cell `*_allc.gz` and `chrom_size_path` is correct
 - Stuck at Bismark: verify reference indices and that `params.bismark_ref` is visible in the container
 - Resume runs: use `-resume` with the same `-w` work directory
