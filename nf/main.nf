@@ -1,6 +1,6 @@
 nextflow.enable.dsl=2
 
-params.workflow = params.workflow ?: 'RNA_MET'
+params.workflow = params.workflow ?: 'rna_met'
 
 include { METHY_ONLY } from './subworkflows/met_only/main'
 include { MAIN as RNA_MET } from './subworkflows/rna_met/main'
