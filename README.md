@@ -602,6 +602,14 @@ nextflow run SeekSoulMethyl/nf/main.nf \
 - Stuck at Bismark: verify reference indices and that `params.bismark_ref` is visible in the container
 - Resume runs: use `-resume` with the same `-w` work directory
 
+## Documentation
+
+Tutorials and reference materials are available under the [docs/](docs) directory:
+
+- [How to build the reference genome database (`--database_dir`)](docs/How_to_build_reference_genome.md)
+- [How to obtain single-cell BAM files](docs/Obtain_single_cell_bam.md) ([中文](docs/Obtain_single_cell_bam.zh.md))
+- [How to deduplicate single-cell BAM files](docs/How_to_deduplicate_single_cell_bam.md) ([中文](docs/How_to_deduplicate_single_cell_bam.zh.md))
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
