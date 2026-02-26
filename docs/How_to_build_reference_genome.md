@@ -124,7 +124,6 @@ awk -F '\t' '{print $1"\t"$2}' "${outdir}/fasta/genome.fa.fai" > "${outdir}/bed/
 Then create `chr_nochrM.bed` by selecting the chromosomes you want to keep.
 
 >[!Note]
->You should decide which contigs are primary chromosomes, which are alt contigs, and which represent mitochondrial DNA for your species/build.
 >For humans, a common choice is chr1–chr22 plus chrX/chrY; for other species, choose the equivalent primary chromosomes.
 
 Example (simple, but species-dependent): keep the first N lines of `chr_len.bed`:
