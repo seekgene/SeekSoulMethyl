@@ -634,7 +634,7 @@ if [ "$allc_count" -eq 0 ]; then
 fi
 
 # Generate geneslop2k bed file
-python gtf_to_gene_bed.py --gtf ${gtf} --out ${methy_dir}/genes.bed
+python ${script_path}/gtf_to_gene_bed.py --gtf ${gtf} --out ${methy_dir}/genes.bed
 bedtools slop -b 2000 -i ${methy_dir}/genes.bed -g ${chrom_size_path} > ${methy_dir}/geneslop2k.bed
 
 # Generate ALLCools datasets with multiple bin sizes
