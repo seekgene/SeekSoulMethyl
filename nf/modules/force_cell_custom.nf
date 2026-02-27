@@ -205,9 +205,9 @@ process STAGE_METHY_ASSETS {
     set -e
     mkdir -p merged
 
-    ln -s "${pre_outdir}/${sample}/${sample}_methy/step3/split_bams/merged/${sample}_cells.csv" merged/${sample}_cells.csv
-    ln -s "${pre_outdir}/${sample}/${sample}_methy/step3/split_bams/merged/filtered_barcode_reads_counts.csv" merged/filtered_barcode_reads_counts.csv
-    ln -s "${pre_outdir}/${sample}/${sample}_methy/${sample}_methy_summary.json" ${sample}_methy_summary.json
+    cp "${pre_outdir}/${sample}/${sample}_methy/step3/split_bams/merged/${sample}_cells.csv" merged/${sample}_cells.csv
+    cp "${pre_outdir}/${sample}/${sample}_methy/step3/split_bams/merged/filtered_barcode_reads_counts.csv" merged/filtered_barcode_reads_counts.csv
+    cp "${pre_outdir}/${sample}/${sample}_methy/${sample}_methy_summary.json" ${sample}_methy_summary.json
 
     if [ -d "${pre_outdir}/${sample}/${sample}_methy/step3/allcools" ]; then
       ln -s "${pre_outdir}/${sample}/${sample}_methy/step3/allcools" allcools
@@ -268,50 +268,37 @@ process FORCE_CELL_BARCODE_DIFF {
     """
 }
 
-process FORCE_CELL_PREPARE_WORKDIR {
-    tag "${sample}-FORCE_CELL_PREPARE_WORKDIR"
-    resourceLabels label: "FORCE_CELL_PREPARE_WORKDIR_${params.project}_${sample}"
-
-    input:
-    tuple val(sample), path(allcools_dir), path(datasets_dir), path(mcds_dir)
-
-    output:
-    tuple val(sample), path("allcools_work"), path("datasets_work"), path("datasets_work/${sample}.mcds"), emit: work
-
-    script:
-    """
-    set -e
-    mkdir -p allcools_work datasets_work
-    (cp -al ${allcools_dir}/. allcools_work/ 2>/dev/null) || cp -a ${allcools_dir}/. allcools_work/
-    (cp -al ${datasets_dir}/. datasets_work/ 2>/dev/null) || cp -a ${datasets_dir}/. datasets_work/
-    test -d datasets_work/${sample}.mcds
-    """
-}
-
 process FORCE_CELL_APPLY_ALLOCOOLS_CHANGES {
     tag "${sample}-FORCE_CELL_APPLY_ALLOCOOLS_CHANGES"
-    publishDir "${params.outdir}/${sample}/${sample}_methy/step3/", mode: "symlink", overwrite: true, saveAs: { "allcools" }
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step3/"
     resourceLabels label: "FORCE_CELL_APPLY_ALLOCOOLS_CHANGES_${params.project}_${sample}"
 
     input:
     tuple val(sample), path(allcools_work), path(drop_barcodes), path(add_allc_dirs)
 
     output:
-    tuple val(sample), path("allcools_force"), emit: allcools_force
+    tuple val(sample), path("allcools"), emit: allcools_force
 
     script:
     def split_n = (params.split_fastq ?: 4) as Integer
     """
     set -e
-    mkdir -p allcools_force
-    (cp -al ${allcools_work}/. allcools_force/ 2>/dev/null) || cp -a ${allcools_work}/. allcools_force/
+    in_allcools="${allcools_work}"
+    if [ -e allcools ] && [ "\$(readlink allcools 2>/dev/null || true)" != "" -o "\$(test -d allcools && echo dir || true)" != "" ]; then
+      if [ "\$(basename "${allcools_work}")" = "allcools" ]; then
+        mv allcools allcools_in
+        in_allcools="allcools_in"
+      fi
+    fi
+    mkdir -p allcools
+    cp -Lr "\${in_allcools}"/* allcools/
 
     removed_total=0
     while read bc; do
       bc="\${bc//\$'\\r'/}"
       bc="\${bc//[[:space:]]/}"
       [ -z "\$bc" ] && continue
-      n=\$(find allcools_force -type f \\( \
+      n=\$(find -L -maxdepth 1 allcools/ -type f \\( \
         -name "\${bc}_allc.gz" -o \
         -name "\${bc}_allc.gz.tbi" -o \
         -name "\${bc}_allc.gz.count.csv" \\
@@ -325,9 +312,9 @@ process FORCE_CELL_APPLY_ALLOCOOLS_CHANGES {
       find -L "\$d" -maxdepth 1 -type f -name "*_allc.gz" | while read f; do
         bc=\$(basename "\$f" "_allc.gz")
         bucket=\${bc:0:${split_n}}
-        dest=\$(find allcools_force -maxdepth 1 -type d -name "*_\${bucket}_*_allcools" -print | head -n 1 || true)
+        dest=\$(find -L allcools/ -maxdepth 1 -type d -name "*_\${bucket}_*_allcools" -print | head -n 1 || true)
         if [ -z "\$dest" ]; then
-          dest="allcools_force/force_added_\${bucket}_allcools"
+          dest="allcools/${sample}_forward_\${bucket}_1_merged_fr_bam_allcools"
           mkdir -p "\$dest"
         fi
         cp -f "\$f" "\$dest/\${bc}_allc.gz"
@@ -476,4 +463,3 @@ process FORCE_CELL_MERGE_AND_SUBSET_MCDS {
     fi
     """
 }
-

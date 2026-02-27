@@ -48,7 +48,6 @@ include {
     STAGE_METHY_ASSETS;
     STAGE_BISMARK_ASSETS;
     FORCE_CELL_BARCODE_DIFF;
-    FORCE_CELL_PREPARE_WORKDIR;
     FORCE_CELL_APPLY_ALLOCOOLS_CHANGES;
     FORCE_CELL_DISCOVER_BUCKET_DIRS;
     FORCE_CELL_ADAPT_BUCKET_FOR_SUBMERGE;
@@ -170,15 +169,6 @@ workflow FORCE_CELL {
     add_gex_barcodes = barcode_diff.diff.map { sample, drop, add, add_gex, target -> tuple(sample, add_gex) }
     target_methy_barcodes = barcode_diff.diff.map { sample, drop, add, add_gex, target -> tuple(sample, target) }
 
-    workdir_prepared = FORCE_CELL_PREPARE_WORKDIR(
-        methy_assets.allcools_dir
-            .combine(methy_assets.datasets_dir, by: 0)
-            .combine(methy_assets.mcds_dir, by: 0)
-            .map { sample, allcools_dir, datasets_dir, mcds_dir ->
-                tuple(sample, allcools_dir, datasets_dir, mcds_dir)
-            }
-    )
-
     bismark_bams_for_add = bismark_bams_flat
         .combine(has_add_by_sample, by: 0)
         .filter { sample, bam, has_add -> has_add }
@@ -264,12 +254,11 @@ workflow FORCE_CELL {
         }
 
     allcools_forced = FORCE_CELL_APPLY_ALLOCOOLS_CHANGES(
-        workdir_prepared.work
-            .map { sample, allcools_work, datasets_work, mcds_orig -> tuple(sample, allcools_work) }
+        methy_assets.allcools_dir
             .combine(drop_barcodes, by: 0)
             .combine(add_allc_dirs_by_sample, by: 0)
-            .map { sample, allcools_work, drop_file, add_dirs ->
-                tuple(sample, allcools_work, drop_file, add_dirs)
+            .map { sample, allcools_dir, drop_file, add_dirs ->
+                tuple(sample, allcools_dir, drop_file, add_dirs)
             }
     )
 
@@ -330,8 +319,7 @@ workflow FORCE_CELL {
         }
 
     mcds_final = FORCE_CELL_MERGE_AND_SUBSET_MCDS(
-        workdir_prepared.work
-            .map { sample, allcools_work, datasets_work, mcds_orig -> tuple(sample, mcds_orig) }
+        methy_assets.mcds_dir
             .combine(add_mcds_parts_by_sample, by: 0)
             .combine(target_methy_barcodes, by: 0)
             .map { sample, mcds_orig, mcds_parts, target_file ->

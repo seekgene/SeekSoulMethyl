@@ -587,7 +587,7 @@ nextflow run SeekSoulMethyl/nf/main.nf \
 - `--database_dir`: reference directory with `fasta/genome.fa`, `genes/genes.gtf`, `star/`, `bed/chr_nochrM.bed` 
 - `--chemistry`: `DD-MET3` or `DD-MET5`; also sets transcriptome chemistry and barcode whitelist 
 - `--split_fastq`: shard by the first n barcode bases (default 4; increases parallelism but adds scheduling/merge overhead) 
-- `--filter_ch`: filter reads with > n CH methylation sites (default 2) 
+- `--filter_ch`: filter reads with > n CH methylation sites (default 2).  If you do not want to enable this filter, set `filter_ch` to 0.
 - The samplesheet header must be `sample_id`
 
 ## Execution environment and resources
