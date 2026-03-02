@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Added a guide for building the reference genome database directory (`--database_dir`).
 - Added a `force_cell` workflow for updating results based on previous outputs.
-
+- Added validation for `sample_id` and `outdir` to ensure they contain no whitespace, or to normalize whitespace to underscores.
 ### Changed
 - Optimized MCDS generation by splitting into smaller tasks and merging results.
 - Updated repository layout documentation to match the current DSL2 structure.

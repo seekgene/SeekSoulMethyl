@@ -102,7 +102,7 @@ def main(
     else:
         n_cores = core
     if n_cores <= 0:
-        ncores = 1
+        n_cores = 1
     # bam list
     bams = [f for f in os.listdir(indir) if f.endswith('.bam')]
     if filtered_barcode:

@@ -201,9 +201,9 @@ process SEEKSOULTOOLS_RNA {
         --include-introns \
         --gtf ${params.gtf} \
         --genomeDir ${params.genomeDir}
-    rm -rf ${sample}/Analysis/.test
-    rm -rf ${sample}/Analysis/step2/STAR/*__STARtmp
-    mv ${sample}/Analysis/${sample}_summary.json ${sample}/Analysis/${sample}_gex_summary.json
+    rm -rf "${sample}/Analysis/.test"
+    rm -rf "${sample}/Analysis/step2/STAR/"*__STARtmp
+    mv "${sample}/Analysis/${sample}_summary.json" "${sample}/Analysis/${sample}_gex_summary.json"
 
     """
 }
@@ -248,7 +248,7 @@ process METHYLATION_BARCODE_EXTRACTION {
         --filter_ch ${params.filter_ch} \
         --split_fastq ${params.split_fastq}
     mv "${sample}_summary.json" "${sample}_methy_summary.json"
-    if [[ ${params.split_fastq} > 0 ]]; then
+    if [[ ${params.split_fastq} -gt 0 ]]; then
         rm step1/${sample}_forward_1.fq.gz 
         rm step1/${sample}_forward_2.fq.gz 
         rm step1/${sample}_reverse_1.fq.gz 

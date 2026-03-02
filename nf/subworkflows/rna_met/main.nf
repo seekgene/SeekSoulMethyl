@@ -11,6 +11,21 @@ nextflow.enable.dsl=2
 
 params.samplesheet = params.samplesheet ?: null
 params.outdir = params.outdir ?: "./results"
+
+def sanitizeSpaces(v) {
+    if (v == null) return null
+    return v.toString().replaceAll(/\s+/, '_')
+}
+
+def __outdir_raw = params.outdir?.toString()
+if (__outdir_raw != null && (__outdir_raw =~ /\s/)) {
+    def __outdir_new = sanitizeSpaces(__outdir_raw)
+    log.warn "outdir contains whitespace; replaced with '_' : '${__outdir_raw}' -> '${__outdir_new}'"
+    params.outdir = __outdir_new
+}
+if (params.outdir?.toString() =~ /\s/) {
+    error "Error: outdir still contains whitespace after normalization: '${params.outdir}'"
+}
     
 // Database file paths
 params.database_dir = params.database_dir ?: ""
@@ -138,7 +153,19 @@ def create_input_channel() {
             .splitCsv(header: true)
             .map { row ->
                 // Parse each row data, collect all file paths
-                def sample_id = row.sample_id
+                def __sample_raw = row.sample_id
+                def sample_id = __sample_raw == null ? '' : __sample_raw.toString().trim()
+                if (sample_id == '') {
+                    error "Error: samplesheet contains empty sample_id"
+                }
+                def __sample_new = sanitizeSpaces(sample_id)
+                if (__sample_new != sample_id) {
+                    log.warn "samplesheet sample_id contains whitespace; replaced with '_' : '${sample_id}' -> '${__sample_new}'"
+                    sample_id = __sample_new
+                }
+                if (sample_id =~ /\s/) {
+                    error "Error: sample_id still contains whitespace after normalization: '${sample_id}'"
+                }
                 def row_files = [:]
                 
                 // Collect all non-empty file paths
@@ -213,6 +240,10 @@ workflow MAIN {
     if (params.help) {
         helpMessage()
         exit 0
+    }
+    def __workdir_raw = workflow.workDir?.toString()
+    if (__workdir_raw != null && (__workdir_raw =~ /\s/)) {
+        error "Error: work directory contains whitespace: '${__workdir_raw}'. Use --workdir (auto '_' normalization) or -w with no spaces."
     }
     if (!params.samplesheet) {
         error "Error: --samplesheet parameter must be provided"
