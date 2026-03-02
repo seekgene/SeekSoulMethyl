@@ -94,7 +94,7 @@ process MERGE_BISMARK_BAM {
 // run allcools bam-to-allc
 process ALLCOOLS_BAM_TO_ALLC {
     tag "$sample-ALLCOOLS_BAM_TO_ALLC"
-    publishDir "${params.outdir}/${sample}/${sample}_methy/step3/allcools/"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step3/allcools/", enabled: !params.force_cell_number
     resourceLabels label: "ALLCOOLS_BAM_TO_ALLC_${params.project}_${sample}"
     
     input:
@@ -165,6 +165,12 @@ process ALLCOOLS_GENERATE_DATASETS {
         barcode=\${tmp##*/}
         echo "\${barcode}\t\${id}"
     done > allc_file_path.txt
+
+    if [ ! -s allc_file_path.txt ]; then
+        exit 1
+    fi
+
+    n_lines=\$(wc -l < allc_file_path.txt | awk '{print \$1}')
     
     # Generate regions and quantifiers parameters dynamically
     REGIONS_PARAMS=""
@@ -188,15 +194,126 @@ process ALLCOOLS_GENERATE_DATASETS {
         QUANTIFIERS_PARAMS="\$QUANTIFIERS_PARAMS --quantifiers \$region count CGN --quantifiers \$region hypo-score CGN cutoff=0.9"
     done
     
-    # Run allcools generate-datasets with dynamic parameters
-    allcools generate-dataset \
-        --allc_table allc_file_path.txt \
-        --output_path ./${sample}.mcds \
-        --chrom_size_path ${params.chrom_size_path} \
-        --obs_dim cell \
-        --cpu ${cores} \
-        \$REGIONS_PARAMS \
-        \$QUANTIFIERS_PARAMS
+    if [[ "\$n_lines" -eq 1 ]]; then
+        real_bc=\$(cut -f1 allc_file_path.txt | head -n 1)
+        echo "\$real_bc" > keep_barcodes.txt
+        awk -F \$'\\t' 'NR==1{print \$1\"__DUMMY\\t\"\$2}' allc_file_path.txt > allc_file_path.dummy.txt
+        cat allc_file_path.dummy.txt >> allc_file_path.txt
+
+        tmp_out="./${sample}.mcds.__tmp"
+        allcools generate-dataset \
+            --allc_table allc_file_path.txt \
+            --output_path "\$tmp_out" \
+            --chrom_size_path ${params.chrom_size_path} \
+            --obs_dim cell \
+            --cpu ${cores} \
+            \$REGIONS_PARAMS \
+            \$QUANTIFIERS_PARAMS
+        step3_mcds_manager.py subset --input_path "\$tmp_out" --barcode_path keep_barcodes.txt --output_path ./${sample}.mcds --mode stream
+        rm -rf "\$tmp_out"
+    else
+        allcools generate-dataset \
+            --allc_table allc_file_path.txt \
+            --output_path ./${sample}.mcds \
+            --chrom_size_path ${params.chrom_size_path} \
+            --obs_dim cell \
+            --cpu ${cores} \
+            \$REGIONS_PARAMS \
+            \$QUANTIFIERS_PARAMS
+    fi
+    """
+}
+
+process ALLCOOLS_GENERATE_DATASETS_PART {
+    tag "$sample-ALLCOOLS_GENERATE_DATASETS_PART"
+    resourceLabels label: "ALLCOOLS_GENERATE_DATASETS_PART_${params.project}_${sample}"
+    
+    input:
+    tuple val(sample), val(pair_id), path(allcools_allc_output), path(gene_bed)
+    
+    output:
+    tuple val(sample), val(pair_id), path("${sample}_${pair_id}.mcds"), optional: true, emit: allcools_generate_datasets_part
+    
+    script:
+    def cores = Math.max(1, task.cpus - 2)
+    """
+    set -e  
+    find -L . -name "*_allc.gz" | sort | while read id; do
+        tmp=\${id%%_allc.gz}
+        barcode=\${tmp##*/}
+        echo "\${barcode}\t\${id}"
+    done > allc_file_path.txt
+    
+    if [ ! -s allc_file_path.txt ]; then
+        exit 0
+    fi
+
+    n_lines=\$(wc -l < allc_file_path.txt | awk '{print \$1}')
+    
+    REGIONS_PARAMS=""
+    QUANTIFIERS_PARAMS=""
+    
+    declare -A BINS_SIZES=(
+        ["chrom1M"]=1000000
+        ["chrom500k"]=500000
+        ["chrom100k"]=100000
+        ["chrom50k"]=50000
+        ["chrom20k"]=20000
+        ["chrom10k"]=10000
+        ["geneslop2k"]=${gene_bed}
+    )
+    
+    for region in "\${!BINS_SIZES[@]}"; do
+        size=\${BINS_SIZES[\$region]}
+        REGIONS_PARAMS="\$REGIONS_PARAMS --regions \$region \$size"
+        QUANTIFIERS_PARAMS="\$QUANTIFIERS_PARAMS --quantifiers \$region count CGN --quantifiers \$region hypo-score CGN cutoff=0.9"
+    done
+    
+    if [[ "\$n_lines" -eq 1 ]]; then
+        real_bc=\$(cut -f1 allc_file_path.txt | head -n 1)
+        echo "\$real_bc" > keep_barcodes.txt
+        awk -F \$'\\t' 'NR==1{print \$1\"__DUMMY\\t\"\$2}' allc_file_path.txt > allc_file_path.dummy.txt
+        cat allc_file_path.dummy.txt >> allc_file_path.txt
+
+        tmp_out="./${sample}_${pair_id}.mcds.__tmp"
+        allcools generate-dataset \
+            --allc_table allc_file_path.txt \
+            --output_path "\$tmp_out" \
+            --chrom_size_path ${params.chrom_size_path} \
+            --obs_dim cell \
+            --cpu ${cores} \
+            \$REGIONS_PARAMS \
+            \$QUANTIFIERS_PARAMS
+        step3_mcds_manager.py subset --input_path "\$tmp_out" --barcode_path keep_barcodes.txt --output_path ./${sample}_${pair_id}.mcds --mode stream
+        rm -rf "\$tmp_out"
+    else
+        allcools generate-dataset \
+            --allc_table allc_file_path.txt \
+            --output_path ./${sample}_${pair_id}.mcds \
+            --chrom_size_path ${params.chrom_size_path} \
+            --obs_dim cell \
+            --cpu ${cores} \
+            \$REGIONS_PARAMS \
+            \$QUANTIFIERS_PARAMS
+    fi
+    """
+}
+
+process MERGE_MCDS {
+    tag "$sample-MERGE_MCDS"
+    publishDir "${params.outdir}/${sample}/${sample}_methy/step3/allcools_generate_datasets/"
+    resourceLabels label: "MERGE_MCDS_${params.project}_${sample}"
+    
+    input:
+    tuple val(sample), path(mcds_parts)
+    
+    output:
+    tuple val(sample), path("${sample}.mcds"), emit: allcools_generate_datasets
+    
+    script:
+    """
+    set -e
+    step3_mcds_manager.py merge ${mcds_parts} --output_path ${sample}.mcds --merge_mode stream
     """
 }
 
@@ -215,7 +332,8 @@ process ALLCOOLS_SUBMERGE {
     def cores = Math.max(1, task.cpus - 2)
     """
     set -e     
-    find ./*/ -name "*_allc.gz" > merge_list.txt
+    shopt -s nullglob
+    find -L ./*/ -name "*_allc.gz" > merge_list.txt || true
     mkdir -p ${sample}_${pair_id}
     n_lines=`wc -l merge_list.txt | awk '{print \$1}'`
     if [[ \$n_lines -gt 1 ]]; then
@@ -225,9 +343,13 @@ process ALLCOOLS_SUBMERGE {
         --output_path ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz \
         --chrom_size_path ${params.chrom_size_path}
     elif [[ \$n_lines -eq 1 ]]; then
-        source_file=`ls */*_allc.gz`
+        source_file=`head -n 1 merge_list.txt`
         cp \${source_file} ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz
-        cp \${source_file}.tbi ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz.tbi
+        if [ -f "\${source_file}.tbi" ]; then
+          cp \${source_file}.tbi ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz.tbi
+        else
+          touch ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz.tbi
+        fi
     else
         touch ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz
         touch ${sample}_${pair_id}/${sample}_${pair_id}_merge_allc.gz.tbi
