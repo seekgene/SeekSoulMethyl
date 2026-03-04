@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] 2026-02-26
+### Added
+- Added a guide for building the reference genome database directory (`--database_dir`).
+- Added a `force_cell` workflow for updating results based on previous outputs.
+- Added validation for `sample_id` and `outdir` to ensure they contain no whitespace, or to normalize whitespace to underscores.
+### Changed
+- Optimized MCDS generation by splitting into smaller tasks and merging results.
+- Updated repository layout documentation to match the current DSL2 structure.
+
 ## [1.0.7] 2026-01-23
 ### Fixed
 - Fixed a bug in the `step3` module where the `allc_file_path.txt` file was not being generated correctly.
@@ -46,4 +55,3 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Initial release of the SeekSoulMethyl pipeline for single-cell transcriptome and methylation dual-omics analysis.
-

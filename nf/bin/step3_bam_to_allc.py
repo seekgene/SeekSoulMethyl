@@ -47,6 +47,11 @@ def run_allcools(args) -> str:
         subprocess.run(samtools_sort_cmd, check=True, shell = True)
         subprocess.run(samtools_index_cmd, check=True, shell = True)
         subprocess.run(bam_to_allc_cmd, check=True, shell = True)
+        # Remove intermediate BAM files
+        if os.path.exists(f'{outdir}/{barcode}_sort.bam'):
+            os.remove(f'{outdir}/{barcode}_sort.bam')
+        if os.path.exists(f'{outdir}/{barcode}_sort.bam.bai'):
+            os.remove(f'{outdir}/{barcode}_sort.bam.bai')
         return f'{barcode} done'
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed processing {barcode}: {e}")
@@ -97,7 +102,7 @@ def main(
     else:
         n_cores = core
     if n_cores <= 0:
-        ncores = 1
+        n_cores = 1
     # bam list
     bams = [f for f in os.listdir(indir) if f.endswith('.bam')]
     if filtered_barcode:

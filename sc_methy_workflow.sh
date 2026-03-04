@@ -633,6 +633,10 @@ if [ "$allc_count" -eq 0 ]; then
     exit 1
 fi
 
+# Generate geneslop2k bed file
+python ${script_path}/gtf_to_gene_bed.py --gtf ${gtf} --out ${methy_dir}/genes.bed
+bedtools slop -b 2000 -i ${methy_dir}/genes.bed -g ${chrom_size_path} > ${methy_dir}/geneslop2k.bed
+
 # Generate ALLCools datasets with multiple bin sizes
 log_info "Running allcools generate-dataset..."
 allcools generate-dataset \
@@ -647,6 +651,7 @@ allcools generate-dataset \
 	--regions chrom50k 50000 \
 	--regions chrom20k 20000 \
 	--regions chrom10k 10000 \
+    --regions geneslop2k ${methy_dir}/geneslop2k.bed \
 	--quantifiers chrom1M count CGN \
 	--quantifiers chrom1M hypo-score CGN cutoff=0.9 \
 	--quantifiers chrom500k count CGN \
@@ -658,7 +663,9 @@ allcools generate-dataset \
 	--quantifiers chrom20k count CGN \
 	--quantifiers chrom20k hypo-score CGN cutoff=0.9 \
 	--quantifiers chrom10k count CGN \
-	--quantifiers chrom10k hypo-score CGN cutoff=0.9
+	--quantifiers chrom10k hypo-score CGN cutoff=0.9 \
+    --quantifiers geneslop2k count CGN \
+    --quantifiers geneslop2k hypo-score CGN cutoff=0.9 
 log_info "ALLCools datasets generation completed"
 
 ########################## Step 3.8: Merge single-cell allc to bulk allc ##########################
