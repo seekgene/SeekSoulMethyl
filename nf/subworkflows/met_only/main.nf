@@ -425,10 +425,15 @@ workflow METHY_ONLY {
         sc_bismark_merge_bam.sc_merged_bam_dir
         .combine(sc_bismark_merge_bam.merged_filtered_barcode, by: [0,1]))
 
+    pair_counts_effective = sc_bismark_merge_bam.sc_merged_bam_dir
+        .map { sample_id, pair_id, bam_dir -> tuple(sample_id, pair_id) }
+        .groupTuple(by: 0)
+        .map { sample_id, pair_ids -> tuple(sample_id, pair_ids.size()) }
+
     // Merge filtered barcode reads counts 
     merged_counts = MERGE_FILTERED_BARCODE_READS_COUNTS(
     sc_bismark_merge_bam.merged_filtered_barcode
-    .combine(pair_counts_per_sample, by: 0)
+    .combine(pair_counts_effective, by: 0)
     .map { sample_id, pair_id, barcode_data, pair_count -> 
         tuple(groupKey(sample_id, pair_count), barcode_data)
     }
@@ -438,7 +443,7 @@ workflow METHY_ONLY {
     }
     .combine(
         sc_bismark_merge_bam.merged_filtered_barcode_reads_counts
-        .combine(pair_counts_per_sample, by: 0)
+        .combine(pair_counts_effective, by: 0)
         .map { sample_id, pair_id, reads_data, pair_count -> 
             tuple(groupKey(sample_id, pair_count), reads_data)
         }
@@ -449,7 +454,7 @@ workflow METHY_ONLY {
     by: 0)
     .combine(
         allc_generated.allcools_allc_output
-        .combine(pair_counts_per_sample, by: 0)
+        .combine(pair_counts_effective, by: 0)
         .map { sample_id, pair_id, allc_data, pair_count -> 
             tuple(groupKey(sample_id, pair_count), allc_data)
         }
@@ -463,7 +468,7 @@ workflow METHY_ONLY {
     // Run allcools generate datasets
     allcools_datasets = ALLCOOLS_GENERATE_DATASETS(
         allc_generated.allcools_allc_output
-        .combine(pair_counts_per_sample, by: 0)
+        .combine(pair_counts_effective, by: 0)
         .map { sample_id, pair_id, allc_data, pair_count -> 
             tuple(groupKey(sample_id, pair_count), allc_data)
         }
@@ -481,7 +486,7 @@ workflow METHY_ONLY {
         // Run allcools merge datasets
         allcools_merged = ALLCOOLS_MERGE(
             allc_submerge.allcools_submerge_allc
-            .combine(pair_counts_per_sample, by: 0)
+            .combine(pair_counts_effective, by: 0)
             .map { sample_id, pair_id, allc_data , pair_count -> 
                 // pass only the gz file paths as a collected list per sample
                 tuple(groupKey(sample_id, pair_count), allc_data)
@@ -494,7 +499,7 @@ workflow METHY_ONLY {
     }else{
         allcools_merged = ALLCOOLS_MERGE(
             allc_generated.allcools_allc_output
-            .combine(pair_counts_per_sample, by: 0)
+            .combine(pair_counts_effective, by: 0)
             .map { sample_id, pair_id, allc_data, pair_count -> 
                 // pass only the gz file paths as a collected list per sample
                 tuple(groupKey(sample_id, pair_count), allc_data)
@@ -511,7 +516,7 @@ workflow METHY_ONLY {
     // Generate methylation summary report
     methylation_summary = METHYLATION_SUMMARY(
         bismark_aligned_forward.bismark_forward_report
-        .combine(pair_counts_per_sample, by: 0)
+        .combine(pair_counts_effective, by: 0)
         .map { sample_id, pair_id, report_data, pair_count -> 
             tuple(groupKey(sample_id, pair_count), report_data)
         }
@@ -521,7 +526,7 @@ workflow METHY_ONLY {
         }
         .combine(
         bismark_aligned_reverse.bismark_reverse_report
-        .combine(pair_counts_per_sample, by: 0)
+        .combine(pair_counts_effective, by: 0)
         .map { sample_id, pair_id, report_data, pair_count -> 
             tuple(groupKey(sample_id, pair_count), report_data)
         }

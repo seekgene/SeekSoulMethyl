@@ -312,32 +312,14 @@ If you use `sc_methy_workflow.sh`, the system requirements are as follows:
 - **Storage**: At least 500GB available space
 - **OS**: Linux (recommended Ubuntu 18.04+ or CentOS 7+)
 
-## Quick Start with Nextflow (Recommended)
+## Running with Nextflow (Recommended)
 
 If you want to process samples in batch and get pipeline-level reports, use Nextflow:
 
-```bash
-conda activate seeksoulmethyl
-conda install -n seeksoulmethyl -c bioconda nextflow
-
-# Prepare the sample sheet (see example above)
-nextflow run SeekSoulMethyl/nf/main.nf \
-  --outdir /path/to/results \
-  --samplesheet samplelist.csv \
-  -w /path/to/work \
-  -c SeekSoulMethyl/nf/nextflow.config \
-  -profile aliyun_k8s \
-  --database_dir /path/to/reference \
-  --split_fastq 4 \
-  --filter_ch 2 \
-  --chemistry DD-MET3 > methy.log
-```
 <figure style="text-align: center;">
 <img src="./docs/images/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl Pipeline" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 6. SeekSoulMethyl nextflow pipeline workflow</figcaption>
 </figure>
-
-## Running with Nextflow
 
 1. Install nextflow:
 ```bash

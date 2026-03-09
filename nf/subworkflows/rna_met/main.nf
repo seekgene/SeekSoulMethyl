@@ -430,10 +430,15 @@ workflow MAIN {
         sc_bismark_merge_bam.sc_merged_bam_dir
         .combine(sc_bismark_merge_bam.merged_filtered_barcode, by: [0,1]))
 
+    pair_counts_effective = sc_bismark_merge_bam.sc_merged_bam_dir
+        .map { sample_id, pair_id, bam_dir -> tuple(sample_id, pair_id) }
+        .groupTuple(by: 0)
+        .map { sample_id, pair_ids -> tuple(sample_id, pair_ids.size()) }
+
     // Merge filtered barcode reads counts 
     merged_counts = MERGE_FILTERED_BARCODE_READS_COUNTS(
     sc_bismark_merge_bam.merged_filtered_barcode
-    .combine(pair_counts_per_sample, by: 0)
+    .combine(pair_counts_effective, by: 0)
     .map { sample_id, pair_id, barcode_data, pair_count -> 
         tuple(groupKey(sample_id, pair_count), barcode_data)
     }
@@ -443,7 +448,7 @@ workflow MAIN {
     }
     .combine(
         sc_bismark_merge_bam.merged_filtered_barcode_reads_counts
-        .combine(pair_counts_per_sample, by: 0)
+        .combine(pair_counts_effective, by: 0)
         .map { sample_id, pair_id, reads_data, pair_count -> 
             tuple(groupKey(sample_id, pair_count), reads_data)
         }
@@ -454,7 +459,7 @@ workflow MAIN {
     by: 0)
     .combine(
         allc_generated.allcools_allc_output
-        .combine(pair_counts_per_sample, by: 0)
+        .combine(pair_counts_effective, by: 0)
         .map { sample_id, pair_id, allc_data, pair_count -> 
             tuple(groupKey(sample_id, pair_count), allc_data)
         }
@@ -468,7 +473,7 @@ workflow MAIN {
     if (params.split_fastq && params.split_fastq.toInteger() > 0) {
         allcools_datasets_part = ALLCOOLS_GENERATE_DATASETS_PART(
             allc_generated.allcools_allc_output
-                .combine(pair_counts_per_sample, by: 0)
+                .combine(pair_counts_effective, by: 0)
                 .map { sample_id, pair_id, allc_data, pair_count ->
                     tuple(groupKey(sample_id, pair_count).toString(), pair_id, allc_data)
                 }
@@ -483,7 +488,7 @@ workflow MAIN {
     } else {
         allcools_datasets_input = allc_generated.allcools_allc_output
             .combine(sc_bismark_merge_bam.merged_filtered_barcode, by: [0,1])
-            .combine(pair_counts_per_sample, by: 0)
+            .combine(pair_counts_effective, by: 0)
             .map { sample_id, pair_id, allc_data, filtered_barcode, pair_count ->
                 tuple(groupKey(sample_id, pair_count), allc_data, filtered_barcode)
             }
@@ -502,7 +507,7 @@ workflow MAIN {
         // Run allcools merge datasets
         allcools_merged = ALLCOOLS_MERGE(
             allc_submerge.allcools_submerge_allc
-            .combine(pair_counts_per_sample, by: 0)
+            .combine(pair_counts_effective, by: 0)
             .map { sample_id, pair_id, allc_data , pair_count -> 
                 // pass only the gz file paths as a collected list per sample
                 tuple(groupKey(sample_id, pair_count), allc_data)
@@ -515,7 +520,7 @@ workflow MAIN {
     }else{
         allcools_merged = ALLCOOLS_MERGE(
             allc_generated.allcools_allc_output
-            .combine(pair_counts_per_sample, by: 0)
+            .combine(pair_counts_effective, by: 0)
             .map { sample_id, pair_id, allc_data, pair_count -> 
                 // pass only the gz file paths as a collected list per sample
                 tuple(groupKey(sample_id, pair_count), allc_data)
@@ -532,7 +537,7 @@ workflow MAIN {
     // Generate methylation summary report
     methylation_summary = METHYLATION_SUMMARY(
         bismark_aligned_forward.bismark_forward_report
-        .combine(pair_counts_per_sample, by: 0)
+        .combine(pair_counts_effective, by: 0)
         .map { sample_id, pair_id, report_data, pair_count -> 
             tuple(groupKey(sample_id, pair_count), report_data)
         }
@@ -542,7 +547,7 @@ workflow MAIN {
         }
         .combine(
         bismark_aligned_reverse.bismark_reverse_report
-        .combine(pair_counts_per_sample, by: 0)
+        .combine(pair_counts_effective, by: 0)
         .map { sample_id, pair_id, report_data, pair_count -> 
             tuple(groupKey(sample_id, pair_count), report_data)
         }

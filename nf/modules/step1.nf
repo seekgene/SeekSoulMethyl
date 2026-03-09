@@ -189,9 +189,9 @@ process SEEKSOULTOOLS_RNA {
         def r2n = r2s[i].toString().tokenize('/')[-1]
         "--fq1 \"${r1n}\" --fq2 \"${r2n}\""
     }.join(' ')
+    def params_multi = params.use_multi == "true" ? "--use_multi" : "--skip_multi"
     """
     set -e
-    
     seeksoultools rna run \
         --samplename ${sample} \
         ${fq_args} \
@@ -200,7 +200,7 @@ process SEEKSOULTOOLS_RNA {
         --chemistry ${params.exp_chemistry} \
         --include-introns \
         --gtf ${params.gtf} \
-        --genomeDir ${params.genomeDir}
+        --genomeDir ${params.genomeDir} ${params_multi}
     rm -rf "${sample}/Analysis/.test"
     rm -rf "${sample}/Analysis/step2/STAR/"*__STARtmp
     mv "${sample}/Analysis/${sample}_summary.json" "${sample}/Analysis/${sample}_gex_summary.json"
@@ -236,6 +236,7 @@ process METHYLATION_BARCODE_EXTRACTION {
         def r2n = mr2s[i].toString().tokenize('/')[-1]
         "--fq1 \"${r1n}\" --fq2 \"${r2n}\""
     }.join(' ')
+    def params_multi = params.use_multi == "true" ? "--use_multi" : "--skip_multi"
     """
     set -e
     barcode_cs_multi.py \
@@ -246,7 +247,7 @@ process METHYLATION_BARCODE_EXTRACTION {
         --core ${cores} \
         --chemistry ${params.chemistry} \
         --filter_ch ${params.filter_ch} \
-        --split_fastq ${params.split_fastq}
+        --split_fastq ${params.split_fastq} ${params_multi}
     mv "${sample}_summary.json" "${sample}_methy_summary.json"
     if [[ ${params.split_fastq} -gt 0 ]]; then
         rm step1/${sample}_forward_1.fq.gz 
