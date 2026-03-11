@@ -414,26 +414,77 @@ workflow MAIN {
     split_bams_f = SPLIT_BAM_FILES_F(sorted_by_name_f.bismark_sortn_bam.combine(rna_results.gex_barcodes,by:0))
     split_bams_r = SPLIT_BAM_FILES_R(sorted_by_name_r.bismark_sortn_bam.combine(rna_results.gex_barcodes,by:0))
     
-        
     // merge single cell forward and reverse bismark bam
-    sc_bismark_merge_bam = MERGE_BISMARK_BAM(split_bams_f.split_bams_dir
-    .combine(split_bams_f.filtered_barcode, by:[0,1])
-    .combine(split_bams_f.filtered_barcode_reads_counts, by:[0,1])
-    .combine(
-        split_bams_r.split_bams_dir
+    // Use join to handle cases where forward/reverse pairs may not match
+    // This allows samples to process independently without waiting for each other
+    forward_data = split_bams_f.split_bams_dir
+        .combine(split_bams_f.filtered_barcode, by:[0,1])
+        .combine(split_bams_f.filtered_barcode_reads_counts, by:[0,1])
+        .map { sample, pair_id, bam_dir, barcode, reads_counts ->
+            tuple(sample, pair_id, bam_dir, barcode, reads_counts)
+        }
+    
+    reverse_data = split_bams_r.split_bams_dir
         .combine(split_bams_r.filtered_barcode, by:[0,1])
-        .combine(split_bams_r.filtered_barcode_reads_counts, by:[0,1]), 
-        by: [0,1]))
+        .combine(split_bams_r.filtered_barcode_reads_counts, by:[0,1])
+        .map { sample, pair_id, bam_dir, barcode, reads_counts ->
+            tuple(sample, pair_id, bam_dir, barcode, reads_counts)
+        }
+    
+    // Join forward and reverse data by sample and pair_id, allowing for missing pairs
+    // Use outer join to ensure all pairs are processed even if one direction is missing
+    empty_bam_dir = file("${projectDir}/assets/empty_split_bams_dir")
+    empty_barcode = file("${projectDir}/assets/empty_filtered_barcode")
+    empty_reads_counts = file("${projectDir}/assets/empty_filtered_barcode_reads_counts.csv")
+    combined_data = forward_data
+        .join(reverse_data, by: [0,1], remainder: true)
+        .map { it ->
+            def sample = it[0]
+            def pair_id = it[1]
+
+            def f_bam_dir = null
+            def f_barcode = null
+            def f_reads_counts = null
+            def r_bam_dir = null
+            def r_barcode = null
+            def r_reads_counts = null
+
+            if (it.size() == 8) {
+                f_bam_dir = it[2]; f_barcode = it[3]; f_reads_counts = it[4]
+                r_bam_dir = it[5]; r_barcode = it[6]; r_reads_counts = it[7]
+            } else if (it.size() == 6) {
+                if (it[2] == null) {
+                    r_bam_dir = it[3]; r_barcode = it[4]; r_reads_counts = it[5]
+                } else if (it[5] == null) {
+                    f_bam_dir = it[2]; f_barcode = it[3]; f_reads_counts = it[4]
+                } else if (it[5] instanceof List && it[5].size() >= 3) {
+                    f_bam_dir = it[2]; f_barcode = it[3]; f_reads_counts = it[4]
+                    r_bam_dir = it[5][0]; r_barcode = it[5][1]; r_reads_counts = it[5][2]
+                } else {
+                    throw new IllegalStateException("Unexpected join tuple shape: ${it}")
+                }
+            } else {
+                throw new IllegalStateException("Unexpected join tuple size=${it.size()} value=${it}")
+            }
+
+            tuple(sample, pair_id,
+                f_bam_dir ?: empty_bam_dir, f_barcode ?: empty_barcode, f_reads_counts ?: empty_reads_counts,
+                r_bam_dir ?: empty_bam_dir, r_barcode ?: empty_barcode, r_reads_counts ?: empty_reads_counts)
+        }
+    
+    sc_bismark_merge_bam = MERGE_BISMARK_BAM(combined_data)
     
     // Run allcools bam-to-allc - requires multiple inputs
     allc_generated = ALLCOOLS_BAM_TO_ALLC(
         sc_bismark_merge_bam.sc_merged_bam_dir
         .combine(sc_bismark_merge_bam.merged_filtered_barcode, by: [0,1]))
-
+    /*
     pair_counts_effective = sc_bismark_merge_bam.sc_merged_bam_dir
         .map { sample_id, pair_id, bam_dir -> tuple(sample_id, pair_id) }
         .groupTuple(by: 0)
         .map { sample_id, pair_ids -> tuple(sample_id, pair_ids.size()) }
+    */
+    pair_counts_effective = pair_counts_per_sample
 
     // Merge filtered barcode reads counts 
     merged_counts = MERGE_FILTERED_BARCODE_READS_COUNTS(
@@ -535,26 +586,50 @@ workflow MAIN {
     // Run allcools extract datasets
     allcools_extracted = ALLCOOLS_EXTRACT(allcools_merged.allcools_merge_allc)
     // Generate methylation summary report
+    empty_bismark_report = file("${projectDir}/assets/empty_bismark_report.txt")
+    
+    joined_bismark_reports = bismark_aligned_forward.bismark_forward_report
+        .join(bismark_aligned_reverse.bismark_reverse_report, by: [0,1], remainder: true)
+        .map { it ->
+            def sample_id = it[0]
+            def pair_id = it[1]
+            def forward_report = null
+            def reverse_report = null
+            if (it.size() == 4) {
+                forward_report = it[2]
+                reverse_report = it[3]
+            } else if (it.size() == 3 && it[2] instanceof List && it[2].size() >= 2) {
+                forward_report = it[2][0]
+                reverse_report = it[2][1]
+            } else {
+                throw new IllegalStateException("Unexpected join tuple shape: ${it}")
+            }
+            tuple(sample_id, pair_id, forward_report ?: empty_bismark_report, reverse_report ?: empty_bismark_report)
+        }
+    
+    forward_reports_grouped = joined_bismark_reports
+        .combine(pair_counts_effective, by: 0)
+        .map { sample_id, pair_id, forward_report, reverse_report, pair_count ->
+            tuple(groupKey(sample_id, pair_count), forward_report)
+        }
+        .groupTuple()
+        .map { group_key, report_list ->
+            tuple(group_key.toString(), report_list)
+        }
+    
+    reverse_reports_grouped = joined_bismark_reports
+        .combine(pair_counts_effective, by: 0)
+        .map { sample_id, pair_id, forward_report, reverse_report, pair_count ->
+            tuple(groupKey(sample_id, pair_count), reverse_report)
+        }
+        .groupTuple()
+        .map { group_key, report_list ->
+            tuple(group_key.toString(), report_list)
+        }
+    
     methylation_summary = METHYLATION_SUMMARY(
-        bismark_aligned_forward.bismark_forward_report
-        .combine(pair_counts_effective, by: 0)
-        .map { sample_id, pair_id, report_data, pair_count -> 
-            tuple(groupKey(sample_id, pair_count), report_data)
-        }
-        .groupTuple()
-        .map { group_key, report_list -> 
-            tuple(group_key.toString(), report_list)
-        }
-        .combine(
-        bismark_aligned_reverse.bismark_reverse_report
-        .combine(pair_counts_effective, by: 0)
-        .map { sample_id, pair_id, report_data, pair_count -> 
-            tuple(groupKey(sample_id, pair_count), report_data)
-        }
-        .groupTuple()
-        .map { group_key, report_list -> 
-            tuple(group_key.toString(), report_list)
-        }, by: 0)
+        forward_reports_grouped
+        .combine(reverse_reports_grouped, by: 0)
         .combine(merged_counts.allcools_cells_csv_output, by: 0)
         .combine(merged_counts.merged_filtered_barcode_reads_counts, by: 0)
         .combine(methy_barcode.methy_barcode_output.map {it -> tuple(it[0], it.last())}, by: 0)

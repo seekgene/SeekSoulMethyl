@@ -1,6 +1,6 @@
 // split bams
 process SPLIT_BAM_FILES {
-    tag "$sample-SPLIT_BAM_FILES"
+    tag "$sample-$pair_id-SPLIT_BAM_FILES"
     resourceLabels label: "SPLIT_BAM_FILES_${params.project}_${sample}"
     
     input:
@@ -26,27 +26,42 @@ process SPLIT_BAM_FILES {
 }
 // merge single cell forward and reverse bam
 process MERGE_BISMARK_BAM {
-    tag "$sample-BISMARK_ALIGNMENT_MERGE"
+    tag "$sample-$pair_id-BISMARK_ALIGNMENT_MERGE"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step3/split_bams/merged/"
     resourceLabels label: "MERGE_BISMARK_BAM_${params.project}_${sample}"
 
     input:
-    tuple val(sample), val(pair_id), path(forward_split_bams_dir), path(forward_filtered_barcodes), path(forward_filtered_barcode_reads_counts), path(reverse_split_bams_dir), path(reverse_filtered_barcodes), path(reverse_filtered_barcode_reads_counts)
+    tuple val(sample), val(pair_id),
+        path(forward_split_bams_dir),
+        path(forward_filtered_barcodes),
+        path(forward_filtered_barcode_reads_counts),
+        path(reverse_split_bams_dir),
+        path(reverse_filtered_barcodes),
+        path(reverse_filtered_barcode_reads_counts)
 
     output:
-    tuple val(sample),val(pair_id), path("${forward_split_bams_dir.baseName}_merge_filtered_barcode"), emit: merged_filtered_barcode
-    tuple val(sample), val(pair_id), path("${forward_split_bams_dir.baseName}_merge_filtered_barcode_reads_counts.csv"), emit: merged_filtered_barcode_reads_counts
-    tuple val(sample), val(pair_id), path("${forward_split_bams_dir.baseName}_merged_fr_bam"), emit: sc_merged_bam_dir
+    tuple val(sample),val(pair_id), path("${(forward_split_bams_dir.baseName == 'empty_split_bams_dir' ? reverse_split_bams_dir.baseName : forward_split_bams_dir.baseName)}_merge_filtered_barcode"), emit: merged_filtered_barcode
+    tuple val(sample), val(pair_id), path("${(forward_split_bams_dir.baseName == 'empty_split_bams_dir' ? reverse_split_bams_dir.baseName : forward_split_bams_dir.baseName)}_merge_filtered_barcode_reads_counts.csv"), emit: merged_filtered_barcode_reads_counts
+    tuple val(sample), val(pair_id), path("${(forward_split_bams_dir.baseName == 'empty_split_bams_dir' ? reverse_split_bams_dir.baseName : forward_split_bams_dir.baseName)}_merged_fr_bam"), emit: sc_merged_bam_dir
     
     script:
+    def prefix = (forward_split_bams_dir.baseName == 'empty_split_bams_dir' ? reverse_split_bams_dir.baseName : forward_split_bams_dir.baseName)
     """
     set -e
-    # Create output directory
-    mkdir -p ${forward_split_bams_dir.baseName}_merged_fr_bam
+    shopt -s nullglob
 
-    # Get all BAM files in the forward directory
-    forward_bams=(\$(find "${forward_split_bams_dir}/" -name "*.bam" | sort))
-    reverse_bams=(\$(find "${reverse_split_bams_dir}/" -name "*.bam" | sort))
+    mkdir -p ${prefix}_merged_fr_bam
+
+    forward_bams=()
+    if [[ -n "${forward_split_bams_dir}" && -d "${forward_split_bams_dir}" ]]; then
+        mapfile -t forward_bams < <(find "${forward_split_bams_dir}/" -name "*.bam" | sort)
+    fi
+
+    reverse_bams=()
+    if [[ -n "${reverse_split_bams_dir}" && -d "${reverse_split_bams_dir}" ]]; then
+        mapfile -t reverse_bams < <(find "${reverse_split_bams_dir}/" -name "*.bam" | sort)
+    fi
+
     declare -A fmap
     declare -A rmap
     for fb in "\${forward_bams[@]}"; do bn=\$(basename "\$fb" .bam); fmap["\$bn"]="\$fb"; done
@@ -57,7 +72,7 @@ process MERGE_BISMARK_BAM {
     for bc in "\${!seen[@]}"; do
         f="\${fmap[\$bc]:-}"
         r="\${rmap[\$bc]:-}"
-        output_bam="${forward_split_bams_dir.baseName}_merged_fr_bam/\${bc}.bam"
+        output_bam="${prefix}_merged_fr_bam/\${bc}.bam"
         if [[ -n "\$f" && -n "\$r" ]]; then
             samtools merge -n -@ ${task.cpus} -o "\$output_bam" "\$f" "\$r"
         elif [[ -n "\$f" ]]; then
@@ -68,24 +83,34 @@ process MERGE_BISMARK_BAM {
     done
     
     echo "Merging and deduplicating barcode files..."
-    cat *_filtered_barcode | sort | uniq > ${forward_split_bams_dir.baseName}_merge_filtered_barcode
+    barcode_files=( *_filtered_barcode )
+    if (( \${#barcode_files[@]} > 0 )); then
+        cat "\${barcode_files[@]}" | sort | uniq > ${prefix}_merge_filtered_barcode
+    else
+        : > ${prefix}_merge_filtered_barcode
+    fi
     
     # Merge all filtered_barcode_reads_counts files and aggregate reads_counts by barcode
     echo "Merging and aggregating reads_counts files..."
     
     # Skip header line, merge all files, group by barcode and sum
-     awk -F ',' '{
-        if (NR==FNR&&FNR==1){print}
-        if (NF >= 2 && FNR!=1 ) {
-            barcode = \$2
-            reads = \$1
-            total[barcode] += reads
-        }
-    } END {
-        for (barcode in total) {
-            print total[barcode] "," barcode
-        }
-    }' *_filtered_barcode_reads_counts.csv > ${forward_split_bams_dir.baseName}_merge_filtered_barcode_reads_counts.csv
+    reads_count_files=( *_filtered_barcode_reads_counts.csv )
+    if (( \${#reads_count_files[@]} > 0 )); then
+        awk -F ',' '{
+            if (NR==FNR && FNR==1) { print }
+            if (NF >= 2 && FNR != 1 ) {
+                barcode = \$2
+                reads = \$1
+                total[barcode] += reads
+            }
+        } END {
+            for (barcode in total) {
+                print total[barcode] "," barcode
+            }
+        }' "\${reads_count_files[@]}" > ${prefix}_merge_filtered_barcode_reads_counts.csv
+    else
+        echo "reads_counts,barcode" > ${prefix}_merge_filtered_barcode_reads_counts.csv
+    fi
     
     echo "BAM file merging, reads_counts aggregation completed"
     """
@@ -93,7 +118,7 @@ process MERGE_BISMARK_BAM {
 
 // run allcools bam-to-allc
 process ALLCOOLS_BAM_TO_ALLC {
-    tag "$sample-ALLCOOLS_BAM_TO_ALLC"
+    tag "$sample-$pair_id-ALLCOOLS_BAM_TO_ALLC"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step3/allcools/", enabled: !params.force_cell_number
     resourceLabels label: "ALLCOOLS_BAM_TO_ALLC_${params.project}_${sample}"
     
@@ -225,7 +250,7 @@ process ALLCOOLS_GENERATE_DATASETS {
 }
 
 process ALLCOOLS_GENERATE_DATASETS_PART {
-    tag "$sample-ALLCOOLS_GENERATE_DATASETS_PART"
+    tag "$sample-$pair_id-ALLCOOLS_GENERATE_DATASETS_PART"
     resourceLabels label: "ALLCOOLS_GENERATE_DATASETS_PART_${params.project}_${sample}"
     
     input:
@@ -318,7 +343,7 @@ process MERGE_MCDS {
 }
 
 process ALLCOOLS_SUBMERGE {
-    tag "$sample-ALLCOOLS_SUBMERGE"
+    tag "$sample-$pair_id-ALLCOOLS_SUBMERGE"
     //publishDir "${params.outdir}/${sample}_methy/step3/"
     resourceLabels label: "ALLCOOLS_SUBMERGE_${params.project}_${sample}"
 
