@@ -18,7 +18,7 @@ process METHYLATION_SUMMARY {
     step4_wgs_summary.py \
         --outdir . \
         --samplename ${sample} \
-        --summary_json ${sample}_methy_summary.json \
+        --summary_json ${summary_json} \
         --genome_info_json ${cpg_sites}
     """
 }

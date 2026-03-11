@@ -344,7 +344,7 @@ workflow MAIN {
     //reverse_pairs_raw.view()
     // Process stdout output, convert multi-line strings to individual tuples
     // Calculate pair counts per sample for dynamic size in groupTuple operations
-    pair_counts_per_sample = forward_pairs_raw
+    pair_counts_per_sample_f = forward_pairs_raw
         .map { sample, stdout_content ->
             def count = 0
             stdout_content.split('\n').each { line ->
@@ -358,6 +358,23 @@ workflow MAIN {
             return tuple(sample, count)
         }
     
+    pair_counts_per_sample_r = reverse_pairs_raw
+        .map { sample, stdout_content ->
+            def count = 0
+            stdout_content.split('\n').each { line ->
+                if (line.trim()) {
+                    def parts = line.split(',')
+                    if (parts.size() == 4) {
+                        count++
+                    }
+                }
+            }
+            return tuple(sample, count)
+        }
+    
+    pair_counts_per_sample = if pair_counts_per_sample_f >= pair_counts_per_sample_r?pair_counts_per_sample_f:pair_counts_per_sample_r
+    
+
     forward_pairs = forward_pairs_raw
         .map { sample, stdout_content ->
             def pairs = []
