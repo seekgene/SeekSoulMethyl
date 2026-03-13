@@ -1313,6 +1313,8 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
 
     fqout1 = f"{fqout}_1.fq.gz"
     fqout2 = f"{fqout}_2.fq.gz"
+    fqout_forward = f"{fqout}_forward"
+    fqout_reverse = f"{fqout}_reverse"
     if use_multi:
         # find the multiple barcodes
         logger.info("deal multi start!")
@@ -1321,8 +1323,6 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
         adapter_filter = AdapterFilter(adapter1=adapter1, adapter2=adapter2, non_insert_len=non_insert_len, chemistry=chemistry)
         multi_stat = defaultdict(int)
         # Create output files for both chain directions for multi rescue
-        fqout_forward = f"{fqout}_forward"
-        fqout_reverse = f"{fqout}_reverse"
         
         # If splitting is enabled, need to create dynamic file handles
         if split_fastq > 0:
@@ -1483,8 +1483,10 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
     stat.save(os.path.join(outdir, f"{samplename}_summary.json"))
     logger.info("extract barcode done!")
     # Return all output file paths
-    return (fqout_forward + "_1.fq.gz", fqout_forward + "_2.fq.gz", 
-            fqout_reverse + "_1.fq.gz", fqout_reverse + "_2.fq.gz")
+    if paired_out:
+        return (fqout_forward + "_1.fq.gz", fqout_forward + "_2.fq.gz", 
+                fqout_reverse + "_1.fq.gz", fqout_reverse + "_2.fq.gz")
+    return (fqout_forward + ".fq.gz", fqout_reverse + ".fq.gz")
 
 if __name__ == '__main__':
     barcode_main()

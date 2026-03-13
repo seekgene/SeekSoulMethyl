@@ -1,7 +1,7 @@
 
 // Bismark forward strand alignment
 process BISMARK_ALIGNMENT_FORWARD {
-    tag "$sample-BISMARK_ALIGNMENT_FORWARD"
+    tag "$sample-$pair_id-BISMARK_ALIGNMENT_FORWARD"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step2/bismark"
     resourceLabels label: "BISMARK_ALIGNMENT_FORWARD_${params.project}_${sample}"
     
@@ -61,7 +61,7 @@ process BISMARK_ALIGNMENT_REVERSE {
 
 // BAM file sorting (by read name)
 process SORT_BAM_BY_NAME {
-    tag "$sample-SORT_BAM_BY_NAME"
+    tag "$sample-$pair_id-SORT_BAM_BY_NAME"
     //publishDir "${params.outdir}/${sample}_methy/step2/bismark/"
     resourceLabels label: "SORT_BAM_BY_NAME_${params.project}_${sample}"
     

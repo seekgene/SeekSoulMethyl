@@ -209,17 +209,61 @@ workflow FORCE_CELL {
             }
     )
 
-    add_bismark_merged = MERGE_BISMARK_BAM(
-        split_forward.split_bams_dir
-            .combine(split_forward.filtered_barcode, by: [0, 1])
-            .combine(split_forward.filtered_barcode_reads_counts, by: [0, 1])
-            .combine(split_reverse.split_bams_dir, by: [0, 1])
-            .combine(split_reverse.filtered_barcode, by: [0, 1])
-            .combine(split_reverse.filtered_barcode_reads_counts, by: [0, 1])
-            .map { sample, pair_id, f_split_dir, f_fb, f_rc, r_split_dir, r_fb, r_rc ->
-                tuple(sample, pair_id, f_split_dir, f_fb, f_rc, r_split_dir, r_fb, r_rc)
+    forward_data = split_forward.split_bams_dir
+        .combine(split_forward.filtered_barcode, by: [0, 1])
+        .combine(split_forward.filtered_barcode_reads_counts, by: [0, 1])
+        .map { sample, pair_id, bam_dir, barcode, reads_counts ->
+            tuple(sample, pair_id, bam_dir, barcode, reads_counts)
+        }
+
+    reverse_data = split_reverse.split_bams_dir
+        .combine(split_reverse.filtered_barcode, by: [0, 1])
+        .combine(split_reverse.filtered_barcode_reads_counts, by: [0, 1])
+        .map { sample, pair_id, bam_dir, barcode, reads_counts ->
+            tuple(sample, pair_id, bam_dir, barcode, reads_counts)
+        }
+
+    empty_bam_dir = file("${projectDir}/assets/empty_split_bams_dir")
+    empty_barcode = file("${projectDir}/assets/empty_filtered_barcode")
+    empty_reads_counts = file("${projectDir}/assets/empty_filtered_barcode_reads_counts.csv")
+
+    combined_data = forward_data
+        .join(reverse_data, by: [0, 1], remainder: true)
+        .map { it ->
+            def sample = it[0]
+            def pair_id = it[1]
+
+            def f_bam_dir = null
+            def f_barcode = null
+            def f_reads_counts = null
+            def r_bam_dir = null
+            def r_barcode = null
+            def r_reads_counts = null
+
+            if (it.size() == 8) {
+                f_bam_dir = it[2]; f_barcode = it[3]; f_reads_counts = it[4]
+                r_bam_dir = it[5]; r_barcode = it[6]; r_reads_counts = it[7]
+            } else if (it.size() == 6) {
+                if (it[2] == null) {
+                    r_bam_dir = it[3]; r_barcode = it[4]; r_reads_counts = it[5]
+                } else if (it[5] == null) {
+                    f_bam_dir = it[2]; f_barcode = it[3]; f_reads_counts = it[4]
+                } else if (it[5] instanceof List && it[5].size() >= 3) {
+                    f_bam_dir = it[2]; f_barcode = it[3]; f_reads_counts = it[4]
+                    r_bam_dir = it[5][0]; r_barcode = it[5][1]; r_reads_counts = it[5][2]
+                } else {
+                    throw new IllegalStateException("Unexpected join tuple shape: ${it}")
+                }
+            } else {
+                throw new IllegalStateException("Unexpected join tuple size=${it.size()} value=${it}")
             }
-    )
+
+            tuple(sample, pair_id,
+                f_bam_dir ?: empty_bam_dir, f_barcode ?: empty_barcode, f_reads_counts ?: empty_reads_counts,
+                r_bam_dir ?: empty_bam_dir, r_barcode ?: empty_barcode, r_reads_counts ?: empty_reads_counts)
+        }
+
+    add_bismark_merged = MERGE_BISMARK_BAM(combined_data)
 
     add_allcools = ALLCOOLS_BAM_TO_ALLC(
         add_bismark_merged.sc_merged_bam_dir

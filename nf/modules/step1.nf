@@ -191,7 +191,6 @@ process SEEKSOULTOOLS_RNA {
     }.join(' ')
     """
     set -e
-    
     seeksoultools rna run \
         --samplename ${sample} \
         ${fq_args} \
@@ -341,7 +340,7 @@ process CREATE_FORWARD_PAIRS {
     while IFS=',' read -r r1_file r2_file; do
         if [ -n "\$r1_file" ] && [ -n "\$r2_file" ]; then
             # Extract pair_id from filename (e.g., AA from HC2_4_forward_AA_1.fq.gz)
-            pair_id=\$(echo "\$r1_file" | sed 's/.*_forward\\(.*\\)1\\.fq\\.gz/\\1/')
+            pair_id=\$(echo "\$r1_file" | sed 's/.*_forward_\\(.*\\)1\\.fq\\.gz/\\1/')
             echo "${sample},\${pair_id},\${r1_file},\${r2_file}"
         fi
     done < ${pairs_file}
@@ -366,7 +365,7 @@ process CREATE_REVERSE_PAIRS {
     while IFS=',' read -r r1_file r2_file; do
         if [ -n "\$r1_file" ] && [ -n "\$r2_file" ]; then
             # Extract pair_id from filename (e.g., AA from HC2_4_reverse_AA_1.fq.gz)
-            pair_id=\$(echo "\$r1_file" | sed 's/.*_reverse\\(.*\\)1\\.fq\\.gz/\\1/')
+            pair_id=\$(echo "\$r1_file" | sed 's/.*_reverse_\\(.*\\)1\\.fq\\.gz/\\1/')
             echo -e "${sample},\${pair_id},\${r1_file},\${r2_file}"
         fi
     done < ${pairs_file}
@@ -375,7 +374,7 @@ process CREATE_REVERSE_PAIRS {
 
 // Fastp quality control after methylation barcode extraction
 process FASTP_METHYLATION_BARCODE_EXTRACT {
-    tag "$sample-FASTP_METHYLATION_BARCODE_EXTRACT"
+    tag "$sample-$pair_id-FASTP_METHYLATION_BARCODE_EXTRACT"
     publishDir "${params.outdir}/${sample}/${sample}_methy/step1/"
     resourceLabels label: "FASTP_METHYLATION_BARCODE_EXTRACT_${params.project}_$sample"
    
