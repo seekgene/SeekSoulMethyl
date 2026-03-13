@@ -2,7 +2,7 @@
 
 /*
  * SeekOne DD Single Cell Multiome Methylation + RNA analysis pipeline
- * Version: 2.0.0
+ * Version: 2.1.0
  */
 
 nextflow.enable.dsl=2
@@ -83,7 +83,7 @@ params.help = params.help ?: false
 // Help message
 def helpMessage() {
     log.info"""
-    SeekOne DD Single Cell Multiome Methylation + RNA analysis pipeline - v2.0.0
+    SeekOne DD Single Cell Multiome Methylation + RNA analysis pipeline - 2.1.0
     
     Usage:
     Batch sample analysis:
@@ -371,8 +371,29 @@ workflow MAIN {
             }
             return tuple(sample, count)
         }
-    
-    pair_counts_per_sample = if pair_counts_per_sample_f >= pair_counts_per_sample_r?pair_counts_per_sample_f:pair_counts_per_sample_r
+
+    pair_counts_per_sample = pair_counts_per_sample_f
+        .join(pair_counts_per_sample_r, by: 0, remainder: true)
+        .map { it ->
+            def sample = it[0]
+            def f_count = 0
+            def r_count = 0
+            if (it.size() == 3) {
+                f_count = (it[1] ?: 0) as Integer
+                r_count = (it[2] ?: 0) as Integer
+            } else if (it.size() == 2) {
+                if (it[1] instanceof List && it[1].size() >= 2) {
+                    f_count = ((it[1][0] ?: 0) as Integer)
+                    r_count = ((it[1][1] ?: 0) as Integer)
+                } else {
+                    f_count = (it[1] ?: 0) as Integer
+                    r_count = 0
+                }
+            } else {
+                throw new IllegalStateException("Unexpected join tuple size=${it.size()} value=${it}")
+            }
+            tuple(sample, Math.max(f_count, r_count))
+        }
     
 
     forward_pairs = forward_pairs_raw
