@@ -211,6 +211,7 @@ genomefa=$database_dir/fasta/genome.fa  # Reference genome fasta file
 gtf=$database_dir/genes/genes.gtf       # Gene annotation file
 genomebed=$database_dir/bed/chr_len.bed # Chromosome length file
 chrom_size_path=$database_dir/bed/chr_nochrM.bed  # Chromosome length file without mitochondria
+chrom_size_full_path=$database_dir/bed/chr_len.bed  # Chromosome length file
 bismark_genome=$database_dir/fasta      # bismark genome index directory
 
 # Set barcode whitelist files
@@ -635,7 +636,7 @@ fi
 
 # Generate geneslop2k bed file
 python ${script_path}/gtf_to_gene_bed.py --gtf ${gtf} --out ${methy_dir}/genes.bed
-bedtools slop -b 2000 -i ${methy_dir}/genes.bed -g ${chrom_size_path} > ${methy_dir}/geneslop2k.bed
+bedtools slop -b 2000 -i ${methy_dir}/genes.bed -g ${chrom_size_full_path} > ${methy_dir}/geneslop2k.bed
 
 # Generate ALLCools datasets with multiple bin sizes
 log_info "Running allcools generate-dataset..."
