@@ -573,7 +573,7 @@ nextflow run SeekSoulMethyl/nf/main.nf \
 - The samplesheet header must be `sample_id`
 
 ## Execution environment and resources
-- Recommended container image: `ghcr.io/weiiioyo/seeksoulmethyl_docker` 
+- Recommended container image: `ghcr.io/seekgene/seeksoulmethyl_docker:v1.0.0` 
 - Choose `-profile aliyun_k8s` or `-profile docker`, and edit `nf/nextflow.config` for your infra
 - Heavy steps: Bismark/ALLCools need substantial CPU/RAM; defaults are set in `withName` blocks, scale up if needed 
 
