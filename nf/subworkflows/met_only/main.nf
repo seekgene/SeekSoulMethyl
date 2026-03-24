@@ -2,7 +2,7 @@
 
 /*
  * SeekOne DD Single Cell Methylation analysis pipeline
- * Version: 2.1.0
+ * Version: 2.1.1
  */
 
 nextflow.enable.dsl=2

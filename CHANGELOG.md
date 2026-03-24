@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.1] 2026-03-24
+### Fixed
+- Resolved the input error "* Chromosome chrM doesn't present in the .genome file. *" in sc_methy_workflow.sh.
+
 ## [2.1.0] 2026-03-13
 ### Fixed
 - Fixed an issue where batch FASTQ results were lost when forward and reverse fastq counts were unequal.
