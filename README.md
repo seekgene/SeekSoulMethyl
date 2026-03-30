@@ -309,7 +309,6 @@ By default, perform dimensionality reduction with LSI on chrom20k bins using ALL
 If you use `sc_methy_workflow.sh`, the system requirements are as follows:
 - **CPU**: 64 cores (recommended)
 - **Memory**: 128GB RAM (recommended)
-- **Storage**: At least 500GB available space
 - **OS**: Linux (recommended Ubuntu 18.04+ or CentOS 7+)
 
 ## Running with Nextflow (Recommended)
