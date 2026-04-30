@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.2] 2026-04-30
+### Fixed
+- Removed Fastp parameters `--max-len1 60 --max-len2 0`.
+- Fixed several configuration issues.
+
 ## [2.1.1] 2026-03-24
 ### Fixed
 - Resolved the input error "* Chromosome chrM doesn't present in the .genome file. *" in sc_methy_workflow.sh.

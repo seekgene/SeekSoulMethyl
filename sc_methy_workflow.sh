@@ -268,7 +268,7 @@ fastp \
     -I ${exp_fq2_merge} \
     -o ${exp_fq1_clean} \
     -O ${exp_fq2_clean} \
-    --cut_tail --cut_tail_window_size 1 --cut_tail_mean_quality 3  --unqualified_percent_limit 80 --n_base_limit 10  --length_required 60 --max_len1 60 --max_len2 0 \
+    --cut_tail --cut_tail_window_size 1 --cut_tail_mean_quality 3  --unqualified_percent_limit 80 --n_base_limit 10  --length_required 60 \
     -j ${outdir}/fastp/${sample}_exp_fastp.json \
     -h ${outdir}/fastp/${sample}_exp_fastp.html \
     --thread ${core}

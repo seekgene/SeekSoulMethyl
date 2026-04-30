@@ -83,7 +83,7 @@ process FASTP_EXPRESSION_MULTI {
         -j ${sample}_${group}_expression_fastp.json \
         --cut_tail --cut_tail_window_size 1 \
         --cut_tail_mean_quality 3  --unqualified_percent_limit 80 \
-        --n_base_limit 10  --length_required 60 --max_len1 60 --max_len2 0
+        --n_base_limit 10  --length_required 60 
     """
 }
 
