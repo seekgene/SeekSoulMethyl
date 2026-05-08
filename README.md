@@ -1,5 +1,5 @@
 # SeekSoulMethyl
-SeekSoulMethyl is a single-cell transcriptome + methylation analysis pipeline designed to analyze data generated using the Beijing SeekGene BioSciences Co., Ltd. SeekOne DD Single Cell Multiome Methylation + RNA kit.
+SeekSoul™ Methyl Tools  (SeekSoulMethyl) is a single-cell transcriptome + methylation analysis pipeline designed to analyze data generated using the Beijing SeekGene BioSciences Co., Ltd. SeekOne DD Single Cell Multiome Methylation + RNA kit.
 
 ## Data Structure
  SeekOne DD Single Cell Multiome Methylation + RNA kit comes in two chemistries. DD-MET3 (dual-label) means the RNA and DNA methylation data barcodes are different for the same cell, and the RNA library is a 3′-end transcriptome library. DD-MET5 (single-label) means the RNA and DNA methylation data barcodes are the same for the same cell, and the RNA library is a 5′-end transcriptome library. Below we describe the DNA methylation library structures for both chemistries.
