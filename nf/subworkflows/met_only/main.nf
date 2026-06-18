@@ -2,7 +2,7 @@
 
 /*
  * SeekOne DD Single Cell Methylation analysis pipeline
- * Version: 2.1.1
+ * Version: 2.1.2
  */
 
 nextflow.enable.dsl=2
@@ -83,7 +83,7 @@ params.help = params.help ?: false
 // Help message
 def helpMessage() {
     log.info"""
-    Single-cell RNA-seq and methylation analysis pipeline - v1.0.0
+    Single-cell RNA-seq and methylation analysis pipeline - v2.1.2
     
     Usage:
     Batch sample analysis:

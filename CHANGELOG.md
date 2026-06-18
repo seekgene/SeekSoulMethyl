@@ -4,8 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [2.1.2] 2026-04-30
 ### Fixed
-- Removed Fastp parameters `--max-len1 60 --max-len2 0`.
+- Fixed version number inconsistency in subworkflow help messages (`rna_met` and `met_only` showed `2.1.1`/`v1.0.0` instead of `2.1.2`).
+- Fixed missing space before "for" in `README.md` line 206.
 - Fixed several configuration issues.
+### Removed
+- Removed Fastp parameters `--max-len1 60 --max-len2 0`.
+### Added
+- Added `.gitignore` entry for `CLAUDE.md`.
+- Added trailing newline to `.gitignore`.
 
 ## [2.1.1] 2026-03-24
 ### Fixed

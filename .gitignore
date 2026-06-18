@@ -155,3 +155,4 @@ sc_methy_workflow_dev.sh
 step3_compare_mcds.py
 .trae/
 .claude/
+CLAUDE.md
