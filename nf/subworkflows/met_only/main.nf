@@ -2,88 +2,25 @@
 
 /*
  * SeekOne DD Single Cell Methylation analysis pipeline
- * Version: 2.1.2
+ * Version: 2.2.0
  */
 
 nextflow.enable.dsl=2
 
 // Parameter definitions
-
 params.samplesheet = params.samplesheet ?: null
 params.outdir = params.outdir ?: "./results"
-
-def sanitizeSpaces(v) {
-    if (v == null) return null
-    return v.toString().replaceAll(/\s+/, '_')
-}
-
-def __outdir_raw = params.outdir?.toString()
-if (__outdir_raw != null && (__outdir_raw =~ /\s/)) {
-    def __outdir_new = sanitizeSpaces(__outdir_raw)
-    log.warn "outdir contains whitespace; replaced with '_' : '${__outdir_raw}' -> '${__outdir_new}'"
-    params.outdir = __outdir_new
-}
-if (params.outdir?.toString() =~ /\s/) {
-    error "Error: outdir still contains whitespace after normalization: '${params.outdir}'"
-}
-    
-// Database file paths
 params.database_dir = params.database_dir ?: ""
 
-def _isNullLike = { v ->
-    if (v == null) return true
-    def s = v.toString().trim()
-    return s == '' || s.equalsIgnoreCase('null')
-}
+// Import shared parameter initialization
+include { initCommonParams; sanitizeSpaces } from '../../modules/params_init'
 
-if (_isNullLike(params.genomeDir)) params['genomeDir'] = "${params.database_dir}/star"
-if (_isNullLike(params.genomefa)) params['genomefa'] = "${params.database_dir}/fasta/genome.fa"
-if (_isNullLike(params.gtf)) params['gtf'] = "${params.database_dir}/genes/genes.gtf"
-if (_isNullLike(params.bismark_ref)) params['bismark_ref'] = "${params.database_dir}/fasta/"
-if (_isNullLike(params.chrom_size_path_full)) params['chrom_size_path_full'] = "${params.database_dir}/bed/chr_len.bed"
-if (_isNullLike(params.chrom_size_path)) {
-    def __nochrM = "${params.database_dir}/bed/chr_nochrM.bed"
-    params['chrom_size_path'] = file(__nochrM).exists() ? __nochrM : params.chrom_size_path_full
-}
-if (_isNullLike(params.methy_barcode_wl)) params['methy_barcode_wl'] = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
-
-params.chemistry = params.chemistry ?: "DD-MET3"
-if (params.chemistry == "DD-MET3") {
-    if (_isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DDV2"
-    if (_isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/DD-M_bUCB3_whitelist.csv"
-}else if (params.chemistry == "DD-MET5") {
-    if (_isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DD-MET5"
-    if (_isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/ME5_bUCB3_whitelist.csv"
-}
-params.split_fastq = params.split_fastq ?: 4
-params.filter_ch = params.filter_ch ?: 2
-
-if (!params.project || params.project.toString().trim() == '') {
-    def __outdir_clean = params.outdir?.toString()?.replaceAll('/+$','')
-    def __tokens = __outdir_clean.split('/').findAll { it != '' }
-    def __proj = 'project'
-    if (__tokens) {
-        def __idxProj = __tokens.indexOf('proj')
-        if (__idxProj != -1 && __tokens.size() > __idxProj + 1) {
-            __proj = __tokens[__idxProj + 1]
-        } else if (__tokens[-1] == 'results') {
-            def __prev = __tokens.size() >= 2 ? __tokens[-2] : null
-            if (__prev && (__prev ==~ /\d{4}-\d{2}-\d{2}(?:-\d{2}-\d{2}(?:-\d{2})?)?/)) {
-                __proj = __tokens.size() >= 3 ? __tokens[-3] : 'project'
-            } else {
-                __proj = __prev ?: 'project'
-            }
-        } else {
-            __proj = __tokens[-1]
-        }
-    }
-    params.project = __proj
-}
-params.help = params.help ?: false
+// Initialize common parameters (database paths, chemistry, project name, etc.)
+initCommonParams(params, projectDir)
 // Help message
 def helpMessage() {
     log.info"""
-    Single-cell RNA-seq and methylation analysis pipeline - v2.1.2
+    Single-cell RNA-seq and methylation analysis pipeline - v2.2.0
     
     Usage:
     Batch sample analysis:

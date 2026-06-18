@@ -137,7 +137,7 @@
         "chemistry": {
             "type": "string",
             "title": "Chemistry",
-            "default": "DD-MET3",
+            "default": "DD-MET5",
             "enum": ["DD-MET3", "DD-MET5"],
             "description": "Library chemistry. Controls defaults for exp_chemistry and cbcsv."
         },

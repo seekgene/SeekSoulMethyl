@@ -371,22 +371,39 @@ python ${script_path}/barcode_cs_multi.py \
 	--core ${core}
 log_info "Barcode recognition completed"
 
-# Perform quality control on fastq files after barcode recognition
-log_info "Performing QC on barcode-recognized reads..."
+# Perform quality control on fastq files after barcode recognition (forward and reverse in parallel)
+log_info "Performing QC on barcode-recognized reads in parallel..."
 fastp \
     -i ${methy_dir}/step1/${sample}_forward_1.fq.gz \
     -I ${methy_dir}/step1/${sample}_forward_2.fq.gz \
     -j ${methy_dir}/step1/${sample}_forward_fastp.json \
     -h ${methy_dir}/step1/${sample}_forward_fastp.html \
 	--cut_tail --cut_tail_window_size 1 --cut_tail_mean_quality 3  --unqualified_percent_limit 80 --n_base_limit 10  --length_required 60 --disable_adapter_trimming \
-    --thread ${core} 
+    --thread ${core} &
+FASTP_FORWARD_PID=$!
+
 fastp \
     -i ${methy_dir}/step1/${sample}_reverse_1.fq.gz \
     -I ${methy_dir}/step1/${sample}_reverse_2.fq.gz \
     -j ${methy_dir}/step1/${sample}_reverse_fastp.json \
     -h ${methy_dir}/step1/${sample}_reverse_fastp.html \
 	--cut_tail --cut_tail_window_size 1 --cut_tail_mean_quality 3  --unqualified_percent_limit 80 --n_base_limit 10  --length_required 60 --disable_adapter_trimming \
-    --thread ${core} 
+    --thread ${core} &
+FASTP_REVERSE_PID=$!
+
+wait $FASTP_FORWARD_PID
+FASTP_FORWARD_EXIT=$?
+wait $FASTP_REVERSE_PID
+FASTP_REVERSE_EXIT=$?
+
+if [ $FASTP_FORWARD_EXIT -ne 0 ]; then
+    log_error "Forward barcode fastp QC failed with exit code $FASTP_FORWARD_EXIT"
+    exit 1
+fi
+if [ $FASTP_REVERSE_EXIT -ne 0 ]; then
+    log_error "Reverse barcode fastp QC failed with exit code $FASTP_REVERSE_EXIT"
+    exit 1
+fi
 log_info "Post-barcode QC completed"
 
 ########################## Step 3: Methylation Data Processing and Single-Cell Analysis ##########################

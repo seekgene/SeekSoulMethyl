@@ -1,5 +1,10 @@
 #!/usr/bin/env nextflow
 
+/*
+ * SeekOne DD Force Cell analysis pipeline
+ * Version: 2.2.0
+ */
+
 nextflow.enable.dsl=2
 
 import groovy.json.JsonSlurper
@@ -13,32 +18,11 @@ params.force_cell_number = params.force_cell_number ?: null
 
 params.database_dir = params.database_dir ?: ""
 
-def _isNullLike = { v ->
-    if (v == null) return true
-    def s = v.toString().trim()
-    return s == '' || s.equalsIgnoreCase('null')
-}
+// Import shared parameter initialization
+include { initCommonParams } from '../../modules/params_init'
 
-if (_isNullLike(params.genomeDir)) params['genomeDir'] = "${params.database_dir}/star"
-if (_isNullLike(params.genomefa)) params['genomefa'] = "${params.database_dir}/fasta/genome.fa"
-if (_isNullLike(params.gtf)) params['gtf'] = "${params.database_dir}/genes/genes.gtf"
-if (_isNullLike(params.bismark_ref)) params['bismark_ref'] = "${params.database_dir}/fasta/"
-if (_isNullLike(params.chrom_size_path_full)) params['chrom_size_path_full'] = "${params.database_dir}/bed/chr_len.bed"
-if (_isNullLike(params.chrom_size_path)) {
-    def __nochrM = "${params.database_dir}/bed/chr_nochrM.bed"
-    params['chrom_size_path'] = file(__nochrM).exists() ? __nochrM : params.chrom_size_path_full
-}
-
-params.chemistry = params.chemistry ?: "DD-MET3"
-if (params.chemistry == "DD-MET3") {
-    if (_isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DDV2"
-    if (_isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/DD-M_bUCB3_whitelist.csv"
-} else if (params.chemistry == "DD-MET5") {
-    if (_isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DD-MET5"
-    if (_isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/ME5_bUCB3_whitelist.csv"
-}
-
-params.split_fastq = params.split_fastq ?: 4
+// Initialize common parameters (database paths, chemistry, project name, etc.)
+initCommonParams(params, projectDir)
 params.project = params.project ?: "force_cell"
 
 include {

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] 2026-06-18
+### Changed
+- Default `chemistry` changed from `DD-MET3` to `DD-MET5` across all workflows (Nextflow and Shell), aligning with SeekOne DD kit defaults.
+- `sc_methy_workflow.sh`: Forward and reverse barcode fastp QC now runs in parallel (lightweight task, safe for large datasets).
+- Extracted common parameter initialization code (~70 lines) from `rna_met`, `met_only`, and `forcecell` into shared module `nf/modules/params_init.nf`, reducing code duplication.
+- Added `withName` resource configurations for all force_cell processes (RESOLVE_PRE_ANALYSIS_ROOT, PRECHECK_SAMPLE, STAGE_METHY_ASSETS, STAGE_BISMARK_ASSETS, FORCE_CELL_BARCODE_DIFF, FORCE_CELL_APPLY_ALLOCOOLS_CHANGES, FORCE_CELL_DISCOVER_BUCKET_DIRS, FORCE_CELL_ADAPT_BUCKET_FOR_SUBMERGE, FORCE_CELL_RECOMPUTE_CELLS_METRICS, FORCE_CELL_UPDATE_FILTERED_READS_COUNTS).
+
+### Added
+- `nf/modules/params_init.nf`: Shared parameter initialization module with `initCommonParams()` and `sanitizeSpaces()` functions.
+
 ## [2.1.2] 2026-04-30
 ### Fixed
 - Fixed version number inconsistency in subworkflow help messages (`rna_met` and `met_only` showed `2.1.1`/`v1.0.0` instead of `2.1.2`).
