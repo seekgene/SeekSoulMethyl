@@ -15,8 +15,6 @@ params.database_dir = params.database_dir ?: ""
 // Import shared parameter initialization
 include { initCommonParams; sanitizeSpaces } from '../../modules/params_init'
 
-// Initialize common parameters (database paths, chemistry, project name, etc.)
-initCommonParams(params, projectDir)
 // Help message
 def helpMessage() {
     log.info"""
@@ -174,6 +172,8 @@ def create_input_channel() {
  * Workflow definition
  */
 workflow MAIN {
+    initCommonParams(params, projectDir)
+
     if (params.help) {
         helpMessage()
         exit 0

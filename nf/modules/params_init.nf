@@ -10,7 +10,7 @@ def sanitizeSpaces(v) {
 }
 
 // Check if a value is null-like (null, empty string, or string "null")
-def _isNullLike = { v ->
+def isNullLike(v) {
     if (v == null) return true
     def s = v.toString().trim()
     return s == '' || s.equalsIgnoreCase('null')
@@ -30,31 +30,31 @@ def initCommonParams(params, projectDir) {
     }
 
     // Database file paths derived from database_dir
-    if (_isNullLike(params.genomeDir)) params['genomeDir'] = "${params.database_dir}/star"
-    if (_isNullLike(params.genomefa)) params['genomefa'] = "${params.database_dir}/fasta/genome.fa"
-    if (_isNullLike(params.gtf)) params['gtf'] = "${params.database_dir}/genes/genes.gtf"
-    if (_isNullLike(params.bismark_ref)) params['bismark_ref'] = "${params.database_dir}/fasta/"
-    if (_isNullLike(params.chrom_size_path_full)) params['chrom_size_path_full'] = "${params.database_dir}/bed/chr_len.bed"
-    if (_isNullLike(params.chrom_size_path)) {
+    if (isNullLike(params.genomeDir)) params['genomeDir'] = "${params.database_dir}/star"
+    if (isNullLike(params.genomefa)) params['genomefa'] = "${params.database_dir}/fasta/genome.fa"
+    if (isNullLike(params.gtf)) params['gtf'] = "${params.database_dir}/genes/genes.gtf"
+    if (isNullLike(params.bismark_ref)) params['bismark_ref'] = "${params.database_dir}/fasta/"
+    if (isNullLike(params.chrom_size_path_full)) params['chrom_size_path_full'] = "${params.database_dir}/bed/chr_len.bed"
+    if (isNullLike(params.chrom_size_path)) {
         def __nochrM = "${params.database_dir}/bed/chr_nochrM.bed"
         params['chrom_size_path'] = file(__nochrM).exists() ? __nochrM : params.chrom_size_path_full
     }
-    if (_isNullLike(params.methy_barcode_wl)) params['methy_barcode_wl'] = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
+    if (isNullLike(params.methy_barcode_wl)) params['methy_barcode_wl'] = "${projectDir}/bin/barcodes/U3CB_methylation.txt"
 
     // Chemistry-dependent defaults
     params.chemistry = params.chemistry ?: "DD-MET5"
     if (params.chemistry == "DD-MET3") {
-        if (_isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DDV2"
-        if (_isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/DD-M_bUCB3_whitelist.csv"
+        if (isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DDV2"
+        if (isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/DD-M_bUCB3_whitelist.csv"
     } else if (params.chemistry == "DD-MET5") {
-        if (_isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DD-MET5"
-        if (_isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/ME5_bUCB3_whitelist.csv"
+        if (isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DD-MET5"
+        if (isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/ME5_bUCB3_whitelist.csv"
     }
     params.split_fastq = params.split_fastq ?: 4
     params.filter_ch = params.filter_ch ?: 2
 
     // Infer project name from outdir if not provided
-    if (!params.project || params.project.toString().trim() == '') {
+    if (!params.containsKey('project') || !params.project || params.project.toString().trim() == '') {
         def __outdir_clean = params.outdir?.toString()?.replaceAll('/+$','')
         def __tokens = __outdir_clean.split('/').findAll { it != '' }
         def __proj = 'project'

@@ -20,44 +20,85 @@ def extract_number(text, pattern):
 
 def parse_bismark_report(report_file):
     """
-    Parse bismark report file and extract methylation context metrics
-    
-    Args:
-        report_file: Path to bismark report file
-        
-    Returns:
-        dict: Dictionary containing methylation metrics
+    Parse bismark report file and extract methylation context metrics.
+
+    Bismark PE reports are line-oriented. Parsing line by line avoids
+    repeatedly scanning the full report with many regular expressions.
     """
-    metrics = {}
-    totalreads, alignedreads, uniquereads = 0, 0, 0
+    metrics = {
+        'totalreads': 0,
+        'uniquereads': 0,
+        'not_uniq_alignedpairs': 0,
+        'alignedreads': 0,
+        'cpg_methylation_rate': 0.0,
+        'chg_methylation_rate': 0.0,
+        'chh_methylation_rate': 0.0,
+        'unknown_methylation_rate': 0.0,
+        'methylated_cpg': 0,
+        'unmethylated_cpg': 0,
+        'methylated_chg': 0,
+        'unmethylated_chg': 0,
+        'methylated_chh': 0,
+        'unmethylated_chh': 0,
+        'methylated_unknown': 0,
+        'unmethylated_unknown': 0,
+    }
+
+    def _value_after_colon(line):
+        return line.split(':', 1)[1].strip() if ':' in line else ''
+
+    def _parse_int(line):
+        value = _value_after_colon(line).replace(',', '')
+        match = re.search(r'\d+', value)
+        return int(match.group(0)) if match else 0
+
+    def _parse_pct(line):
+        value = _value_after_colon(line)
+        match = re.search(r'([\d.]+)\s*%', value)
+        return float(match.group(1)) if match else 0.0
+
     try:
         with open(report_file, 'r') as f:
-            content = f.read()
-        # Extract input reads during alignment
-        metrics['totalreads'] = extract_number(content, r'Sequence pairs analysed in total:\s*(\d+)') * 2
-        metrics['uniquereads'] = extract_number(content, r'Number of paired-end alignments with a unique best hit:\s*(\d+)') * 2
-        metrics['not_uniq_alignedpairs'] = extract_number(content, r'Sequence pairs did not map uniquely:\s*(\d+)') * 2
+            for raw_line in f:
+                line = raw_line.strip()
+                if not line:
+                    continue
+                if line.startswith('Sequence pairs analysed in total:'):
+                    metrics['totalreads'] = _parse_int(line) * 2
+                elif line.startswith('Number of paired-end alignments with a unique best hit:'):
+                    metrics['uniquereads'] = _parse_int(line) * 2
+                elif line.startswith('Sequence pairs did not map uniquely:'):
+                    metrics['not_uniq_alignedpairs'] = _parse_int(line) * 2
+                elif line.startswith('C methylated in CpG context:'):
+                    metrics['cpg_methylation_rate'] = _parse_pct(line)
+                elif line.startswith('C methylated in CHG context:'):
+                    metrics['chg_methylation_rate'] = _parse_pct(line)
+                elif line.startswith('C methylated in CHH context:'):
+                    metrics['chh_methylation_rate'] = _parse_pct(line)
+                elif line.startswith('C methylated in Unknown context'):
+                    metrics['unknown_methylation_rate'] = _parse_pct(line)
+                elif line.startswith("Total methylated C's in CpG context:"):
+                    metrics['methylated_cpg'] = _parse_int(line)
+                elif line.startswith("Total unmethylated C's in CpG context:"):
+                    metrics['unmethylated_cpg'] = _parse_int(line)
+                elif line.startswith("Total methylated C's in CHG context:"):
+                    metrics['methylated_chg'] = _parse_int(line)
+                elif line.startswith("Total unmethylated C's in CHG context:"):
+                    metrics['unmethylated_chg'] = _parse_int(line)
+                elif line.startswith("Total methylated C's in CHH context:"):
+                    metrics['methylated_chh'] = _parse_int(line)
+                elif line.startswith("Total unmethylated C's in CHH context:"):
+                    metrics['unmethylated_chh'] = _parse_int(line)
+                elif line.startswith("Total methylated C's in Unknown context:"):
+                    metrics['methylated_unknown'] = _parse_int(line)
+                elif line.startswith("Total unmethylated C's in Unknown context:"):
+                    metrics['unmethylated_unknown'] = _parse_int(line)
+
         metrics['alignedreads'] = metrics['uniquereads'] + metrics['not_uniq_alignedpairs']
-        # Extract methylation rates
-        metrics['cpg_methylation_rate'] = extract_percentage(content, r'C methylated in CpG context:\s*([\d.]+)%')
-        metrics['chg_methylation_rate'] = extract_percentage(content, r'C methylated in CHG context:\s*([\d.]+)%')
-        metrics['chh_methylation_rate'] = extract_percentage(content, r'C methylated in CHH context:\s*([\d.]+)%')
-        metrics['unknown_methylation_rate'] = extract_percentage(content, r'C methylated in Unknown context \(CN or CHN\):\s*([\d.]+)%')
-        
-        # Extract methylated and unmethylated C counts (for calculating average methylation rate)
-        metrics['methylated_cpg'] = extract_number(content, r'Total methylated C\'s in CpG context:\s*(\d+)')
-        metrics['unmethylated_cpg'] = extract_number(content, r'Total unmethylated C\'s in CpG context:\s*(\d+)')
-        metrics['methylated_chg'] = extract_number(content, r'Total methylated C\'s in CHG context:\s*(\d+)')
-        metrics['unmethylated_chg'] = extract_number(content, r'Total unmethylated C\'s in CHG context:\s*(\d+)')
-        metrics['methylated_chh'] = extract_number(content, r'Total methylated C\'s in CHH context:\s*(\d+)')
-        metrics['unmethylated_chh'] = extract_number(content, r'Total unmethylated C\'s in CHH context:\s*(\d+)')
-        metrics['methylated_unknown'] = extract_number(content, r'Total methylated C\'s in Unknown context:\s*(\d+)')
-        metrics['unmethylated_unknown'] = extract_number(content, r'Total unmethylated C\'s in Unknown context:\s*(\d+)')
-        
     except Exception as e:
         print(f"Error parsing {report_file}: {e}")
         return None
-    
+
     return metrics
 
 

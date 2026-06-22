@@ -17,9 +17,9 @@ import subprocess
 logger = logging.getLogger(__name__)
 def run_allcools(args) -> str:
     '''
-    Run ALLCools to extract CpG context, 
+    Run ALLCools to extract CpG context,
     and generate methylation reads counts and coverage counts for each CpG.
-    
+
     bam: path to single cell barcode bam file
     genome_fa: path to reference fasta file
     barcode: barcode name
@@ -29,34 +29,36 @@ def run_allcools(args) -> str:
     tag: BAM tag to correction.
     '''
     bam, genome_fa, barcode, outdir, chrom_size_path, align_method, tag = args
-    other_args = ''
+    sorted_bam = os.path.join(outdir, f'{barcode}_sort.bam')
+    sorted_bai = f'{sorted_bam}.bai'
+    output_prefix = os.path.join(outdir, f'{barcode}_allc')
+
+    bam_to_allc_cmd = [
+        'allcools', 'bam-to-allc',
+        '--bam_path', sorted_bam,
+        '--reference_fasta', genome_fa,
+        '--output_path', output_prefix,
+        '--save_count_df',
+    ]
     if align_method == 'bismark':
-        other_args = '--convert_bam_strandness'
+        bam_to_allc_cmd.append('--convert_bam_strandness')
     if tag:
-        other_args += f' --tag {tag}'
-    samtools_sort_cmd = (f'samtools sort -o {outdir}/{barcode}_sort.bam {bam};')
-    samtools_index_cmd = (f'samtools index {outdir}/{barcode}_sort.bam;')
-    bam_to_allc_cmd = (
-        f'allcools bam-to-allc '
-        f'--bam_path {outdir}/{barcode}_sort.bam '
-        f'--reference_fasta {genome_fa} '
-        f'--output_path {outdir}/{barcode}_allc {other_args} '
-        f'--save_count_df;'
-    )
+        bam_to_allc_cmd.extend(['--tag', tag])
+
     try:
-        subprocess.run(samtools_sort_cmd, check=True, shell = True)
-        subprocess.run(samtools_index_cmd, check=True, shell = True)
-        subprocess.run(bam_to_allc_cmd, check=True, shell = True)
-        # Remove intermediate BAM files
-        if os.path.exists(f'{outdir}/{barcode}_sort.bam'):
-            os.remove(f'{outdir}/{barcode}_sort.bam')
-        if os.path.exists(f'{outdir}/{barcode}_sort.bam.bai'):
-            os.remove(f'{outdir}/{barcode}_sort.bam.bai')
+        subprocess.run(['samtools', 'sort', '-o', sorted_bam, bam], check=True)
+        subprocess.run(['samtools', 'index', sorted_bam], check=True)
+        subprocess.run(bam_to_allc_cmd, check=True)
         return f'{barcode} done'
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed processing {barcode}: {e}")
-        raise e
-   
+        raise
+    finally:
+        # Remove intermediate BAM files even when ALLCools fails after sorting/indexing
+        for path in (sorted_bam, sorted_bai):
+            if os.path.exists(path):
+                os.remove(path)
+
 @click.command()
 @click.option('--indir', 
               help = 'Directory containing all single-cell barcode bam files', 

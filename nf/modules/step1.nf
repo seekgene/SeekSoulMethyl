@@ -24,43 +24,20 @@ process FASTP_EXPRESSION_MULTI {
     tag "$sample-FASTP_EXPRESSION_MULTI-$group"
     publishDir "${params.outdir}/fastp"
     resourceLabels label: "FASTP_EXPRESSION_MULTI_${params.project}_$sample"
-    
-    
+
+
     input:
     tuple val(sample), val(group), val(exp_r1), val(exp_r2)
-    
+
     output:
     tuple val(sample), val(group), path("${sample}_${group}_expression_clean_R1.fastq.gz"), path("${sample}_${group}_expression_clean_R2.fastq.gz"), emit: rna_fastp_multi_data
     path "*.{html,json}"
-    
+
     script:
     def cores = Math.max(1, task.cpus - 2)
     """
     set -e
-    stage_file() {
-        local src="\$1"
-        local name=\$(basename "\$src")
-        if [[ "\$src" == oss://* ]]; then
-            echo "Downloading \$src" >&2
-            cfg="${projectDir}/bin/.ossutilconfig"
-            if [ -f "\$cfg" ]; then
-                ossutil cp --sign-version v4 --region cn-beijing -c "\$cfg" "\$src" "\$name" 1>&2
-            else
-                ossutil cp --sign-version v4 --region cn-beijing -e oss-cn-beijing-internal.aliyuncs.com -i "\$AccessKeyId" -k "\$AccessKeySecret" "\$src" "\$name" 1>&2
-            fi
-            if [ \$? -ne 0 ]; then
-                echo "ERROR: ossutil failed for \$src" >&2
-                exit 1
-            fi
-        else
-            if [ -f "\$src" ]; then
-                ln -s "\$src" "\$name"
-            else
-                cp "\$src" "\$name"
-            fi
-        fi
-        echo "\$name"
-    }
+    source ${projectDir}/bin/stage_file.sh
     R1_LOCAL=\$(stage_file "${exp_r1}")
     R2_LOCAL=\$(stage_file "${exp_r2}")
 
@@ -83,7 +60,7 @@ process FASTP_EXPRESSION_MULTI {
         -j ${sample}_${group}_expression_fastp.json \
         --cut_tail --cut_tail_window_size 1 \
         --cut_tail_mean_quality 3  --unqualified_percent_limit 80 \
-        --n_base_limit 10  --length_required 60 
+        --n_base_limit 10  --length_required 60
     """
 }
 
@@ -92,42 +69,19 @@ process FASTP_METHYLATION_MULTI {
     tag "$sample-FASTP_METHYLATION_MULTI-$group"
     publishDir "${params.outdir}/fastp"
     resourceLabels label: "FASTP_METHYLATION_MULTI_${params.project}_$sample"
-    
+
     input:
     tuple val(sample), val(group), val(methy_r1), val(methy_r2)
-    
+
     output:
     tuple val(sample), val(group), path("${sample}_${group}_methylation_clean_R1.fastq.gz"), path("${sample}_${group}_methylation_clean_R2.fastq.gz"), emit: methy_fastp_multi_data
     path "*.{html,json}"
-    
+
     script:
     def cores = Math.max(1, task.cpus - 2)
     """
     set -e
-    stage_file() {
-        local src="\$1"
-        local name=\$(basename "\$src")
-        if [[ "\$src" == oss://* ]]; then
-            echo "Downloading \$src" >&2
-            cfg="${projectDir}/bin/.ossutilconfig"
-            if [ -f "\$cfg" ]; then
-                ossutil cp --sign-version v4 --region cn-beijing -c "\$cfg" "\$src" "\$name" 1>&2
-            else
-                ossutil cp --sign-version v4 --region cn-beijing -e oss-cn-beijing-internal.aliyuncs.com -i "\$AccessKeyId" -k "\$AccessKeySecret" "\$src" "\$name" 1>&2
-            fi
-            if [ \$? -ne 0 ]; then
-                echo "ERROR: ossutil failed for \$src" >&2
-                exit 1
-            fi
-        else
-            if [ -f "\$src" ]; then
-                ln -s "\$src" "\$name"
-            else
-                cp "\$src" "\$name"
-            fi
-        fi
-        echo "\$name"
-    }
+    source ${projectDir}/bin/stage_file.sh
     R1_LOCAL=\$(stage_file "${methy_r1}")
     R2_LOCAL=\$(stage_file "${methy_r2}")
 

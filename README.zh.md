@@ -169,7 +169,7 @@ bash sc_methy_workflow.sh \
 --sample WTJW880 \
 --outdir /path/to/results \
 --database_dir /path/to/human-reference-GRCh38 \
---chemistry DD-MET3 \
+--chemistry DD-MET5 \
 --core 64 \
 --filter_ch 2
 ```
@@ -197,7 +197,7 @@ bash sc_methy_workflow.sh \
 - **sample**：样本名称。
 - **outdir**：输出目录路径。
 - **database_dir**：参考基因组数据库路径。
-- **chemistry**：甲基化建库方案（DD-MET3 或 DD-MET5）。DD-MET3 为双标签数据集，表示同一细胞的 RNA 和 DNA 甲基化数据 barcode 不同；DD-MET5 为单标签，表示同一细胞的 RNA 和 DNA 甲基化数据 barcode 相同。
+- **chemistry**：甲基化建库方案（DD-MET3 或 DD-MET5；默认值：DD-MET5）。DD-MET3 为双标签数据集，表示同一细胞的 RNA 和 DNA 甲基化数据 barcode 不同；DD-MET5 为单标签，表示同一细胞的 RNA 和 DNA 甲基化数据 barcode 相同。
 - **core**：CPU 核心数。
 - **filter_ch**：过滤包含 > n 个 CH 甲基化位点的 reads。如果不需要启用此过滤，请将 filter_ch 设置为 0。
 
@@ -358,7 +358,7 @@ nextflow run -bg SeekSoulMethyl/nf/main.nf \
 --database_dir /path/to/human-reference-GRCh38/ \
 --split_fastq 1 \
 --filter_ch 2 \
---chemistry DD-MET3 > methy.log
+--chemistry DD-MET5 > methy.log
 
 # --outdir：最终结果目录
 # --samplesheet：输入样本表文件
@@ -368,7 +368,7 @@ nextflow run -bg SeekSoulMethyl/nf/main.nf \
 # --database_dir：参考基因组数据库目录
 # --split_fastq：为加速分析过程，根据 barcode 前 n 个碱基拆分 fastq。默认值为 4。
 # --filter_ch：过滤包含 > 2 个 CH 甲基化位点的 reads。
-# --chemistry：甲基化建库方案（DD-MET3 或 DD-MET5）
+# --chemistry：甲基化建库方案（DD-MET3 或 DD-MET5；默认值：DD-MET5）
 ```
 
 ### nextflow.config 说明
@@ -561,12 +561,12 @@ nextflow run SeekSoulMethyl/nf/main.nf \
   --database_dir /path/to/reference \
   --split_fastq 4 \
   --filter_ch 2 \
-  --chemistry DD-MET3
+  --chemistry DD-MET5
 ```
 
 ## 关键参数与提示
 - `--database_dir`：参考数据库目录，包含 `fasta/genome.fa`、`genes/genes.gtf`、`star/`、`bed/chr_nochrM.bed`
-- `--chemistry`：`DD-MET3` 或 `DD-MET5`；同时设置转录组建库方案和 barcode 白名单
+- `--chemistry`：`DD-MET3` 或 `DD-MET5`（默认值：`DD-MET5`）；同时设置转录组建库方案和 barcode 白名单
 - `--split_fastq`：根据 barcode 前 n 个碱基进行分片（默认值 4；增加并行度但会增加调度/合并开销）
 - `--filter_ch`：过滤包含 > n 个 CH 甲基化位点的 reads（默认值 2）。如果不需要启用此过滤，请将 `filter_ch` 设置为 0。
 - 样本表表头必须包含 `sample_id`

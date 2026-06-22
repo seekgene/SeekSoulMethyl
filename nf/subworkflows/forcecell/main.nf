@@ -21,10 +21,6 @@ params.database_dir = params.database_dir ?: ""
 // Import shared parameter initialization
 include { initCommonParams } from '../../modules/params_init'
 
-// Initialize common parameters (database paths, chemistry, project name, etc.)
-initCommonParams(params, projectDir)
-params.project = params.project ?: "force_cell"
-
 include {
     PRECHECK_SAMPLE;
     RESOLVE_PRE_ANALYSIS_ROOT;
@@ -80,7 +76,29 @@ def _fileNotEmpty = { filePath ->
     return f.length() > 0
 }
 
+// Help message
+def helpMessage() {
+    log.info"""
+    SeekOne DD Force Cell analysis pipeline - v2.2.0
+
+    Usage:
+        nextflow run main.nf --workflow force_cell \
+            --pre_analysis_path /path/to/previous_run \
+            --outdir /path/to/force_results \
+            --database_dir /path/to/reference \
+            --sample sampleA,sampleB \
+            --force_cell_number '{"sampleA":5000,"sampleB":6000}'
+    """.stripIndent()
+}
+
 workflow FORCE_CELL {
+    initCommonParams(params, projectDir)
+
+    if (params.help) {
+        helpMessage()
+        exit 0
+    }
+
     if (!params.pre_analysis_path || !params.pre_outdir) {
         error "Error: --pre_analysis_path (and/or --pre_outdir) must be provided"
     }

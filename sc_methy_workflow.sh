@@ -253,11 +253,12 @@ if [ ${#exp_fq1_files[@]} -eq 1 ]; then
 else
     exp_fq1_merge=${outdir}/fastp/${sample}_exp_R1_merged.fq.gz
     exp_fq2_merge=${outdir}/fastp/${sample}_exp_R2_merged.fq.gz
-    if ! zcat "${exp_fq1_files[@]}" | gzip -c > "${exp_fq1_merge}"; then
+    # Concatenate gzip members directly to avoid costly decompress/recompress for large FASTQ files
+    if ! cat "${exp_fq1_files[@]}" > "${exp_fq1_merge}"; then
         log_error "Transcriptome R1 merge failed: ${exp_fq1_merge}"
         exit 1
     fi
-    if ! zcat "${exp_fq2_files[@]}" | gzip -c > "${exp_fq2_merge}"; then
+    if ! cat "${exp_fq2_files[@]}" > "${exp_fq2_merge}"; then
         log_error "Transcriptome R2 merge failed: ${exp_fq2_merge}"
         exit 1
     fi
@@ -294,11 +295,12 @@ if [ ${#methy_fq1_files[@]} -eq 1 ]; then
 else
     methy_fq1_merge=${outdir}/fastp/${sample}_methy_R1_merged.fq.gz
     methy_fq2_merge=${outdir}/fastp/${sample}_methy_R2_merged.fq.gz
-    if ! zcat "${methy_fq1_files[@]}" | gzip -c > "${methy_fq1_merge}"; then
+    # Concatenate gzip members directly to avoid costly decompress/recompress for large FASTQ files
+    if ! cat "${methy_fq1_files[@]}" > "${methy_fq1_merge}"; then
         log_error "Methylation R1 merge failed: ${methy_fq1_merge}"
         exit 1
     fi
-    if ! zcat "${methy_fq2_files[@]}" | gzip -c > "${methy_fq2_merge}"; then
+    if ! cat "${methy_fq2_files[@]}" > "${methy_fq2_merge}"; then
         log_error "Methylation R2 merge failed: ${methy_fq2_merge}"
         exit 1
     fi

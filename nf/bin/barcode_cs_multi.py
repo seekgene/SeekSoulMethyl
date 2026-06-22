@@ -629,7 +629,43 @@ class QcStat:
             self.data = d
         else:
             for k, v in d.items():
-                self.data[k] += v
+                self._merge_value(k, v)
+
+    def _merge_value(self, key, value):
+        """Recursively merge values, handling Counter and nested dict correctly"""
+        if key not in self.data:
+            self.data[key] = value
+            return
+
+        existing = self.data[key]
+        if isinstance(existing, Counter) and isinstance(value, Counter):
+            existing.update(value)
+        elif isinstance(existing, Counter) and isinstance(value, defaultdict):
+            # Convert defaultdict to Counter before merging
+            existing.update(Counter(value))
+        elif isinstance(existing, defaultdict) and isinstance(value, Counter):
+            # Convert existing defaultdict to Counter, then merge
+            self.data[key] = Counter(existing)
+            self.data[key].update(value)
+        elif isinstance(existing, defaultdict) and isinstance(value, defaultdict):
+            # Both defaultdict(int): merge by summing values
+            for k2, v2 in value.items():
+                existing[k2] += v2
+        elif isinstance(existing, dict) and isinstance(value, dict):
+            # Nested dicts: try to merge recursively
+            # If both dicts have numeric values, sum them
+            try:
+                for k2, v2 in value.items():
+                    if k2 in existing:
+                        existing[k2] += v2
+                    else:
+                        existing[k2] = v2
+            except (TypeError, ValueError):
+                # If values aren't numeric, just replace
+                self.data[key] = value
+        else:
+            # Simple numeric values: use +=
+            self.data[key] += value
 
     @staticmethod
     def _sort_gc(d):
@@ -714,25 +750,81 @@ def get_new_bc(bc:str, white_list:set, distance:int)->set:
         for i, c in enumerate(bc):
             if c == "N":
                 mm_dict = { bc[:i] + base + bc[i+1:]:f"{i}{base}" for base in BASE_LIST }
-                break  
+                break
             else:
                 mm_dict.update({ bc[:i] + base + bc[i+1:]:f"{i}{base}" for base in BASE_LIST if base!=c })
-                
+
         bc_set = set(mm_dict.keys()).intersection(white_list)
-        # return {k: mm_dict[k] for k in bc_set}
     else:
-        bc_dict = defaultdict(set)
-        for bc_true in white_list:
-            hmm = sum(ch1 != ch2 for ch1,ch2 in zip(bc_true,bc))
-            if hmm <= distance:
-                bc_dict[hmm].add(bc_true)
-                
-        bc_set = set()
-        if len(bc_dict) != 0:
-            sorted_items = sorted(bc_dict.items(), key=lambda x: x[0])
-            bc_set = sorted_items[0][1]
-    
+        # Use trie-based search for distance > 1 to avoid O(N×L) brute force
+        bc_set = trie_search(bc, white_list, distance)
+
     return bc_set
+
+
+class TrieNode:
+    """Trie node for efficient barcode correction with distance > 1"""
+    __slots__ = ['children', 'barcodes']
+    def __init__(self):
+        self.children = {}
+        self.barcodes = set()  # Only populated at leaf/terminal nodes
+
+def build_trie(white_list: set) -> TrieNode:
+    """Build a trie from whitelist barcodes for efficient neighborhood search"""
+    root = TrieNode()
+    for bc in white_list:
+        node = root
+        for ch in bc:
+            if ch not in node.children:
+                node.children[ch] = TrieNode()
+            node = node.children[ch]
+        node.barcodes.add(bc)
+    return root
+
+def trie_search(bc: str, white_list: set, max_distance: int) -> set:
+    """
+    Search whitelist trie for barcodes with Hamming distance <= max_distance.
+
+    This preserves the old get_new_bc() semantics for distance > 1:
+    - only same-length substitutions are allowed (Hamming distance, no indels)
+    - if any matches exist, return only the nearest-distance match set
+    """
+    trie = _trie_cache.get(id(white_list))
+    if trie is None:
+        trie = build_trie(white_list)
+        _trie_cache[id(white_list)] = trie
+
+    results_by_distance = defaultdict(set)
+    _trie_search_hamming(trie, bc, 0, 0, max_distance, results_by_distance)
+    if not results_by_distance:
+        return set()
+    min_distance = min(results_by_distance)
+    return results_by_distance[min_distance]
+
+def _trie_search_hamming(node: TrieNode, bc: str, pos: int, errors: int,
+                         max_distance: int, results_by_distance: dict):
+    """Recursive same-length Hamming search with pruning."""
+    if errors > max_distance:
+        return
+
+    if pos == len(bc):
+        if node.barcodes:
+            results_by_distance[errors].update(node.barcodes)
+        return
+
+    target_ch = bc[pos]
+    for ch, child in node.children.items():
+        _trie_search_hamming(
+            child,
+            bc,
+            pos + 1,
+            errors + (0 if ch == target_ch else 1),
+            max_distance,
+            results_by_distance,
+        )
+
+# Trie cache: maps whitelist set id -> Trie root node
+_trie_cache = {}
 
 def hamming_distance(s1, s2):
     return len([(i, j) for i, j in zip(s1, s2) if i != j])

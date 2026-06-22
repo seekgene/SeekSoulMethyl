@@ -6,11 +6,21 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Default `chemistry` changed from `DD-MET3` to `DD-MET5` across all workflows (Nextflow and Shell), aligning with SeekOne DD kit defaults.
 - `sc_methy_workflow.sh`: Forward and reverse barcode fastp QC now runs in parallel (lightweight task, safe for large datasets).
+- `sc_methy_workflow.sh`: Multi-batch FASTQ merge now concatenates gzip members directly instead of decompressing and recompressing.
+- `step3_split_bams.py`: Reworked BAM splitting from multi-process repeated full-file traversal to single-pass barcode-group traversal, reducing redundant I/O.
+- `barcode_cs_multi.py`: Added trie-backed Hamming search for `distance > 1` barcode correction and fixed `QcStat.update()` nested counter merging.
+- `step3_bam_to_allc.py`: Replaced shell-string subprocess calls with argument-list calls and guaranteed cleanup of intermediate sorted BAM files.
+- `step4_wgs_summary.py`: Replaced repeated full-report regex scans with line-by-line Bismark report parsing.
 - Extracted common parameter initialization code (~70 lines) from `rna_met`, `met_only`, and `forcecell` into shared module `nf/modules/params_init.nf`, reducing code duplication.
-- Added `withName` resource configurations for all force_cell processes (RESOLVE_PRE_ANALYSIS_ROOT, PRECHECK_SAMPLE, STAGE_METHY_ASSETS, STAGE_BISMARK_ASSETS, FORCE_CELL_BARCODE_DIFF, FORCE_CELL_APPLY_ALLOCOOLS_CHANGES, FORCE_CELL_DISCOVER_BUCKET_DIRS, FORCE_CELL_ADAPT_BUCKET_FOR_SUBMERGE, FORCE_CELL_RECOMPUTE_CELLS_METRICS, FORCE_CELL_UPDATE_FILTERED_READS_COUNTS).
+- Added `withName` resource configurations for all force_cell processes and `MERGE_BISMARK_BAM`.
+- Reduced default `METHYLATION_BARCODE_EXTRACTION` memory from 120 GB to 48 GB with retry-based scaling.
+- Aligned Docker profile container image with README documentation.
 
 ### Added
 - `nf/modules/params_init.nf`: Shared parameter initialization module with `initCommonParams()` and `sanitizeSpaces()` functions.
+- `nf/bin/stage_file.sh`: Shared file staging helper for local and OSS inputs.
+- `nf/bin/lint_config_schema.py`: Lightweight config/schema/version consistency lint script.
+- `local_test` profile for lightweight local syntax/config checks.
 
 ## [2.1.2] 2026-04-30
 ### Fixed

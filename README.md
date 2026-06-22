@@ -169,7 +169,7 @@ bash sc_methy_workflow.sh \
 --sample WTJW880 \
 --outdir /path/to/results \
 --database_dir /path/to/human-reference-GRCh38 \
---chemistry DD-MET3 \
+--chemistry DD-MET5 \
 --core 64 \
 --filter_ch 2
 ```
@@ -197,7 +197,7 @@ bash sc_methy_workflow.sh \
 - **sample**: Sample name.
 - **outdir**: Output directory path.
 - **database_dir**: Reference genome database path.
-- **chemistry**: Methylation chemistry (DD-MET3 or DD-MET5). DD-MET3 is a dual-label dataset, meaning the RNA and DNA methylation data barcodes are different for the same cell, while DD-MET5 is single-label, meaning the RNA and DNA methylation data barcodes are the same for the same cell.
+- **chemistry**: Methylation chemistry (DD-MET3 or DD-MET5; default: DD-MET5). DD-MET3 is a dual-label dataset, meaning the RNA and DNA methylation data barcodes are different for the same cell, while DD-MET5 is single-label, meaning the RNA and DNA methylation data barcodes are the same for the same cell.
 - **core**: Number of CPU cores.  
 - **filter_ch**: Filter reads that contain > n CH methylation sites. If you do not want to enable this filter, set filter_ch to 0.
 
@@ -358,7 +358,7 @@ nextflow run -bg SeekSoulMethyl/nf/main.nf \
 --database_dir /path/to/human-reference-GRCh38/ \
 --split_fastq 1 \
 --filter_ch 2 \
---chemistry DD-MET3 > methy.log
+--chemistry DD-MET5 > methy.log
 
 # --outdir: final results directory
 # --samplesheet: input samplesheet file
@@ -368,7 +368,7 @@ nextflow run -bg SeekSoulMethyl/nf/main.nf \
 # --database_dir: reference genome database directory
 # --split_fastq: To speed up the analysis process, split fastq according to first n bases of barcode. Default is 4.
 # --filter_ch: filter reads that contain > 2 CH methylation sites.
-# --chemistry: methylation chemistry (DD-MET3 or DD-MET5)
+# --chemistry: methylation chemistry (DD-MET3 or DD-MET5; default: DD-MET5)
 ```
 
 ### Notes on nextflow.config
@@ -561,12 +561,12 @@ nextflow run SeekSoulMethyl/nf/main.nf \
   --database_dir /path/to/reference \
   --split_fastq 4 \
   --filter_ch 2 \
-  --chemistry DD-MET3
+  --chemistry DD-MET5
 ```
 
 ## Key parameters and tips
 - `--database_dir`: reference directory with `fasta/genome.fa`, `genes/genes.gtf`, `star/`, `bed/chr_nochrM.bed` 
-- `--chemistry`: `DD-MET3` or `DD-MET5`; also sets transcriptome chemistry and barcode whitelist 
+- `--chemistry`: `DD-MET3` or `DD-MET5` (default: `DD-MET5`); also sets transcriptome chemistry and barcode whitelist
 - `--split_fastq`: shard by the first n barcode bases (default 4; increases parallelism but adds scheduling/merge overhead) 
 - `--filter_ch`: filter reads with > n CH methylation sites (default 2).  If you do not want to enable this filter, set `filter_ch` to 0.
 - The samplesheet header must be `sample_id`
