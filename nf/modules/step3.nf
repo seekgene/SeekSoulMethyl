@@ -12,6 +12,7 @@ process SPLIT_BAM_FILES {
     tuple val(sample), val(pair_id), path("${bismark_sortn_bam.baseName.replaceAll(/_bismark_.*/, '')}/${bismark_sortn_bam.baseName.replaceAll(/_bismark_.*/, '')}_filtered_barcode_reads_counts.csv"), emit: filtered_barcode_reads_counts
     
     script:
+    def barcode_namespace_arg = params.workflow == 'methy_only' ? '--gexcb-is-methylation' : ''
     """
     set -e
     # Split BAM files
@@ -21,7 +22,8 @@ process SPLIT_BAM_FILES {
         --samplename ${bismark_sortn_bam.baseName} \
         --core ${task.cpus} \
         --gexcb ${gex_barcodes} \
-        --cbcsv ${params.cbcsv}
+        --cbcsv ${params.cbcsv} \
+        ${barcode_namespace_arg}
     """
 }
 // merge single cell forward and reverse bam
@@ -64,8 +66,15 @@ process MERGE_BISMARK_BAM {
 
     declare -A fmap
     declare -A rmap
-    for fb in "\${forward_bams[@]}"; do bn=\$(basename "\$fb" .bam); fmap["\$bn"]="\$fb"; done
-    for rb in "\${reverse_bams[@]}"; do bn=\$(basename "\$rb" .bam); rmap["\$bn"]="\$rb"; done
+    if [[ \${#forward_bams[@]} -gt 0 ]]; then
+        for fb in "\${forward_bams[@]}"; do bn=\$(basename "\$fb" .bam); fmap["\$bn"]="\$fb"; done
+    fi
+    if [[ \${#reverse_bams[@]} -gt 0 ]]; then
+        for rb in "\${reverse_bams[@]}"; do bn=\$(basename "\$rb" .bam); rmap["\$bn"]="\$rb"; done
+    fi
+    if [[ \${#forward_bams[@]} -eq 0 && \${#reverse_bams[@]} -eq 0 ]]; then
+        echo "WARNING: No BAM files found in either forward or reverse directories" >&2
+    fi
     declare -A seen
     for bc in "\${!fmap[@]}"; do seen["\$bc"]=1; done
     for bc in "\${!rmap[@]}"; do seen["\$bc"]=1; done
@@ -402,6 +411,7 @@ process ALLCOOLS_MERGE {
     # Run allcools to merge datasets, about 12h
     set -e
     ls */*_allc.gz > merge_list.txt
+    : > merge_list_real.txt
     cat merge_list.txt | while read id; do if [[ -s \${id} ]]; then echo "\${id}" >> merge_list_real.txt;fi;done
     allcools merge \
     --cpu ${cores} \

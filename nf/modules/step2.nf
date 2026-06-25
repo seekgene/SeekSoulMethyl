@@ -18,7 +18,7 @@ process BISMARK_ALIGNMENT_FORWARD {
     # Bismark alignment
     bismark \
         --genome ${params.bismark_ref} \
-        --parallel 8 \
+        --parallel ${Math.max(1, Math.min(task.cpus.toInteger(), 16))} \
         -1 ${methy_forward_r1} \
         -2 ${methy_forward_r2} \
         -o . \
@@ -47,7 +47,7 @@ process BISMARK_ALIGNMENT_REVERSE {
     # Bismark alignment
     bismark \
         --genome ${params.bismark_ref} \
-        --parallel 8 \
+        --parallel ${Math.max(1, Math.min(task.cpus.toInteger(), 16))} \
         -1 ${methy_reverse_r1} \
         -2 ${methy_reverse_r2} \
         -o . \

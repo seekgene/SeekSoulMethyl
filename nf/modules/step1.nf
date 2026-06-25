@@ -202,13 +202,26 @@ process METHYLATION_BARCODE_EXTRACTION {
         --split_fastq ${params.split_fastq}
     mv "${sample}_summary.json" "${sample}_methy_summary.json"
     if [[ ${params.split_fastq} -gt 0 ]]; then
-        rm step1/${sample}_forward_1.fq.gz 
-        rm step1/${sample}_forward_2.fq.gz 
-        rm step1/${sample}_reverse_1.fq.gz 
+        rm step1/${sample}_forward_1.fq.gz
+        rm step1/${sample}_forward_2.fq.gz
+        rm step1/${sample}_reverse_1.fq.gz
         rm step1/${sample}_reverse_2.fq.gz
     fi
+
+    for strand in forward reverse; do
+        shopt -s nullglob
+        r1_files=(step1/${sample}_\${strand}_*1.fq.gz)
+        r2_files=(step1/${sample}_\${strand}_*2.fq.gz)
+        if [[ \${#r1_files[@]} -eq 0 ]]; then
+            gzip -n -c /dev/null > step1/${sample}_\${strand}_empty_1.fq.gz
+        fi
+        if [[ \${#r2_files[@]} -eq 0 ]]; then
+            gzip -n -c /dev/null > step1/${sample}_\${strand}_empty_2.fq.gz
+        fi
+        shopt -u nullglob
+    done
     """
-}    
+}
 
 // Parse and group fastq files - pair based on identifiers
 process PARSE_FASTQ_FILES {
@@ -232,6 +245,9 @@ process PARSE_FASTQ_FILES {
     # Extract identifiers from all forward R1 files
     for r1_file in ${sample}_forward_*1.fq.gz; do
         if [ -f "\$r1_file" ]; then
+            if [[ "\$r1_file" == *"_empty_1.fq.gz" ]]; then
+                continue
+            fi
             # Extract identifier (e.g., extract AA from sample_forward_AA_1.fq.gz)
             identifier=\$(echo "\$r1_file" | sed 's/.*_forward_\\(.*\\)1\\.fq\\.gz/\\1/')
             r2_file="${sample}_forward_\${identifier}2.fq.gz"
@@ -252,6 +268,9 @@ process PARSE_FASTQ_FILES {
     # Extract identifiers from all reverse R1 files
     for r1_file in ${sample}_reverse_*1.fq.gz; do
         if [ -f "\$r1_file" ]; then
+            if [[ "\$r1_file" == *"_empty_1.fq.gz" ]]; then
+                continue
+            fi
             # Extract identifier (e.g., extract AA from sample_reverse_AA_1.fq.gz)
             identifier=\$(echo "\$r1_file" | sed 's/.*_reverse_\\(.*\\)1\\.fq\\.gz/\\1/')
             r2_file="${sample}_reverse_\${identifier}2.fq.gz"
@@ -280,21 +299,26 @@ process PARSE_FASTQ_FILES {
 process CREATE_FORWARD_PAIRS {
     tag "$sample-CREATE_FORWARD_PAIRS"
     resourceLabels label: "CREATE_FORWARD_PAIRS_${params.project}_$sample"
-    
+
     input:
     tuple val(sample), path(pairs_file), path(r1_fastq), path(r2_fastq)
-    
+
     output:
-    tuple val(sample), stdout
-    
+    tuple val(sample), stdout, path("forward_pairs_fastq/${sample}_forward_*1.fq.gz"), path("forward_pairs_fastq/${sample}_forward_*2.fq.gz")
+
     script:
     """
     set -e
-    # Read pairs file and output each pair as tab-separated values
+    mkdir -p forward_pairs_fastq
+    # Read pairs file and output each pair as comma-separated values.
+    # Link FASTQ inputs into a process-created output directory so Nextflow can
+    # stage them as path outputs instead of relying on publishDir side effects.
     while IFS=',' read -r r1_file r2_file; do
         if [ -n "\$r1_file" ] && [ -n "\$r2_file" ]; then
             # Extract pair_id from filename (e.g., AA from HC2_4_forward_AA_1.fq.gz)
             pair_id=\$(echo "\$r1_file" | sed 's/.*_forward_\\(.*\\)1\\.fq\\.gz/\\1/')
+            ln -sf "../\$r1_file" "forward_pairs_fastq/\$r1_file"
+            ln -sf "../\$r2_file" "forward_pairs_fastq/\$r2_file"
             echo "${sample},\${pair_id},\${r1_file},\${r2_file}"
         fi
     done < ${pairs_file}
@@ -305,22 +329,27 @@ process CREATE_FORWARD_PAIRS {
 process CREATE_REVERSE_PAIRS {
     tag "$sample-CREATE_REVERSE_PAIRS"
     resourceLabels label: "CREATE_REVERSE_PAIRS_${params.project}_$sample"
-    
+
     input:
     tuple val(sample), path(pairs_file), path(r1_fastq), path(r2_fastq)
-    
+
     output:
-    tuple val(sample), stdout
-    
+    tuple val(sample), stdout, path("reverse_pairs_fastq/${sample}_reverse_*1.fq.gz"), path("reverse_pairs_fastq/${sample}_reverse_*2.fq.gz")
+
     script:
     """
     set -e
-    # Read pairs file and output each pair as tab-separated values
+    mkdir -p reverse_pairs_fastq
+    # Read pairs file and output each pair as comma-separated values.
+    # Link FASTQ inputs into a process-created output directory so Nextflow can
+    # stage them as path outputs instead of relying on publishDir side effects.
     while IFS=',' read -r r1_file r2_file; do
         if [ -n "\$r1_file" ] && [ -n "\$r2_file" ]; then
             # Extract pair_id from filename (e.g., AA from HC2_4_reverse_AA_1.fq.gz)
             pair_id=\$(echo "\$r1_file" | sed 's/.*_reverse_\\(.*\\)1\\.fq\\.gz/\\1/')
-            echo -e "${sample},\${pair_id},\${r1_file},\${r2_file}"
+            ln -sf "../\$r1_file" "reverse_pairs_fastq/\$r1_file"
+            ln -sf "../\$r2_file" "reverse_pairs_fastq/\$r2_file"
+            echo "${sample},\${pair_id},\${r1_file},\${r2_file}"
         fi
     done < ${pairs_file}
     """

@@ -20,13 +20,13 @@ process ESTIMATED_CELLS {
     tag "$sample-ESTIMATED_CELLS"
     publishDir "${params.outdir}/${sample}_methy/step3/"
     resourceLabels label: "ESTIMATED_CELLS_${params.project}_${sample}"
-    
+
     input:
-    tuple val(sample),val(pair_id), path(cb_aligned_reads_counts)
-    
+    tuple val(sample), path(cb_aligned_reads_counts)
+
     output:
     tuple val(sample), path("filtered_barcode"), emit: filtered_barcode
-    
+
     script:
     """
     set -e

@@ -91,7 +91,7 @@ def estimated_cells(raw_aligned_reads_counts:str, expected_cell_num:int, outdir:
     
     filtered_file = os.path.join(outdir, 'filtered_barcode_read_counts.csv')
     filtered_df.to_csv(filtered_file, sep=',', index=False, header=False)
-    filtered_df["barcode"].to_csv('filtered_barcode', sep=',', index=False, header=False)
+    filtered_df["barcode"].to_csv(os.path.join(outdir, 'filtered_barcode'), sep=',', index=False, header=False)
     
 if __name__ == '__main__':
     estimated_cells()

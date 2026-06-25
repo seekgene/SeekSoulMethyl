@@ -129,7 +129,66 @@ def try_get_value(dict_obj: dict, key: str, default: Any = None) -> Any:
     Safely get a value from a dictionary. If the key is not found, return the default value.
     """
     return dict_obj.get(key, default)
-   
+
+
+def deduplicate_cells_by_m_cb(cells_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Collapse shard-level methylation cell metrics to one row per methylation barcode.
+    """
+    if not cells_df['m_cb'].duplicated().any():
+        return cells_df
+
+    duplicate_rows = int(cells_df['m_cb'].duplicated(keep=False).sum())
+    duplicate_barcodes = int(cells_df.loc[cells_df['m_cb'].duplicated(keep=False), 'm_cb'].nunique())
+    logger.warning(
+        f"Found duplicated methylation cell metrics: {duplicate_rows} rows across {duplicate_barcodes} barcodes; aggregating by m_cb"
+    )
+
+    cells_df = cells_df.copy()
+    original_columns = cells_df.columns.tolist()
+    additive_cols = {
+        'total_mc', 'total_cov', 'total_number', 'total_cpg_number',
+        'genome_cov', 'genome_cov_raw_umi', 'genome_cov_new_umi',
+    }
+    additive_cols.update(
+        col for col in cells_df.columns
+        if col.endswith(('_mc', '_cov', '_number'))
+    )
+
+    agg_dict = {}
+    for col in cells_df.columns:
+        if col == 'm_cb':
+            continue
+        if col in additive_cols:
+            cells_df[col] = pd.to_numeric(cells_df[col], errors='coerce')
+            agg_dict[col] = 'sum'
+        else:
+            agg_dict[col] = 'first'
+
+    cells_df = cells_df.groupby('m_cb', as_index=False, sort=False).agg(agg_dict)
+
+    def safe_rate(numerator_col: str, denominator_col: str):
+        denominator = cells_df[denominator_col]
+        return np.where(denominator != 0, cells_df[numerator_col] / denominator, np.nan)
+
+    if {'total_mc', 'total_cov', 'weighted_mc_rate'}.issubset(cells_df.columns):
+        cells_df['weighted_mc_rate'] = safe_rate('total_mc', 'total_cov')
+    if {'genome_cov_new_umi', 'genome_cov_raw_umi', 'cell_saturation'}.issubset(cells_df.columns):
+        cells_df['cell_saturation'] = np.where(
+            cells_df['genome_cov_raw_umi'] != 0,
+            1 - cells_df['genome_cov_new_umi'] / cells_df['genome_cov_raw_umi'],
+            np.nan,
+        )
+    for col in [col for col in cells_df.columns if col.endswith('_mc_rate')]:
+        context = col[:-len('_mc_rate')]
+        mc_col = f'{context}_mc'
+        cov_col = f'{context}_cov'
+        if mc_col in cells_df.columns and cov_col in cells_df.columns:
+            cells_df[col] = safe_rate(mc_col, cov_col)
+
+    return cells_df[original_columns]
+
+
 def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, cells_file: str, output_file: str, whitelist_file: str = None) -> pd.DataFrame:
     """
     Merge RNA and methylation tables into a single file based on barcode mapping.
@@ -160,7 +219,13 @@ def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, 
         raise
     if 'barcode' not in counts_df.columns:
         raise ValueError(f"Missing 'barcode' column in {filtered_counts_file}")
+    if 'reads_counts' not in counts_df.columns:
+        raise ValueError(f"Missing 'reads_counts' column in {filtered_counts_file}")
     counts_df = counts_df.rename(columns={'barcode': 'm_cb'})
+    counts_df['reads_counts'] = pd.to_numeric(counts_df['reads_counts'], errors='coerce')
+    if counts_df['reads_counts'].isna().any():
+        raise ValueError(f"Invalid 'reads_counts' values in {filtered_counts_file}")
+    counts_df = counts_df.groupby('m_cb', as_index=False)['reads_counts'].sum()
 
     # Read cells (methylation barcode is in cell_barcode; strip suffix)
     try:
@@ -178,6 +243,7 @@ def merge_rna_methylation_by_barcode(tsne_file: str, filtered_counts_file: str, 
         .str.replace('_allc.gz', '', regex=False)
         .str.replace('.gz', '', regex=False)
     )
+    cells_df = deduplicate_cells_by_m_cb(cells_df)
     tsne_map_df = tsne_df.reset_index(drop=True)
     
     # Read whitelist (map gex_cb to m_cb)

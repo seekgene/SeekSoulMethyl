@@ -198,12 +198,12 @@ workflow MAIN {
     exp_groups = input_ch.map { sample_id, files ->
         def r1s = files['expression_r1'] ?: []
         def r2s = files['expression_r2'] ?: []
+        if (!r1s || !r2s || r1s.size() != r2s.size()) {
+            error "Invalid expression FASTQ pairs for ${sample_id}: R1=${r1s.size()} R2=${r2s.size()}"
+        }
         def pairs = []
-        def n = Math.max(r1s.size(), r2s.size())
-        (0..<n).each { idx ->
-            def r1 = idx < r1s.size() ? r1s[idx] : r1s.last()
-            def r2 = idx < r2s.size() ? r2s[idx] : r2s.last()
-            pairs.add(tuple(sample_id, "G${idx+1}", r1, r2))
+        (0..<r1s.size()).each { idx ->
+            pairs.add(tuple(sample_id, "G${idx+1}", r1s[idx], r2s[idx]))
         }
         return pairs
     }.flatMap { it }
@@ -212,12 +212,12 @@ workflow MAIN {
     methy_groups = input_ch.map { sample_id, files ->
         def r1s = files['methylation_r1'] ?: []
         def r2s = files['methylation_r2'] ?: []
+        if (!r1s || !r2s || r1s.size() != r2s.size()) {
+            error "Invalid methylation FASTQ pairs for ${sample_id}: R1=${r1s.size()} R2=${r2s.size()}"
+        }
         def pairs = []
-        def n = Math.max(r1s.size(), r2s.size())
-        (0..<n).each { idx ->
-            def r1 = idx < r1s.size() ? r1s[idx] : r1s.last()
-            def r2 = idx < r2s.size() ? r2s[idx] : r2s.last()
-            pairs.add(tuple(sample_id, "G${idx+1}", r1, r2))
+        (0..<r1s.size()).each { idx ->
+            pairs.add(tuple(sample_id, "G${idx+1}", r1s[idx], r2s[idx]))
         }
         return pairs
     }.flatMap { it }
@@ -276,13 +276,13 @@ workflow MAIN {
         parsed_files.reverse_pairs
         .combine(
             methy_barcode.methy_barcode_output
-            .map {it -> tuple(it[0], it[1], it[2])}, by:0))
+            .map {it -> tuple(it[0], it[3], it[4])}, by:0))
     //forward_pairs_raw.view()
     //reverse_pairs_raw.view()
     // Process stdout output, convert multi-line strings to individual tuples
     // Calculate pair counts per sample for dynamic size in groupTuple operations
     pair_counts_per_sample_f = forward_pairs_raw
-        .map { sample, stdout_content ->
+        .map { sample, stdout_content, r1_files, r2_files ->
             def count = 0
             stdout_content.split('\n').each { line ->
                 if (line.trim()) {
@@ -296,7 +296,7 @@ workflow MAIN {
         }
     
     pair_counts_per_sample_r = reverse_pairs_raw
-        .map { sample, stdout_content ->
+        .map { sample, stdout_content, r1_files, r2_files ->
             def count = 0
             stdout_content.split('\n').each { line ->
                 if (line.trim()) {
@@ -323,6 +323,9 @@ workflow MAIN {
                     f_count = ((it[1][0] ?: 0) as Integer)
                     r_count = ((it[1][1] ?: 0) as Integer)
                 } else {
+                    // Remainder size==2: only one direction present. Cannot determine
+                    // whether it's forward or reverse — assign to f_count.
+                    // Math.max(f_count, r_count) below ensures correct effective count.
                     f_count = (it[1] ?: 0) as Integer
                     r_count = 0
                 }
@@ -334,7 +337,9 @@ workflow MAIN {
     
 
     forward_pairs = forward_pairs_raw
-        .map { sample, stdout_content ->
+        .map { sample, stdout_content, r1_files, r2_files ->
+            def r1_list = (r1_files instanceof List) ? r1_files : [r1_files]
+            def r2_list = (r2_files instanceof List) ? r2_files : [r2_files]
             def pairs = []
             stdout_content.split('\n').each { line ->
                 if (line.trim()) {
@@ -342,8 +347,11 @@ workflow MAIN {
                     if (parts.size() == 4) {
                         def sample_id = parts[0]
                         def pair_id = parts[1]
-                        def r1_file = file("${params.outdir}/${sample}/${sample}_methy/step1/${parts[2]}")
-                        def r2_file = file("${params.outdir}/${sample}/${sample}_methy/step1/${parts[3]}")
+                        def r1_file = r1_list.find { it.toString().tokenize('/')[-1] == parts[2] }
+                        def r2_file = r2_list.find { it.toString().tokenize('/')[-1] == parts[3] }
+                        if (!r1_file || !r2_file) {
+                            throw new IllegalStateException("Missing staged forward FASTQ pair for ${sample_id}/${pair_id}: ${parts[2]}, ${parts[3]}")
+                        }
                         pairs.add(tuple(sample_id, pair_id, r1_file, r2_file))
                     }
                 }
@@ -351,9 +359,11 @@ workflow MAIN {
             return pairs
         }
         .flatMap { it }
-    
+
     reverse_pairs = reverse_pairs_raw
-        .map { sample, stdout_content ->
+        .map { sample, stdout_content, r1_files, r2_files ->
+            def r1_list = (r1_files instanceof List) ? r1_files : [r1_files]
+            def r2_list = (r2_files instanceof List) ? r2_files : [r2_files]
             def pairs = []
             stdout_content.split('\n').each { line ->
                 if (line.trim()) {
@@ -361,8 +371,11 @@ workflow MAIN {
                     if (parts.size() == 4) {
                         def sample_id = parts[0]
                         def pair_id = parts[1]
-                        def r1_file = file("${params.outdir}/${sample}/${sample}_methy/step1/${parts[2]}")
-                        def r2_file = file("${params.outdir}/${sample}/${sample}_methy/step1/${parts[3]}")
+                        def r1_file = r1_list.find { it.toString().tokenize('/')[-1] == parts[2] }
+                        def r2_file = r2_list.find { it.toString().tokenize('/')[-1] == parts[3] }
+                        if (!r1_file || !r2_file) {
+                            throw new IllegalStateException("Missing staged reverse FASTQ pair for ${sample_id}/${pair_id}: ${parts[2]}, ${parts[3]}")
+                        }
                         pairs.add(tuple(sample_id, pair_id, r1_file, r2_file))
                     }
                 }
@@ -453,13 +466,10 @@ workflow MAIN {
     allc_generated = ALLCOOLS_BAM_TO_ALLC(
         sc_bismark_merge_bam.sc_merged_bam_dir
         .combine(sc_bismark_merge_bam.merged_filtered_barcode, by: [0,1]))
-    /*
     pair_counts_effective = sc_bismark_merge_bam.sc_merged_bam_dir
         .map { sample_id, pair_id, bam_dir -> tuple(sample_id, pair_id) }
         .groupTuple(by: 0)
         .map { sample_id, pair_ids -> tuple(sample_id, pair_ids.size()) }
-    */
-    pair_counts_effective = pair_counts_per_sample
 
     // Merge filtered barcode reads counts 
     merged_counts = MERGE_FILTERED_BARCODE_READS_COUNTS(
@@ -561,50 +571,29 @@ workflow MAIN {
     // Run allcools extract datasets
     allcools_extracted = ALLCOOLS_EXTRACT(allcools_merged.allcools_merge_allc)
     // Generate methylation summary report
-    empty_bismark_report = file("${projectDir}/assets/empty_bismark_report.txt")
-    
     joined_bismark_reports = bismark_aligned_forward.bismark_forward_report
         .join(bismark_aligned_reverse.bismark_reverse_report, by: [0,1], remainder: true)
         .map { it ->
             def sample_id = it[0]
             def pair_id = it[1]
-            def forward_report = null
-            def reverse_report = null
-            if (it.size() == 4) {
-                forward_report = it[2]
-                reverse_report = it[3]
-            } else if (it.size() == 3 && it[2] instanceof List && it[2].size() >= 2) {
-                forward_report = it[2][0]
-                reverse_report = it[2][1]
-            } else {
-                throw new IllegalStateException("Unexpected join tuple shape: ${it}")
-            }
-            tuple(sample_id, pair_id, forward_report ?: empty_bismark_report, reverse_report ?: empty_bismark_report)
+            def reports = []
+            if (it.size() >= 3 && it[2]) reports << it[2]
+            if (it.size() >= 4 && it[3]) reports << it[3]
+            tuple(sample_id, pair_id, reports)
         }
-    
-    forward_reports_grouped = joined_bismark_reports
+
+    bismark_reports_grouped = joined_bismark_reports
         .combine(pair_counts_effective, by: 0)
-        .map { sample_id, pair_id, forward_report, reverse_report, pair_count ->
-            tuple(groupKey(sample_id, pair_count), forward_report)
+        .map { sample_id, pair_id, reports, pair_count ->
+            tuple(groupKey(sample_id, pair_count), reports)
         }
         .groupTuple()
-        .map { group_key, report_list ->
-            tuple(group_key.toString(), report_list)
+        .map { group_key, report_groups ->
+            tuple(group_key.toString(), report_groups.flatten())
         }
-    
-    reverse_reports_grouped = joined_bismark_reports
-        .combine(pair_counts_effective, by: 0)
-        .map { sample_id, pair_id, forward_report, reverse_report, pair_count ->
-            tuple(groupKey(sample_id, pair_count), reverse_report)
-        }
-        .groupTuple()
-        .map { group_key, report_list ->
-            tuple(group_key.toString(), report_list)
-        }
-    
+
     methylation_summary = METHYLATION_SUMMARY(
-        forward_reports_grouped
-        .combine(reverse_reports_grouped, by: 0)
+        bismark_reports_grouped
         .combine(merged_counts.allcools_cells_csv_output, by: 0)
         .combine(merged_counts.merged_filtered_barcode_reads_counts, by: 0)
         .combine(methy_barcode.methy_barcode_output.map {it -> tuple(it[0], it.last())}, by: 0)

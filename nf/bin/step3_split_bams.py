@@ -54,9 +54,9 @@ def count_reads(bam: str, samplename: str, outdir: str, max_cells: int = 12000) 
     logger.info(f"Selected top {len(top_barcodes)} barcodes from {len(barcode_counts)} total barcodes")
     return top_barcodes
 
-def get_barcodes_from_gexcb_and_cbcsv(gexcb: str, cbcsv: str = None) -> list:
+def get_barcodes_from_gexcb_and_cbcsv(gexcb: str, cbcsv: str = None, gexcb_is_methylation: bool = False) -> list:
     gexcb = pd.read_csv(gexcb, header = None, names = ['barcode'], sep = '\t')
-    if cbcsv:
+    if cbcsv and not gexcb_is_methylation:
         cbcsv_map = pd.read_csv(cbcsv, header = 0, sep = ',')
         return cbcsv_map[cbcsv_map['gex_cb'].isin(gexcb['barcode'])]['m_cb'].tolist()
     else:
@@ -170,11 +170,14 @@ def split_bam_single_pass(
 @click.option('--cbcsv',
               help='Path to bUCB3_whitelist.csv',
               show_default=True)
+@click.option('--gexcb-is-methylation',
+              is_flag=True,
+              help='Treat --gexcb as methylation barcodes and skip gex_cb-to-m_cb mapping')
 @click.option('--core',
               default=1,
               type=int,
               help='Number of CPU cores (used for read counting when no gexcb provided)')
-def main(bam: str, samplename: str, outdir: str, max_cells: int = 20000, core: int = 1, gexcb: str = None, cbcsv: str = None):
+def main(bam: str, samplename: str, outdir: str, max_cells: int = 20000, core: int = 1, gexcb: str = None, cbcsv: str = None, gexcb_is_methylation: bool = False):
     # Get barcodes either from counting or from provided file
     if not gexcb:
         logger.info("Counting reads and selecting top barcodes...")
@@ -182,7 +185,7 @@ def main(bam: str, samplename: str, outdir: str, max_cells: int = 20000, core: i
     else:
         logger.info(f"Loading barcodes through file: {gexcb} and {cbcsv}")
         try:
-            top_barcodes = get_barcodes_from_gexcb_and_cbcsv(gexcb, cbcsv)
+            top_barcodes = get_barcodes_from_gexcb_and_cbcsv(gexcb, cbcsv, gexcb_is_methylation)
         except FileNotFoundError:
             logger.error(f"Barcode file not found: {gexcb} or {cbcsv}")
             raise

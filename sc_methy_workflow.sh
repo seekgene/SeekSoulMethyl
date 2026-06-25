@@ -28,6 +28,7 @@
 
 # Set error handling
 set -e
+set -o pipefail
 
 # Logging functions (pure text output for clean log files)
 log_info() {
@@ -609,8 +610,9 @@ log_info "ALLCools bam-to-allc completed"
 
 # Move allcools output to allcools/ directory (to match Nextflow structure)
 log_info "Organizing output directory structure..."
+rm -rf ${methy_dir}/step3/allcools/merged_fr_bam_allcools 2>/dev/null
 mkdir -p ${methy_dir}/step3/allcools
-mv ${methy_dir}/step3/merged_fr_bam_allcools ${methy_dir}/step3/allcools/
+mv ${methy_dir}/step3/merged_fr_bam_allcools ${methy_dir}/step3/allcools/ || { log_error "Failed to move allcools output"; exit 1; }
 log_info "Output organized to: ${methy_dir}/step3/allcools/merged_fr_bam_allcools/"
 
 ########################## Step 3.6: Merge single-cell metrics ##########################
@@ -635,12 +637,11 @@ mkdir -p ${methy_dir}/step3/allcools_generate_datasets
 # Create allc_file_path.txt
 log_info "Creating allc file path table..."
 ls ${methy_dir}/step3/allcools/merged_fr_bam_allcools/*_allc.gz 2>/dev/null | \
-    awk '{
-        n=split($0, parts, "/");
-        filename=parts[n];
-        gsub(/_allc.gz/, "", filename);
-        print filename "\t" $0
-    }' > ${methy_dir}/step3/allcools_generate_datasets/allc_file_path.txt
+    while read id; do
+        barcode=${id##*/}
+        barcode=${barcode%_allc.gz}
+        printf '%s\t%s\n' "$barcode" "$id"
+    done > ${methy_dir}/step3/allcools_generate_datasets/allc_file_path.txt
 
 # Count allc files
 allc_count=$(wc -l < ${methy_dir}/step3/allcools_generate_datasets/allc_file_path.txt)

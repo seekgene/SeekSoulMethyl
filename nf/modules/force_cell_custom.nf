@@ -12,10 +12,7 @@ process RESOLVE_PRE_ANALYSIS_ROOT {
     tuple val(sample), val(force_cell)
 
     output:
-    tuple val(sample), val(force_cell), stdout, emit: ctx
-    path("addtagYaml/${sample}_exp/${sample}_exp_SortedByCoordinate_withTag.bam"),optional:true
-    path("addtagYaml/${sample}_exp/${sample}_exp_SortedByCoordinate_withTag.bam.bai"),optional:true
-    path("nextflowYaml/results/${sample}/"),optional:true
+    tuple val(sample), val(force_cell), path("nextflowYaml/results"), path("addtagYaml"), emit: ctx
 
     script:
     """
@@ -24,45 +21,52 @@ process RESOLVE_PRE_ANALYSIS_ROOT {
         local src="\$1"
         local dst="\$2"
         mkdir -p "\$(dirname "\$dst")"
-        ossutil cp --sign-version v4 --region cn-beijing -e oss-cn-beijing-internal.aliyuncs.com -i "\$AccessKeyId" -k "\$AccessKeySecret" "\$src" "\$dst" 1>&2
-        
+        ossutil cp --sign-version v4 --region cn-beijing -e "${params.oss_endpoint}" -i "\$AccessKeyId" -k "\$AccessKeySecret" "\$src" "\$dst" 1>&2
+
     }
     oss_cp_r() {
         local src="\$1"
         local dst="\$2"
         mkdir -p "\$dst"
-        ossutil cp --sign-version v4 --region cn-beijing -e oss-cn-beijing-internal.aliyuncs.com -i "\$AccessKeyId" -k "\$AccessKeySecret" -r "\$src" "\$dst" 1>&2
+        ossutil cp --sign-version v4 --region cn-beijing -e "${params.oss_endpoint}" -i "\$AccessKeyId" -k "\$AccessKeySecret" -r "\$src" "\$dst" 1>&2
     }
     if [[ "${params.pre_analysis_path}" == oss://* ]]; then
         pre_path="${params.pre_analysis_path}"
-        pre_local="./"
+        pre_local="."
         pre_outdir_oss="${params.pre_outdir}"
         sample="${sample}"
+        mkdir -p "\${pre_local}/nextflowYaml/results" "\${pre_local}/addtagYaml"
 
         oss_cp "\${pre_outdir_oss}/\${sample}/\${sample}_rna_methy_summary.csv" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_rna_methy_summary.csv"
 
         oss_cp "\${pre_path}/addtagYaml/\${sample}_exp/\${sample}_exp_SortedByCoordinate_withTag.bam" "\${pre_local}/addtagYaml/\${sample}_exp/\${sample}_exp_SortedByCoordinate_withTag.bam"
         oss_cp "\${pre_path}/addtagYaml/\${sample}_exp/\${sample}_exp_SortedByCoordinate_withTag.bam.bai" "\${pre_local}/addtagYaml/\${sample}_exp/\${sample}_exp_SortedByCoordinate_withTag.bam.bai"
 
-        oss_cp_r "\${pre_outdir_oss}/\${sample}/\${sample}_exp/\${sample}/Analysis/" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_exp/\${sample}/Analysis/" 
+        oss_cp_r "\${pre_outdir_oss}/\${sample}/\${sample}_exp/\${sample}/Analysis/" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_exp/\${sample}/Analysis/"
         oss_cp "\${pre_outdir_oss}/\${sample}/\${sample}_methy/step3/split_bams/merged/\${sample}_cells.csv" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_methy/step3/split_bams/merged/\${sample}_cells.csv"
         oss_cp "\${pre_outdir_oss}/\${sample}/\${sample}_methy/step3/split_bams/merged/filtered_barcode_reads_counts.csv" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_methy/step3/split_bams/merged/filtered_barcode_reads_counts.csv"
         oss_cp "\${pre_outdir_oss}/\${sample}/\${sample}_methy/${sample}_methy_summary.json" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_methy/${sample}_methy_summary.json"
 
-        oss_cp "\${pre_outdir_oss}/\${sample}/\${sample}_methy/step3/allcools.tar.gz" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_methy/step3/allcools.tar.gz" || true
-        oss_cp "\${pre_outdir_oss}/\${sample}/\${sample}_methy/step3/allcools_generate_datasets.tar.gz" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_methy/step3/allcools_generate_datasets.tar.gz" || true
+        if ! oss_cp "\${pre_outdir_oss}/\${sample}/\${sample}_methy/step3/allcools.tar.gz" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_methy/step3/allcools.tar.gz"; then
+            echo "WARNING: Failed to download allcools.tar.gz for \${sample}, downloading allcools directory" >&2
+            oss_cp_r "\${pre_outdir_oss}/\${sample}/\${sample}_methy/step3/allcools/" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_methy/step3/allcools/"
+        fi
+        if ! oss_cp "\${pre_outdir_oss}/\${sample}/\${sample}_methy/step3/allcools_generate_datasets.tar.gz" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_methy/step3/allcools_generate_datasets.tar.gz"; then
+            echo "WARNING: Failed to download allcools_generate_datasets.tar.gz for \${sample}, downloading allcools_generate_datasets directory" >&2
+            oss_cp_r "\${pre_outdir_oss}/\${sample}/\${sample}_methy/step3/allcools_generate_datasets/" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_methy/step3/allcools_generate_datasets/"
+        fi
 
         oss_cp_r "\${pre_outdir_oss}/\${sample}/\${sample}_methy/step2/bismark/" "\${pre_local}/nextflowYaml/results/\${sample}/\${sample}_methy/step2/bismark"
-
-        echo -e "${params.outdir}/pre_analysis\t${params.outdir}/pre_analysis/nextflowYaml/results\t${params.outdir}/pre_analysis/addtagYaml" 
     else
         pre_path="${params.pre_analysis_path}"
-        pre_local="./"
         sample="${sample}"
+        mkdir -p nextflowYaml
         if [ -d "\${pre_path}/nextflowYaml/results/\${sample}" ]; then
-            pre_path="\${pre_path}/nextflowYaml/results/"
+            ln -s "\${pre_path}/nextflowYaml/results" nextflowYaml/results
+        else
+            ln -s "\${pre_path}" nextflowYaml/results
         fi
-        echo -e "\${pre_path}\t\${pre_path}\t\${pre_path}/../../addtagYaml" 
+        ln -s "\$(readlink -f nextflowYaml/results)/../../addtagYaml" addtagYaml
     fi
     """
 }
@@ -72,10 +76,10 @@ process PRECHECK_SAMPLE {
     resourceLabels label: "FORCE_CELL_PRECHECK_${params.project}_${sample}"
 
     input:
-    tuple val(sample), val(force_cell), val(pre_root), val(pre_outdir), val(addtag_dir)
+    tuple val(sample), val(force_cell), val(pre_root), path(pre_outdir), path(addtag_dir)
 
     output:
-    tuple val(sample), val(force_cell), val(pre_root), val(pre_outdir), val(addtag_dir), emit: ok
+    tuple val(sample), val(force_cell), val(pre_root), path(pre_outdir), path(addtag_dir), emit: ok
 
     script:
     """
@@ -116,7 +120,7 @@ process RUN_RNA_FORCE {
     resourceLabels label: "FORCE_CELL_RNA_${params.project}_${sample}"
 
     input:
-    tuple val(sample), val(force_cell), val(pre_root), val(pre_outdir), val(addtag_dir)
+    tuple val(sample), val(force_cell), val(pre_root), path(pre_outdir), path(addtag_dir)
 
     output:
     tuple val(sample), path("${sample}/Analysis/step3/filtered_feature_bc_matrix/barcodes.tsv.gz"), emit: gex_barcodes
@@ -190,7 +194,7 @@ process STAGE_METHY_ASSETS {
     resourceLabels label: "FORCE_CELL_STAGE_METHY_${params.project}_${sample}"
 
     input:
-    tuple val(sample), val(force_cell), val(pre_root), val(pre_outdir), val(addtag_dir)
+    tuple val(sample), val(force_cell), val(pre_root), path(pre_outdir), path(addtag_dir)
 
     output:
     tuple val(sample), path("allcools"), emit: allcools_dir
@@ -230,7 +234,7 @@ process STAGE_BISMARK_ASSETS {
     resourceLabels label: "FORCE_CELL_STAGE_BISMARK_${params.project}_${sample}"
 
     input:
-    tuple val(sample), val(force_cell), val(pre_root), val(pre_outdir), val(addtag_dir)
+    tuple val(sample), val(force_cell), val(pre_root), path(pre_outdir), path(addtag_dir)
 
     output:
     tuple val(sample), path("bismark/*_bismark_bt2_pe.bam"), emit: bismark_bams
@@ -298,11 +302,20 @@ process FORCE_CELL_APPLY_ALLOCOOLS_CHANGES {
       bc="\${bc//\$'\\r'/}"
       bc="\${bc//[[:space:]]/}"
       [ -z "\$bc" ] && continue
-      n=\$(find -L -maxdepth 1 allcools/ -type f \\( \
+      n=\$(find -L allcools/ -type f \\( \
         -name "\${bc}_allc.gz" -o \
         -name "\${bc}_allc.gz.tbi" -o \
         -name "\${bc}_allc.gz.count.csv" \\
       \\) -print -delete | wc -l)
+      remaining=\$(find -L allcools/ -type f \\( \
+        -name "\${bc}_allc.gz" -o \
+        -name "\${bc}_allc.gz.tbi" -o \
+        -name "\${bc}_allc.gz.count.csv" \\
+      \\) -print -quit | wc -l)
+      if [ "\$remaining" -ne 0 ]; then
+        echo "ERROR: Failed to remove dropped barcode \$bc from allcools tree" >&2
+        exit 1
+      fi
       removed_total=\$((removed_total+n))
     done < ${drop_barcodes}
     echo "Removed files: \$removed_total" > drop_removed_files.txt

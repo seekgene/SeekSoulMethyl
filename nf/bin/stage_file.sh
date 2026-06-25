@@ -22,10 +22,14 @@ stage_file() {
             exit 1
         fi
     else
+        if [ ! -e "$src" ]; then
+            echo "ERROR: Source file not found: $src" >&2
+            exit 1
+        fi
         if [ -f "$src" ]; then
-            ln -s "$src" "$name"
+            ln -sf "$src" "$name"
         else
-            cp "$src" "$name"
+            cp "$src" "$name" || { echo "ERROR: Failed to copy $src" >&2; exit 1; }
         fi
     fi
     echo "$name"

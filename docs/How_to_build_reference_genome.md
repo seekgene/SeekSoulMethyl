@@ -165,7 +165,7 @@ Pass the directory as the `--database_dir` parameter:
 
 ```bash
 nextflow run nf/main.nf \
-  -c nf/nextflow.new.config \
+  -c nf/nextflow.config \
   --workflow rna_met \
   --database_dir "${outdir}" \
   --samplesheet /path/to/samplesheet.csv \

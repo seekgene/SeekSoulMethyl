@@ -5,7 +5,7 @@ process METHYLATION_SUMMARY {
     resourceLabels label: "METHYLATION_SUMMARY_${params.project}_${sample}"
     
     input:
-    tuple val(sample),path(bismark_forward_report), path(bismark_reverse_report), path(allcools_cells_csv_output), 
+    tuple val(sample), path(bismark_reports), path(allcools_cells_csv_output),
     path(filtered_barcode),path(filtered_barcode_reads_counts), path(summary_json), path(allcools_extract_allc), path(cpg_sites)
     
     output:
@@ -14,6 +14,12 @@ process METHYLATION_SUMMARY {
     script:
     """
     set -e
+    mkdir -p step2/bismark
+    shopt -s nullglob
+    for report in *_bismark_bt2_PE_report.txt; do
+        ln -sf "../../\$report" "step2/bismark/\$(basename \$report)"
+    done
+    shopt -u nullglob
     # Generate summary report
     step4_wgs_summary.py \
         --outdir . \

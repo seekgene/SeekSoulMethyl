@@ -27,9 +27,11 @@ def generate_cb_map_dcit(cbcsv):
 
 def extract_cell_barcode(filename):
     """Extract cell barcode from filename"""
-    # Filename format: AAGAGTTAGAAGATTTG_all.gz.count.csv
+    # Filename format: AAGAGTTAGAAGATTTG_allc.gz.count.csv
     basename = os.path.basename(filename)
-    if basename.endswith('_all.gz.count.csv'):
+    if basename.endswith('_allc.gz.count.csv'):
+        return basename.replace('_allc.gz.count.csv', '')
+    elif basename.endswith('_all.gz.count.csv'):
         return basename.replace('_all.gz.count.csv', '')
     elif basename.endswith('.count.csv'):
         return basename.replace('.count.csv', '')

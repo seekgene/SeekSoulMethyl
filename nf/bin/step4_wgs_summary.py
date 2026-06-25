@@ -306,7 +306,8 @@ def parse_cell_info(cells_reads_csv: str, cells_allc_metric_csv: str) -> dict:
     # cells_reads has two columns: barcode, reads_counts
     print(cells_reads_csv, flush = True)
     # sort value by reads counts, ascending = True
-    cells_reads = pd.read_csv(cells_reads_csv, header = 0, sep = ",").sort_values(by = "reads_counts", ascending = False)
+    cells_reads = pd.read_csv(cells_reads_csv, header = 0, sep = ",")
+    cells_reads = cells_reads.groupby("barcode", as_index=False)["reads_counts"].sum().sort_values(by = "reads_counts", ascending = False)
     cells_reads.index = cells_reads["barcode"]
     print(cells_allc_metric_csv, flush = True)
     cells_allc_metrics = pd.read_csv(cells_allc_metric_csv, index_col=0, header = 0, sep = ",").sort_values(by = "genome_cov", ascending = False)
@@ -433,15 +434,16 @@ def outcsv(outdir, samplename, summary_json, genome_info_json):
     reads_median_cell = f'{int(summary["cells"]["Reads of median cell"] / 2)}'
     saturation_median_cell = f'{summary["cells"]["Saturation of median cell"]:.2%}'
     cellnum = f'{summary["cells"]["Estimated Number of Cells"]}'
-    summary["cells"]["Fraction Reads in Cells"] = summary["cells"]["Reads in Cells"] / summary["mapping"]["uniquereads"]
-    fraction = f'{summary["cells"]["Fraction Reads in Cells"]:.2%}' 
+    uniquereads = summary["mapping"].get("uniquereads", 0)
+    summary["cells"]["Fraction Reads in Cells"] = summary["cells"]["Reads in Cells"] / uniquereads if uniquereads > 0 else 0.0
+    fraction = f'{summary["cells"]["Fraction Reads in Cells"]:.2%}'
     with open(summary_json, 'w') as fh:
         json.dump(summary, fh, indent=4)
 
     header=('Samplename,Estimated_Number_of_Cells,Number_of_Reads,Valid_Barcode_Ratio,Dropped_Too_Short,Dropped_Chimeric,Valid_7F_Reads_Rate,Valid_17LME_Reads_Rate,Valid_7F17LME_Reads_Rate,C-T_Conversion,C-C_Ratio,'
             'Reads_Mapped_to_Genome,Reads_Mapped_Confidently_to_Genome,CpG_Methylation_Rate,CHG_Methylation_Rate,CHH_Methylation_Rate,Unknown_Methylation_Rate,CpG_Coverage_Rate,'
-            'Total_CPGs_Detected,Genome_Coverage_Rate_of_Max_Cell,CPGs_of_Max_Cell,Reads_of_Max_Cell,Saturation_of_Max_Cell,'
-            'Genome_Coverage_Rate_of_Median_Cell,CPGs_of_Median_Cell,Reads_of_Median_Cell,Saturation_of_Median_Cell,Fraction_Reads_in_Cells')
+            'Total_CPGs_Detected,Genome_Coverage_Rate_of_Max_Cell,CPGs_of_Max_Cell,Read_Pairs_of_Max_Cell,Saturation_of_Max_Cell,'
+            'Genome_Coverage_Rate_of_Median_Cell,CPGs_of_Median_Cell,Read_Pairs_of_Median_Cell,Saturation_of_Median_Cell,Fraction_Reads_in_Cells')
 
     summary_data = [
              samplename,

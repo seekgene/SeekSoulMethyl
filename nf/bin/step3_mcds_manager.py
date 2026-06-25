@@ -64,6 +64,43 @@ def _expand_inputs(inputs):
     return dataset_dirs
 
 
+def _format_examples(values, limit=5):
+    return ", ".join([str(v) for v in values[:limit]])
+
+
+def _validate_unique_obs_across_shards(input_paths, first_cfg, var_dim_keys, obs_dim):
+    for region_key in var_dim_keys:
+        region_dim = first_cfg["ds_region_dim"][region_key]
+        obs_dim_this = first_cfg.get("ds_sample_dim", {}).get(region_key, obs_dim)
+        seen = set()
+        for shard_dir in input_paths:
+            src = pathlib.Path(shard_dir) / region_dim
+            if not src.exists():
+                raise FileNotFoundError(f"Missing dataset subdir {region_dim} in shard: {shard_dir}")
+            ds = xr.open_zarr(str(src))
+            obs_index = list(ds.get_index(obs_dim_this))
+            duplicate_in_shard = []
+            seen_in_shard = set()
+            for value in obs_index:
+                if value in seen_in_shard and value not in duplicate_in_shard:
+                    duplicate_in_shard.append(value)
+                seen_in_shard.add(value)
+            if len(duplicate_in_shard) > 0:
+                raise ValueError(
+                    f"Duplicate {obs_dim_this} values found within MCDS shard {shard_dir} "
+                    f"for region {region_key}: {_format_examples(duplicate_in_shard)}. "
+                    "Refusing to merge because duplicate-cell aggregation is not implemented."
+                )
+            overlap = [value for value in obs_index if value in seen]
+            if len(overlap) > 0:
+                raise ValueError(
+                    f"Duplicate {obs_dim_this} values found across MCDS shards for region {region_key}: "
+                    f"{_format_examples(overlap)}. Refusing to append shards because duplicate-cell "
+                    "aggregation is not implemented; merge per-cell ALLC files before generating MCDS."
+                )
+            seen.update(obs_index)
+
+
 def merge_mcds_shards(
     inputs,
     output_path,
@@ -93,6 +130,8 @@ def merge_mcds_shards(
     if len(var_dim_keys) == 0:
         raise ValueError(f"Invalid .ALLCools config (empty ds_region_dim): {input_paths[0]}")
     var_dims = list(dict.fromkeys([first_cfg["ds_region_dim"][k] for k in var_dim_keys]))
+
+    _validate_unique_obs_across_shards(input_paths, first_cfg, var_dim_keys, obs_dim)
 
     output_path = pathlib.Path(output_path).absolute()
     if output_path.exists():

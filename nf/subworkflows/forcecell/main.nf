@@ -129,9 +129,8 @@ workflow FORCE_CELL {
     sample_only = Channel.fromList(samples)
 
     sample_ctx = RESOLVE_PRE_ANALYSIS_ROOT(sample_force).ctx
-        .map { sample, force_cell, stdout_text ->
-            def parts = stdout_text.toString().trim().split("\\t")
-            tuple(sample, force_cell, parts[0], parts[1], parts[2])
+        .map { sample, force_cell, pre_outdir, addtag_dir ->
+            tuple(sample, force_cell, pre_outdir, pre_outdir, addtag_dir)
         }
 
     precheck = PRECHECK_SAMPLE(sample_ctx)

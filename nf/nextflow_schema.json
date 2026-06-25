@@ -192,6 +192,12 @@
             "default": null,
             "description": "Samples to force (comma-separated), used by force_cell workflow."
         },
+        "oss_endpoint": {
+            "type": "string",
+            "title": "OSS Endpoint",
+            "default": "oss-cn-beijing-internal.aliyuncs.com",
+            "description": "OSS endpoint for Alibaba Cloud object storage downloads."
+        },
         "force_cell_number": {
             "title": "Force Cell Number",
             "default": null,

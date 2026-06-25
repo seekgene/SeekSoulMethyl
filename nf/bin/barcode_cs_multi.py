@@ -582,7 +582,7 @@ class AdapterFilter:
                     r1 =  m.trimmed(r1)
                     # print(r1.sequence)
             #r1_start = 9
-            r1_start = 0 # qiuxia 
+            r1_start = 0 # qiuxia: override standard cutadapt 9bp trim; UMI extraction (line ~1226) depends on this.
             r1_end = len(r1.sequence)
             if len(r1.sequence) > 18:
                 if r1_me_left:
@@ -749,7 +749,7 @@ def get_new_bc(bc:str, white_list:set, distance:int)->set:
         mm_dict = dict()
         for i, c in enumerate(bc):
             if c == "N":
-                mm_dict = { bc[:i] + base + bc[i+1:]:f"{i}{base}" for base in BASE_LIST }
+                mm_dict.update({ bc[:i] + base + bc[i+1:]:f"{i}{base}" for base in BASE_LIST })
                 break
             else:
                 mm_dict.update({ bc[:i] + base + bc[i+1:]:f"{i}{base}" for base in BASE_LIST if base!=c })
@@ -923,14 +923,14 @@ def calculate_ct_conversion_rate(r1, stat_Dict, positions=None, chemistry="DD-ME
         
         # Only perform conversion rate calculation when average quality >= 30
         if average_quality >= 30:
-            if insert == 'CCC': 
+            if insert == 'CCC':
                 # CC insert type: calculate C and T conversion rates
                 B_count_C = countseq.count('C')
                 B_count_T = countseq.count('T')
                 if B_count_C + B_count_T == len(countseq):
                     stat_Dict["line_B"] += 1
                     stat_Dict["B_all_C"] += B_count_C
-                    
+
             elif insert == 'TTT':
                 # TT insert type: calculate T and C conversion rates
                 A_count_T = countseq.count('T')
@@ -938,7 +938,9 @@ def calculate_ct_conversion_rate(r1, stat_Dict, positions=None, chemistry="DD-ME
                 if A_count_T + A_count_C == len(countseq):  # Must be C or T, other bases indicate sequencing errors
                     stat_Dict["line_A"] += 1
                     stat_Dict["A_all_T"] += A_count_T
-    
+    else:
+        stat_Dict["low_quality_skipped"] += 1
+
     return stat_Dict
 
 def generate_random_string(length=12):
@@ -1188,12 +1190,11 @@ def process_barcode(fq1, fq2, fq_out_forward, fq_out_reverse, fqout_multi, r1_st
                         barcode_new = "".join(element)
                         bc_new_lst.append(barcode_new)
                         
-                    # Simplify multi file read name format, excluding chain direction information
-                    # Store candidate barcode list and original read name separately
+                    # Store candidate barcode list, pre-trim chain direction, and original read name separately
                     bc_new_all = ":".join(bc_new_lst)
-                    # Format: barcode_old_candidate_list_umi_original_read_name
-                    r2.name = "_".join([barcode_old, bc_new_all, umi, r2.name])
-                    r1.name = "_".join([barcode_old, bc_new_all, umi, r1.name])
+                    # Format: barcode_old_candidate_list_umi_chain_direction_original_read_name
+                    r2.name = "_".join([barcode_old, bc_new_all, umi, chain_direction, r2.name])
+                    r1.name = "_".join([barcode_old, bc_new_all, umi, chain_direction, r1.name])
                     r1.sequence = sequence[start_pos:]
                     r1.qualities = qualities[start_pos:]
                     
@@ -1222,7 +1223,9 @@ def process_barcode(fq1, fq2, fq_out_forward, fq_out_reverse, fqout_multi, r1_st
                 if chemistry == "DD-MET5":
                     final_umi = umi  # ME5 mode uses original UMI directly
                 else:
-                    # DD-M mode uses first 12bp of final output r1 sequence as umi
+                    # DD-M mode uses first 12bp of final output r1 sequence as UMI.
+                    # NOTE: depends on r1_start=0 (qiuxia override at line ~585). If r1_start changes,
+                    # the UMI extraction position must also be updated.
                     final_umi = r1.sequence[:12] if len(r1.sequence) >= 12 else r1.sequence
 
                 # Add barcode to end of read name
@@ -1444,13 +1447,13 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
                     multi_stat["total"] += 1
                     final_barcode = None
                     
-                    # Parse multi file read name format: barcode_old_candidate_list_umi_original_read_name
-                    bc_old, r2_candidate, umi, r2_name = r2.name.split("_", 3)
+                    # Parse multi file read name format: barcode_old_candidate_list_umi_chain_direction_original_read_name
+                    bc_old, r2_candidate, umi, chain_direction, r2_name = r2.name.split("_", 4)
                     r2_candidate = r2_candidate.split(":")
                     # r2_name now only contains original read name, not candidate barcode list
-                    
+
                     # Similarly parse r1.name to ensure format consistency
-                    _, _, _, r1_name = r1.name.split("_", 3)
+                    _, _, _, _, r1_name = r1.name.split("_", 4)
                     
                     read_num = 0
                     for _ in sorted(r2_candidate):
@@ -1485,9 +1488,8 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
                     alt_l = [str(i)+o for i, (o,n) in enumerate(zip(bc_old, final_barcode)) if o != n]
                     _alt = "".join([alt for alt in alt_l])
 
-                    # Re-determine chain direction (based on finally determined barcode)
-                    chain_direction = determine_chain_direction(r1.sequence, chemistry, positions)
-                    
+                    # Use pre-trim chain direction stored when multi read was first generated
+
                     # Determine UMI format based on chemistry type
                     if chemistry == "DD-MET5":
                         final_umi = umi  # ME5 mode uses original UMI directly
@@ -1560,10 +1562,18 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
     stat.data["stat"]["gexname"] = samplename
     # ct_mean = A_all_T / (5 * line_A)
     #stat.data["stat"]["ct_mean"] = stat.data["stat"]["A_all_T"] / (5 * stat.data["stat"]["line_A"])
-    stat.data["stat"]["ct_mean"] = stat.data["stat"]["A_all_T"] / (4 * stat.data["stat"]["line_A"])
+    if stat.data["stat"]["line_A"] > 0:
+        stat.data["stat"]["ct_mean"] = stat.data["stat"]["A_all_T"] / (4 * stat.data["stat"]["line_A"])
+    else:
+        stat.data["stat"]["ct_mean"] = 0.0
+        stat.data["stat"]["ct_mean_missing_evidence"] = 1
     # cc_mean = B_all_C / (5 * line_B)
     #stat.data["stat"]["cc_mean"] = stat.data["stat"]["B_all_C"] / (5 * stat.data["stat"]["line_B"])
-    stat.data["stat"]["cc_mean"] = stat.data["stat"]["B_all_C"] / (4 * stat.data["stat"]["line_B"])
+    if stat.data["stat"]["line_B"] > 0:
+        stat.data["stat"]["cc_mean"] = stat.data["stat"]["B_all_C"] / (4 * stat.data["stat"]["line_B"])
+    else:
+        stat.data["stat"]["cc_mean"] = 0.0
+        stat.data["stat"]["cc_mean_missing_evidence"] = 1
     # rate_7f = num_7f / total
     stat.data["stat"]["rate_7f"] = stat.data["stat"]["num_7f"] / stat.data["stat"]["total"]
     # rate_17lme = num_17lme / total
