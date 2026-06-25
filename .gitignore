@@ -156,3 +156,6 @@ step3_compare_mcds.py
 .trae/
 .claude/
 CLAUDE.md
+
+# Local session/scratch notes (not project artifacts)
+session.txt
