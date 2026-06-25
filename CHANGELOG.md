@@ -16,7 +16,6 @@ All notable changes to this project will be documented in this file.
 - Added `withName` resource configurations for all force_cell processes and `MERGE_BISMARK_BAM`.
 - Reduced default `METHYLATION_BARCODE_EXTRACTION` memory from 120 GB to 48 GB with retry-based scaling.
 - Aligned Docker profile container image with README documentation.
-- `nf/modules/step2.nf`: Bismark `--parallel` now scales with `task.cpus` (clamped to 1–16) instead of a hard-coded 8, so the configured `cpus = 32` for `BISMARK_ALIGNMENT_FORWARD`/`REVERSE` is actually used.
 - `nf/nextflow.config`: Dynamic-memory processes now double requested memory on retry only when the previous attempt died from an OOM-class exit code (134, 137–140); other failures (e.g. 143 SIGTERM from node preemption) retry at the same memory level. Consolidated into a shared `oomAwareMemory` closure used by all 16 dynamic-memory processes. Requires Nextflow >= 24.10.0 (`task.previousTrace`).
 
 ### Fixed
