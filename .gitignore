@@ -32,11 +32,16 @@ trace-*.txt
 report-*.html
 timeline-*.html
 dag-*.html
+# Fixed-name Nextflow run artifacts (configured via trace/report/timeline/dag blocks in nextflow.config)
+execution_trace.txt
+execution_report.html
+execution_timeline.html
+pipeline_dag.html
+methy.log*
 main_retry_spot.nf
 test.nf
 
 # Python
-__pycache__/
 *.py[cod]
 *$py.class
 *.so
@@ -159,3 +164,4 @@ CLAUDE.md
 
 # Local session/scratch notes (not project artifacts)
 session.txt
+barcode-extract/

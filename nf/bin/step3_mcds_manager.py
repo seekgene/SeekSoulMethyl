@@ -68,11 +68,10 @@ def _format_examples(values, limit=5):
     return ", ".join([str(v) for v in values[:limit]])
 
 
-def _validate_unique_obs_across_shards(input_paths, first_cfg, var_dim_keys, obs_dim):
+def _validate_no_duplicate_obs_within_shards(input_paths, first_cfg, var_dim_keys, obs_dim):
     for region_key in var_dim_keys:
         region_dim = first_cfg["ds_region_dim"][region_key]
         obs_dim_this = first_cfg.get("ds_sample_dim", {}).get(region_key, obs_dim)
-        seen = set()
         for shard_dir in input_paths:
             src = pathlib.Path(shard_dir) / region_dim
             if not src.exists():
@@ -89,16 +88,42 @@ def _validate_unique_obs_across_shards(input_paths, first_cfg, var_dim_keys, obs
                 raise ValueError(
                     f"Duplicate {obs_dim_this} values found within MCDS shard {shard_dir} "
                     f"for region {region_key}: {_format_examples(duplicate_in_shard)}. "
-                    "Refusing to merge because duplicate-cell aggregation is not implemented."
+                    "Refusing to merge because duplicate-cell aggregation within a single shard is not implemented."
                 )
-            overlap = [value for value in obs_index if value in seen]
-            if len(overlap) > 0:
-                raise ValueError(
-                    f"Duplicate {obs_dim_this} values found across MCDS shards for region {region_key}: "
-                    f"{_format_examples(overlap)}. Refusing to append shards because duplicate-cell "
-                    "aggregation is not implemented; merge per-cell ALLC files before generating MCDS."
-                )
-            seen.update(obs_index)
+
+
+def _validate_no_obs_overlap_across_shards(input_paths, region_dim, obs_dim):
+    seen = set()
+    for shard_dir in input_paths:
+        src = pathlib.Path(shard_dir) / region_dim
+        if not src.exists():
+            raise FileNotFoundError(f"Missing dataset subdir {region_dim} in shard: {shard_dir}")
+        ds = xr.open_zarr(str(src))
+        obs_index = list(ds.get_index(obs_dim))
+        duplicate_across_shards = []
+        for value in obs_index:
+            if value in seen and value not in duplicate_across_shards:
+                duplicate_across_shards.append(value)
+        if len(duplicate_across_shards) > 0:
+            raise ValueError(
+                f"Overlapping {obs_dim} values found across MCDS shards for region {region_dim}: "
+                f"{_format_examples(duplicate_across_shards)}. "
+                "Refusing to merge because MCDS-level aggregation cannot globally deduplicate "
+                "UR-tagged molecules. Merge per-cell BAM/ALLC before generating MCDS."
+            )
+        seen.update(obs_index)
+
+
+def _write_merged_region(input_paths, target, region_dim, obs_dim):
+    for i, shard_dir in enumerate(input_paths):
+        src = pathlib.Path(shard_dir) / region_dim
+        if not src.exists():
+            raise FileNotFoundError(f"Missing dataset subdir {region_dim} in shard: {shard_dir}")
+        ds = xr.open_zarr(str(src))
+        if i == 0:
+            ds.to_zarr(str(target), mode="w")
+        else:
+            ds.to_zarr(str(target), append_dim=obs_dim)
 
 
 def merge_mcds_shards(
@@ -131,7 +156,11 @@ def merge_mcds_shards(
         raise ValueError(f"Invalid .ALLCools config (empty ds_region_dim): {input_paths[0]}")
     var_dims = list(dict.fromkeys([first_cfg["ds_region_dim"][k] for k in var_dim_keys]))
 
-    _validate_unique_obs_across_shards(input_paths, first_cfg, var_dim_keys, obs_dim)
+    _validate_no_duplicate_obs_within_shards(input_paths, first_cfg, var_dim_keys, obs_dim)
+    for region_key in var_dim_keys:
+        region_dim = first_cfg["ds_region_dim"][region_key]
+        obs_dim_this = first_cfg.get("ds_sample_dim", {}).get(region_key, obs_dim)
+        _validate_no_obs_overlap_across_shards(input_paths, region_dim, obs_dim_this)
 
     output_path = pathlib.Path(output_path).absolute()
     if output_path.exists():
@@ -154,15 +183,7 @@ def merge_mcds_shards(
             region_dim = first_cfg["ds_region_dim"][region_key]
             obs_dim_this = first_cfg.get("ds_sample_dim", {}).get(region_key, obs_dim)
             target = output_path / region_dim
-            for i, shard_dir in enumerate(input_paths):
-                src = pathlib.Path(shard_dir) / region_dim
-                if not src.exists():
-                    raise FileNotFoundError(f"Missing dataset subdir {region_dim} in shard: {shard_dir}")
-                ds = xr.open_zarr(str(src))
-                if i == 0:
-                    ds.to_zarr(str(target), mode="w")
-                else:
-                    ds.to_zarr(str(target), append_dim=obs_dim_this)
+            _write_merged_region(input_paths, target, region_dim, obs_dim_this)
     else:
         raise ValueError(f"Unsupported merge_mode: {merge_mode}")
 

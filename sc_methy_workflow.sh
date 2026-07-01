@@ -239,8 +239,8 @@ gexcb=$exp_outdir/${sample}/Analysis/step3/filtered_feature_bc_matrix/barcodes.t
 # Use fastp software to perform quality control on raw data, filter out low-quality reads to obtain clean data
 log_info "Step 1: Starting data quality control with fastp..."
 mkdir -p ${outdir}/fastp
-exp_fq1_clean=${outdir}/fastp/${sample}_exp_R1_clean.fq.gz
-exp_fq2_clean=${outdir}/fastp/${sample}_exp_R2_clean.fq.gz
+exp_fq1_clean_files=()
+exp_fq2_clean_files=()
 # Prepare input files (handle multiple comma-separated files)
 IFS=',' read -ra exp_fq1_files <<< "$exp_fq1"
 IFS=',' read -ra exp_fq2_files <<< "$exp_fq2"
@@ -248,35 +248,31 @@ if [ ${#exp_fq1_files[@]} -ne ${#exp_fq2_files[@]} ]; then
     log_error "Transcriptome R1/R2 file count mismatch: ${#exp_fq1_files[@]} vs ${#exp_fq2_files[@]}"
     exit 1
 fi
-if [ ${#exp_fq1_files[@]} -eq 1 ]; then
-    exp_fq1_merge=${exp_fq1_files[0]}
-    exp_fq2_merge=${exp_fq2_files[0]}
-else
-    exp_fq1_merge=${outdir}/fastp/${sample}_exp_R1_merged.fq.gz
-    exp_fq2_merge=${outdir}/fastp/${sample}_exp_R2_merged.fq.gz
-    # Concatenate gzip members directly to avoid costly decompress/recompress for large FASTQ files
-    if ! cat "${exp_fq1_files[@]}" > "${exp_fq1_merge}"; then
-        log_error "Transcriptome R1 merge failed: ${exp_fq1_merge}"
-        exit 1
+for idx in "${!exp_fq1_files[@]}"; do
+    group=$((idx + 1))
+    if [ ${#exp_fq1_files[@]} -eq 1 ]; then
+        exp_fq1_clean=${outdir}/fastp/${sample}_exp_R1_clean.fq.gz
+        exp_fq2_clean=${outdir}/fastp/${sample}_exp_R2_clean.fq.gz
+        exp_fastp_prefix=${sample}_exp_fastp
+    else
+        exp_fq1_clean=${outdir}/fastp/${sample}_G${group}_exp_R1_clean.fq.gz
+        exp_fq2_clean=${outdir}/fastp/${sample}_G${group}_exp_R2_clean.fq.gz
+        exp_fastp_prefix=${sample}_G${group}_exp_fastp
     fi
-    if ! cat "${exp_fq2_files[@]}" > "${exp_fq2_merge}"; then
-        log_error "Transcriptome R2 merge failed: ${exp_fq2_merge}"
-        exit 1
-    fi
-fi
 
-fastp \
-    -i ${exp_fq1_merge} \
-    -I ${exp_fq2_merge} \
-    -o ${exp_fq1_clean} \
-    -O ${exp_fq2_clean} \
-    --cut_tail --cut_tail_window_size 1 --cut_tail_mean_quality 3  --unqualified_percent_limit 80 --n_base_limit 10  --length_required 60 \
-    -j ${outdir}/fastp/${sample}_exp_fastp.json \
-    -h ${outdir}/fastp/${sample}_exp_fastp.html \
-    --thread ${core}
-if [ ${#exp_fq1_files[@]} -gt 1 ]; then
-    rm -f "${exp_fq1_merge}" "${exp_fq2_merge}"
-fi
+    fastp \
+        -i ${exp_fq1_files[$idx]} \
+        -I ${exp_fq2_files[$idx]} \
+        -o ${exp_fq1_clean} \
+        -O ${exp_fq2_clean} \
+        --cut_tail --cut_tail_window_size 1 --cut_tail_mean_quality 3  --unqualified_percent_limit 80 --n_base_limit 10  --length_required 60 \
+        -j ${outdir}/fastp/${exp_fastp_prefix}.json \
+        -h ${outdir}/fastp/${exp_fastp_prefix}.html \
+        --thread ${core}
+
+    exp_fq1_clean_files+=("${exp_fq1_clean}")
+    exp_fq2_clean_files+=("${exp_fq2_clean}")
+done
 log_info "Transcriptome QC completed"
 
 # Perform quality control on methylation data
@@ -340,9 +336,13 @@ fi
 log_info "Input chemistry parameter: ${chemistry}"
 log_info "Chemistry used for transcriptome analysis: ${exp_chemistry}"
 
+exp_fq_args=()
+for idx in "${!exp_fq1_clean_files[@]}"; do
+    exp_fq_args+=(--fq1 "${exp_fq1_clean_files[$idx]}" --fq2 "${exp_fq2_clean_files[$idx]}")
+done
+
 seeksoultools rna run \
-	--fq1 ${exp_fq1_clean} \
-	--fq2 ${exp_fq2_clean} \
+	"${exp_fq_args[@]}" \
 	--samplename ${sample} \
 	--genomeDir ${genomeDir} \
 	--gtf $gtf \
@@ -552,7 +552,7 @@ for barcode in "${!all_barcodes[@]}"; do
     output_bam="${methy_dir}/step3/split_bams/merged/merged_fr_bam/${barcode}.bam"
     
     if [[ -n "$f_bam" && -n "$r_bam" ]]; then
-        samtools merge -n -@ 4 -o "$output_bam" "$f_bam" "$r_bam"
+        samtools merge -f -n -@ 4 -o "$output_bam" "$f_bam" "$r_bam"
     elif [[ -n "$f_bam" ]]; then
         cp "$f_bam" "$output_bam"
     elif [[ -n "$r_bam" ]]; then

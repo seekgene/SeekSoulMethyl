@@ -31,7 +31,7 @@ process ESTIMATED_CELLS {
     """
     set -e
     echo "estimated cells"
-    step3_estimated_cells.py -r ./ --outdir .
+    step3_estimated_cells.py -r ./ --outdir . -e ${params.expected_cell_num}
     """
 }
 

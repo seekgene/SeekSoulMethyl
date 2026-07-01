@@ -412,7 +412,10 @@ workflow FORCE_CELL {
             .combine(allcools_extracted.allcools_extract_allc_output, by: 0)
             .combine(cpg_sites.cpg_sites)
             .map { sample, forward_reports, reverse_reports, cells_csv, filtered_barcode, filtered_counts_csv, summary_json, allc_extract, cpg_sites_json ->
-                tuple(sample, forward_reports, reverse_reports, cells_csv, filtered_barcode, filtered_counts_csv, summary_json, allc_extract, cpg_sites_json)
+                def reports = []
+                reports.addAll(forward_reports ?: [])
+                reports.addAll(reverse_reports ?: [])
+                tuple(sample, reports, cells_csv, filtered_barcode, filtered_counts_csv, summary_json, allc_extract, cpg_sites_json)
             }
     )
 

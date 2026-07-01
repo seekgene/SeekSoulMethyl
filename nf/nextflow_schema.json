@@ -160,6 +160,19 @@
             "minimum": 0,
             "description": "Filter CH context threshold."
         },
+        "barcode_engine": {
+            "type": "string",
+            "default": "python",
+            "enum": ["python", "rust"],
+            "description": "Barcode extraction engine for METHYLATION_BARCODE_EXTRACTION. 'rust' uses the prebuilt barcode-extract binary; 'python' uses barcode_cs_multi.py (fallback)."
+        },
+        "expected_cell_num": {
+            "type": "integer",
+            "title": "Expected Cell Number",
+            "default": 3000,
+            "minimum": 1,
+            "description": "Expected number of cells used by methy_only to estimate the filtered barcode set."
+        },
         "project": {
             "type": "string",
             "title": "Project Name",

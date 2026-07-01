@@ -50,8 +50,8 @@ def initCommonParams(params, projectDir) {
         if (isNullLike(params.exp_chemistry)) params['exp_chemistry'] = "DD-MET5"
         if (isNullLike(params.cbcsv)) params['cbcsv'] = "${projectDir}/bin/barcodes/ME5_bUCB3_whitelist.csv"
     }
-    params.split_fastq = params.split_fastq ?: 4
-    params.filter_ch = params.filter_ch ?: 2
+    if (isNullLike(params.split_fastq)) params['split_fastq'] = 4
+    if (isNullLike(params.filter_ch)) params['filter_ch'] = 2
 
     // Infer project name from outdir if not provided
     if (!params.containsKey('project') || !params.project || params.project.toString().trim() == '') {

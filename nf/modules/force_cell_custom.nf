@@ -63,10 +63,11 @@ process RESOLVE_PRE_ANALYSIS_ROOT {
         mkdir -p nextflowYaml
         if [ -d "\${pre_path}/nextflowYaml/results/\${sample}" ]; then
             ln -s "\${pre_path}/nextflowYaml/results" nextflowYaml/results
+            ln -s "\${pre_path}/addtagYaml" addtagYaml
         else
             ln -s "\${pre_path}" nextflowYaml/results
+            ln -s "\$(readlink -f nextflowYaml/results)/../../addtagYaml" addtagYaml
         fi
-        ln -s "\$(readlink -f nextflowYaml/results)/../../addtagYaml" addtagYaml
     fi
     """
 }
@@ -243,8 +244,35 @@ process STAGE_BISMARK_ASSETS {
     script:
     """
     set -e
+    shopt -s nullglob
     mkdir -p bismark
-    ln -s "${pre_outdir}/${sample}/${sample}_methy/step2/bismark/"* bismark/
+
+    pre_bismark_dir=\$(readlink -f "${pre_outdir}/${sample}/${sample}_methy/step2/bismark" || true)
+    if [ -z "\${pre_bismark_dir}" ] || [ ! -d "\${pre_bismark_dir}" ]; then
+      echo "ERROR: missing Bismark directory: ${pre_outdir}/${sample}/${sample}_methy/step2/bismark" >&2
+      exit 1
+    fi
+
+    bams=( "\${pre_bismark_dir}"/*_bismark_bt2_pe.bam )
+    reports=( "\${pre_bismark_dir}"/*_bismark_bt2_PE_report.txt )
+    if [ "\${#bams[@]}" -eq 0 ]; then
+      echo "ERROR: no Bismark BAM files found in \${pre_bismark_dir}" >&2
+      exit 1
+    fi
+    if [ "\${#reports[@]}" -eq 0 ]; then
+      echo "ERROR: no Bismark report files found in \${pre_bismark_dir}" >&2
+      exit 1
+    fi
+
+    for f in "\${pre_bismark_dir}"/*; do
+      [ -e "\$f" ] || continue
+      target=\$(readlink -f "\$f" || true)
+      if [ -z "\$target" ] || [ ! -e "\$target" ]; then
+        echo "ERROR: invalid Bismark asset symlink: \$f" >&2
+        exit 1
+      fi
+      ln -s "\$target" "bismark/\$(basename "\$f")"
+    done
     """
 }
 
@@ -284,7 +312,7 @@ process FORCE_CELL_APPLY_ALLOCOOLS_CHANGES {
     tuple val(sample), path("allcools"), emit: allcools_force
 
     script:
-    def split_n = (params.split_fastq ?: 4) as Integer
+    def split_n = (params.split_fastq != null && params.split_fastq.toString().trim() != '' ? params.split_fastq : 4) as Integer
     """
     set -e
     in_allcools="${allcools_work}"

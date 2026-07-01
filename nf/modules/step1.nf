@@ -191,15 +191,27 @@ process METHYLATION_BARCODE_EXTRACTION {
     }.join(' ')
     """
     set -e
-    barcode_cs_multi.py \
-        ${fq_args_m} \
-        --barcode ${params.methy_barcode_wl} \
-        --outdir . \
-        --samplename ${sample} \
-        --core ${cores} \
-        --chemistry ${params.chemistry} \
-        --filter_ch ${params.filter_ch} \
-        --split_fastq ${params.split_fastq}
+    if [[ "${params.barcode_engine}" == "rust" ]]; then
+        barcode-extract \
+            ${fq_args_m} \
+            --barcode ${params.methy_barcode_wl} \
+            --outdir . \
+            --samplename ${sample} \
+            --core ${cores} \
+            --chemistry ${params.chemistry} \
+            --filter_ch ${params.filter_ch} \
+            --split_fastq ${params.split_fastq}
+    else
+        barcode_cs_multi.py \
+            ${fq_args_m} \
+            --barcode ${params.methy_barcode_wl} \
+            --outdir . \
+            --samplename ${sample} \
+            --core ${cores} \
+            --chemistry ${params.chemistry} \
+            --filter_ch ${params.filter_ch} \
+            --split_fastq ${params.split_fastq}
+    fi
     mv "${sample}_summary.json" "${sample}_methy_summary.json"
     if [[ ${params.split_fastq} -gt 0 ]]; then
         rm step1/${sample}_forward_1.fq.gz
@@ -313,15 +325,21 @@ process CREATE_FORWARD_PAIRS {
     # Read pairs file and output each pair as comma-separated values.
     # Link FASTQ inputs into a process-created output directory so Nextflow can
     # stage them as path outputs instead of relying on publishDir side effects.
+    linked_pairs=0
     while IFS=',' read -r r1_file r2_file; do
         if [ -n "\$r1_file" ] && [ -n "\$r2_file" ]; then
             # Extract pair_id from filename (e.g., AA from HC2_4_forward_AA_1.fq.gz)
             pair_id=\$(echo "\$r1_file" | sed 's/.*_forward_\\(.*\\)1\\.fq\\.gz/\\1/')
             ln -sf "../\$r1_file" "forward_pairs_fastq/\$r1_file"
             ln -sf "../\$r2_file" "forward_pairs_fastq/\$r2_file"
+            linked_pairs=\$((linked_pairs + 1))
             echo "${sample},\${pair_id},\${r1_file},\${r2_file}"
         fi
     done < ${pairs_file}
+    if [ "\${linked_pairs}" -eq 0 ]; then
+        gzip -n -c /dev/null > "forward_pairs_fastq/${sample}_forward_empty_1.fq.gz"
+        gzip -n -c /dev/null > "forward_pairs_fastq/${sample}_forward_empty_2.fq.gz"
+    fi
     """
 }
 
@@ -343,15 +361,21 @@ process CREATE_REVERSE_PAIRS {
     # Read pairs file and output each pair as comma-separated values.
     # Link FASTQ inputs into a process-created output directory so Nextflow can
     # stage them as path outputs instead of relying on publishDir side effects.
+    linked_pairs=0
     while IFS=',' read -r r1_file r2_file; do
         if [ -n "\$r1_file" ] && [ -n "\$r2_file" ]; then
             # Extract pair_id from filename (e.g., AA from HC2_4_reverse_AA_1.fq.gz)
             pair_id=\$(echo "\$r1_file" | sed 's/.*_reverse_\\(.*\\)1\\.fq\\.gz/\\1/')
             ln -sf "../\$r1_file" "reverse_pairs_fastq/\$r1_file"
             ln -sf "../\$r2_file" "reverse_pairs_fastq/\$r2_file"
+            linked_pairs=\$((linked_pairs + 1))
             echo "${sample},\${pair_id},\${r1_file},\${r2_file}"
         fi
     done < ${pairs_file}
+    if [ "\${linked_pairs}" -eq 0 ]; then
+        gzip -n -c /dev/null > "reverse_pairs_fastq/${sample}_reverse_empty_1.fq.gz"
+        gzip -n -c /dev/null > "reverse_pairs_fastq/${sample}_reverse_empty_2.fq.gz"
+    fi
     """
 }
 

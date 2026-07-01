@@ -79,15 +79,12 @@ def estimated_cells(raw_aligned_reads_counts:str, expected_cell_num:int, outdir:
     
     merged_df = merged_df.sort_values(by='aligned_reads', ascending=False)
     
-    # Compute threshold
-    percentile = 99
-    threshold_index = int(expected_cell_num * (1 - percentile / 100))
-    if threshold_index >= len(merged_df):
-        threshold_index = len(merged_df) - 1
-        
+    # Compute threshold from the expected-cell rank
+    threshold_index = min(max(expected_cell_num - 1, 0), len(merged_df) - 1)
+
     readscut = merged_df.iloc[threshold_index]['aligned_reads'] * 0.1
-    
-    filtered_df = merged_df[merged_df['aligned_reads'] > readscut]
+
+    filtered_df = merged_df[merged_df['aligned_reads'] >= readscut]
     
     filtered_file = os.path.join(outdir, 'filtered_barcode_read_counts.csv')
     filtered_df.to_csv(filtered_file, sep=',', index=False, header=False)
