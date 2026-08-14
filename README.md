@@ -203,7 +203,7 @@ bash sc_methy_workflow.sh \
 
 ## Process Details
 ### Transcriptome Processing Workflow
-Transcriptome data is analyzed using [SeekSoulTools](https://github.com/seekgene/SeekSoulMethyl/tree/nf_rna_methy/dependence/seeksoultools). See the official [Algorithms Overview](http://seeksoul.seekgene.com/en/v1.3.0/2.tutorial/1.rna/4.description.html) for detailed steps. Cells used in the downstream methylation library are determined based on the transcriptome library cell barcodes.
+Transcriptome data is analyzed using [SeekSoulTools](https://github.com/seekgene/SeekSoulMethyl/tree/nf_rna_methy/dependence/seeksoultools). See the official [Algorithms Overview](https://seeksoul.online/cloudplatform-doc/zh/document/Software/3_SeekSoul_Tools/1_v1.3.0a/3_Use_guide/1_rna/4_Algorithm.html) for detailed steps. Cells used in the downstream methylation library are determined based on the transcriptome library cell barcodes.
 
 ### Methylation Processing Workflow
 #### Step 1: Preprocessing and Barcode Parsing
