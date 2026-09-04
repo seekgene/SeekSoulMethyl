@@ -123,6 +123,12 @@ def _write_merged_region(input_paths, target, region_dim, obs_dim):
         if i == 0:
             ds.to_zarr(str(target), mode="w")
         else:
+            # Load before append: open_zarr returns a dask-backed dataset, and the
+            # append_dim path does not support dask parallel writes — misaligned
+            # chunks race and SILENTLY drop cells (chrom1M/chrom500k lost 5.8%/7.7%
+            # on real runs). Serial load+write matches the new-xarray
+            # validate_grid_chunks_alignment contract.
+            ds = ds.load()
             ds.to_zarr(str(target), append_dim=obs_dim)
 
 
