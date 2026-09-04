@@ -386,10 +386,7 @@ class Writer:
         for file_handles in self.file_handles.values():
             for fh in file_handles:
                 fh.close()
-        
-        # Write barcode statistics to file
-        self._write_barcode_stats()
-        
+
     def _write_barcode_stats(self):
         """Write barcode read pair counts to a statistics file"""
         try:
@@ -1546,6 +1543,12 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
                             elif chain_direction == 'reverse':
                                 f_reverse.write(r1, r2)
 
+                        # Count the rescued read under its final barcode so barcode_stats.txt
+                        # reflects every written read pair. Same guard as the main loop
+                        # (_get_barcode_prefix only counts when split_fastq > 0).
+                        if split_fastq > 0 and chain_direction in ('forward', 'reverse'):
+                            pipeline.writer.barcode_counts[final_barcode] += 1
+
         # Close all dynamically created file handles
         if split_fastq > 0:
             for outfh in forward_files.values():
@@ -1555,6 +1558,11 @@ def barcode_main(chemistry, fq1:list, fq2:list, samplename: str, outdir:str,
 
         with open(json_multi, "w") as fh:
             json.dump(multi_stat, fp=fh, indent=4)
+
+    # Write barcode stats AFTER multi-rescue so rescued reads are included.
+    # (Writer.close() no longer writes the file; the rescue stage runs after
+    # pipeline.run() returns and adds to the same barcode_counts table.)
+    pipeline.writer._write_barcode_stats()
 
     del stat.data["barcode_count"]
     logger.info("deal multi done!")
