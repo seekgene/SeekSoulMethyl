@@ -1,6 +1,16 @@
 # SeekSoulMethyl
 SeekSoul™ Methyl Tools  (SeekSoulMethyl) is a single-cell transcriptome + methylation analysis pipeline designed to analyze data generated using the Beijing [SeekGene](https://www.seekgene.com/) BioSciences Co., Ltd. SeekOne DD Single Cell Multiome Methylation + RNA kit.
 
+## Release Notes
+
+### v2.2.1 (2026-09) — MCDS merge data-loss fix
+
+v2.2.1 fixes a silent data-loss bug in the methylation `MERGE_MCDS` step. In v2.0.0–v2.2.0, a random subset of cells was silently zeroed out in the large-scale bins — **~9% of cells in `chrom1M` and ~8% in `chrom500k`** — with no error or warning. The default clustering bin `chrom20k` was unaffected.
+
+**Who should upgrade**: if your analysis uses the large-scale bins `chrom1M` / `chrom500k`, upgrade to v2.2.1 and re-run. If you only use the default `chrom20k` clustering, your existing results are intact and no re-run is needed.
+
+Full report: [merge_mcds_data_loss_fix.md](docs/changelogs_detail/2.2.1/merge_mcds_data_loss_fix.md) · [中文](docs/changelogs_detail/2.2.1/merge_mcds_data_loss_fix.zh.md)
+
 ## Data Structure
  SeekOne DD Single Cell Multiome Methylation + RNA kit comes in two chemistries. DD-MET3 (dual-label) means the RNA and DNA methylation data barcodes are different for the same cell, and the RNA library is a 3′-end transcriptome library. DD-MET5 (single-label) means the RNA and DNA methylation data barcodes are the same for the same cell, and the RNA library is a 5′-end transcriptome library. Below we describe the DNA methylation library structures for both chemistries.
 

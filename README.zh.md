@@ -1,6 +1,16 @@
 # SeekSoulMethyl
 SeekSoul™ Methyl Tools（SeekSoulMethyl）是一个单细胞转录组 + 甲基化分析流程，旨在分析使用北京[寻因生物](https://www.seekgene.com/)科技有限公司 SeekOne DD 单细胞多组学甲基化 + RNA 试剂盒产生的数据。
 
+## 版本更新
+
+### v2.2.1（2026-09）— MCDS 合并数据丢失修复
+
+v2.2.1 修复了甲基化 `MERGE_MCDS` 环节的一个静默数据丢失问题。在 v2.0.0–v2.2.0 中，会随机有一部分细胞在大尺度 bin 上被静默清零——**chrom1M 约 9% 的细胞、chrom500k 约 8% 的细胞**——且无任何报错或警告。默认聚类用的 `chrom20k` 不受影响。
+
+**哪些用户需要升级**：如果您的分析使用大尺度 bin `chrom1M` / `chrom500k`，请升级到 v2.2.1 并重跑；如果只用默认的 `chrom20k` 聚类，现有结果是完整的，无需重跑。
+
+完整报告：[merge_mcds_data_loss_fix.zh.md](docs/changelogs_detail/2.2.1/merge_mcds_data_loss_fix.zh.md) · [English](docs/changelogs_detail/2.2.1/merge_mcds_data_loss_fix.md)
+
 ## 数据结构
 SeekOne DD 单细胞多组学甲基化 + RNA 试剂盒包含两种建库方案。DD-MET3（双标签）表示同一细胞的 RNA 和 DNA 甲基化数据 barcode 不同，RNA 文库为 3' 端转录组文库。DD-MET5（单标签）表示同一细胞的 RNA 和 DNA 甲基化数据 barcode 相同，RNA 文库为 5' 端转录组文库。下面分别介绍两种建库方案的 DNA 甲基化文库结构。
 
