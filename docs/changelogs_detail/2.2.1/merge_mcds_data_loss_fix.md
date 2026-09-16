@@ -61,7 +61,10 @@ The bug affects only the **large-scale bins**, where the `count_type` dimension 
 | chrom1M | ~9% of cells zeroed | **0 (fully restored)** |
 | chrom500k | ~8% of cells zeroed | **0 (fully restored)** |
 | chrom100k / 50k / 10k | essentially 0 (occasional single-cell halving) | 0 |
+| geneslop2k | occasional cov halving only (mc intact, a few cells) | 0 |
 | **chrom20k (default clustering)** | **0** | **0** |
+
+> `geneslop2k` (the 2 kb gene-flanking bins used for gene-level DMG) has `count_type chunk = 1` like the small bins, so it is affected only by the **cov-halving** mode — mc is intact and only a handful of cells lose cov (verified on one sample). This does not change the chrom20k clustering conclusion.
 
 ---
 
