@@ -31,7 +31,7 @@ Reverse reads 对应甲基化术语中的 CTOT/CTOB（原始链的反向互补�
 "forward"或"reverse"的判定结果标注在 read name 中。
 
 <figure style="text-align: center;">
-<img src="./images/fr_determinate.png" alt="Forward 和 Reverse reads 判定" width="600" style="max-width: 100%; height: auto;" />
+<img src="../images/fr_determinate.png" alt="Forward 和 Reverse reads 判定" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">图 3. Forward 和 Reverse reads 判定</figcaption>
 </figure>
 
@@ -46,7 +46,7 @@ Reverse reads 对应甲基化术语中的 CTOT/CTOB（原始链的反向互补�
 对于保留的 reads，我们提取相应位置的碱基来计算 C-to-T 转换率：
 
 <figure style="text-align: center;">
-<img src="./images/CT_conversion.png" alt="CT 转换率" width="600" style="max-width: 100%; height: auto;" />
+<img src="../images/CT_conversion.png" alt="CT 转换率" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">图 4. CT 转换率</figcaption>
 </figure>
 
@@ -92,7 +92,7 @@ Reverse reads 对应甲基化术语中的 CTOT/CTOB（原始链的反向互补�
 将每个单细胞 BAM 文件按位置排序，并使用 ALLCools `bam-to-allc` 转换为 ALLC 格式。我们修改的 ALLCools 基于 UR 标签对每个 C 位点进行 UMI 纠错和去重。
 
 <figure style="text-align: center;">
-<img src="./images/umi_correction_detailed_diagram_en.png" alt="UMI 纠错详细流程图" width="600" style="max-width: 100%; height: auto;" />
+<img src="../images/umi_correction_detailed_diagram_en.png" alt="UMI 纠错详细流程图" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">图 5. UMI 纠错详细流程图</figcaption>
 </figure>
 

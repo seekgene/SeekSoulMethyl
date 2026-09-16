@@ -57,7 +57,7 @@ bash sc_methy_workflow.sh \
 如果需要批量处理样本并获取流程级报告，请使用 Nextflow：
 
 <figure style="text-align: center;">
-<img src="./images/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl 流程" width="600" style="max-width: 100%; height: auto;" />
+<img src="../images/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl 流程" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">图 6. SeekSoulMethyl Nextflow 流程工作流</figcaption>
 </figure>
 

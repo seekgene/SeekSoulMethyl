@@ -172,13 +172,13 @@ wget -c -O XYRD-WTJW880-MET_S01_L001_R2_001.fastq.gz.md5 "https://seekgene-publi
 
 教程和参考资料位于 [docs/](docs) 目录下：
 
-- [如何构建参考基因组数据库（`--database_dir`）](docs/How_to_build_reference_genome.md)
-- [如何获取单细胞 BAM 文件](docs/Obtain_single_cell_bam.md)（[中文](docs/Obtain_single_cell_bam.zh.md)）
-- [如何对单细胞 BAM 文件进行去重](docs/How_to_deduplicate_single_cell_bam.md)（[中文](docs/How_to_deduplicate_single_cell_bam.zh.md)）
-- [使用方法 —— 双组学（Shell）与 Nextflow](docs/usage.zh.md)（[English](docs/usage.md)）
-- [算法与流程原理](docs/algorithm.zh.md)（[English](docs/algorithm.md)）
-- [输出文件](docs/outputs.zh.md)（[English](docs/outputs.md)）
-- [常见问题](docs/faq.zh.md)（[English](docs/faq.md)）
+- [如何构建参考基因组数据库（`--database_dir`）](docs/tutorials/How_to_build_reference_genome.md)
+- [如何获取单细胞 BAM 文件](docs/tutorials/Obtain_single_cell_bam.md)（[中文](docs/tutorials/Obtain_single_cell_bam.zh.md)）
+- [如何对单细胞 BAM 文件进行去重](docs/tutorials/How_to_deduplicate_single_cell_bam.md)（[中文](docs/tutorials/How_to_deduplicate_single_cell_bam.zh.md)）
+- [使用方法 —— 双组学（Shell）与 Nextflow](docs/guide/usage.zh.md)（[English](docs/guide/usage.md)）
+- [算法与流程原理](docs/guide/algorithm.zh.md)（[English](docs/guide/algorithm.md)）
+- [输出文件](docs/guide/outputs.zh.md)（[English](docs/guide/outputs.md)）
+- [常见问题](docs/guide/faq.zh.md)（[English](docs/guide/faq.md)）
 - [版本更新详情 —— v2.2.1 MCDS 合并数据丢失修复](docs/changelogs_detail/2.2.1/merge_mcds_data_loss_fix.zh.md)（[English](docs/changelogs_detail/2.2.1/merge_mcds_data_loss_fix.md)）
 
 ## 许可证

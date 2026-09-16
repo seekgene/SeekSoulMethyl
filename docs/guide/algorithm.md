@@ -31,7 +31,7 @@ Reverse reads correspond to CTOT/CTOB (reverse complement of the original strand
 The "forward" or "reverse" determination is annotated in the read name.
 
 <figure style="text-align: center;">
-<img src="./images/fr_determinate.png" alt="Forward and reverse reads determination" width="600" style="max-width: 100%; height: auto;" />
+<img src="../images/fr_determinate.png" alt="Forward and reverse reads determination" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 3. Forward and reverse reads determination</figcaption>
 </figure>
 
@@ -46,7 +46,7 @@ We calculate the C-to-T conversion rate using the original C positions within 17
 For the retained reads, we extract the bases at the corresponding positions to calculate the C-to-T conversion rate:
 
 <figure style="text-align: center;">
-<img src="./images/CT_conversion.png" alt="CT conversion rate" width="600" style="max-width: 100%; height: auto;" />
+<img src="../images/CT_conversion.png" alt="CT conversion rate" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 4. CT conversion rate</figcaption>
 </figure>
 
@@ -92,7 +92,7 @@ Split name-sorted BAMs by RNA-derived cell barcodes into per-cell BAM files, eac
 Sort each per-cell BAM by position and convert to ALLC using ALLCools `bam-to-allc`. Our modified ALLCools performs UR-tag-based UMI correction and deduplication per C site.
 
 <figure style="text-align: center;">
-<img src="./images/umi_correction_detailed_diagram_en.png" alt="UMI correction detailed diagram" width="600" style="max-width: 100%; height: auto;" />
+<img src="../images/umi_correction_detailed_diagram_en.png" alt="UMI correction detailed diagram" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 5. UMI correction detailed diagram</figcaption>
 </figure>
 

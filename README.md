@@ -172,13 +172,13 @@ Details of both methods are provided below.
 
 Tutorials and reference materials are available under the [docs/](docs) directory:
 
-- [How to build the reference genome database (`--database_dir`)](docs/How_to_build_reference_genome.md)
-- [How to obtain single-cell BAM files](docs/Obtain_single_cell_bam.md) ([中文](docs/Obtain_single_cell_bam.zh.md))
-- [How to deduplicate single-cell BAM files](docs/How_to_deduplicate_single_cell_bam.md) ([中文](docs/How_to_deduplicate_single_cell_bam.zh.md))
-- [Usage — dual-omics (shell) & Nextflow](docs/usage.md) ([中文](docs/usage.zh.md))
-- [Algorithm and processing details](docs/algorithm.md) ([中文](docs/algorithm.zh.md))
-- [Output files](docs/outputs.md) ([中文](docs/outputs.zh.md))
-- [FAQ](docs/faq.md) ([中文](docs/faq.zh.md))
+- [How to build the reference genome database (`--database_dir`)](docs/tutorials/How_to_build_reference_genome.md)
+- [How to obtain single-cell BAM files](docs/tutorials/Obtain_single_cell_bam.md) ([中文](docs/tutorials/Obtain_single_cell_bam.zh.md))
+- [How to deduplicate single-cell BAM files](docs/tutorials/How_to_deduplicate_single_cell_bam.md) ([中文](docs/tutorials/How_to_deduplicate_single_cell_bam.zh.md))
+- [Usage — dual-omics (shell) & Nextflow](docs/guide/usage.md) ([中文](docs/guide/usage.zh.md))
+- [Algorithm and processing details](docs/guide/algorithm.md) ([中文](docs/guide/algorithm.zh.md))
+- [Output files](docs/guide/outputs.md) ([中文](docs/guide/outputs.zh.md))
+- [FAQ](docs/guide/faq.md) ([中文](docs/guide/faq.zh.md))
 - [Changelog details — v2.2.1 MCDS merge data-loss fix](docs/changelogs_detail/2.2.1/merge_mcds_data_loss_fix.md) ([中文](docs/changelogs_detail/2.2.1/merge_mcds_data_loss_fix.zh.md))
 
 ## License

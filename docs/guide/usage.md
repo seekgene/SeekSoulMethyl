@@ -57,7 +57,7 @@ bash sc_methy_workflow.sh \
 If you want to process samples in batch and get pipeline-level reports, use Nextflow:
 
 <figure style="text-align: center;">
-<img src="./images/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl Pipeline" width="600" style="max-width: 100%; height: auto;" />
+<img src="../images/nf_SeekSoulMethyl_workflow.png" alt="SeekSoulMethyl Pipeline" width="600" style="max-width: 100%; height: auto;" />
 <figcaption style="font-size: 0.95em; color: #666; margin-top: 4px;">Figure 6. SeekSoulMethyl nextflow pipeline workflow</figcaption>
 </figure>
 
