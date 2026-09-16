@@ -58,13 +58,6 @@ cd SeekSoulMethyl
 
 2. 创建并激活 conda 环境：
 
-中国用户：
-```bash
-conda env create -n seeksoulmethyl -f conda_dependencies.zh.yml
-conda activate seeksoulmethyl
-```
-
-国际用户：
 ```bash
 conda env create -n seeksoulmethyl -f conda_dependencies.yml
 conda activate seeksoulmethyl
