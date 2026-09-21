@@ -109,39 +109,6 @@ v2.2.1 (containing `ds.load()`) was run to completion and compared cell-by-cell,
 
 **Conclusion**: every cell that v2.2.0 silently zeroed in chrom1M/500k is fully restored in v2.2.1, and chrom20k was never affected.
 
-### 6.5 Tiny-demo QC comparison (v2.2.0 vs v2.2.1, same reference)
-
-The tiny demo (WTJW880, DD-MET3) was run end-to-end with both v2.2.0 and v2.2.1, using the **same reference genome** (`refdata-met-GRCh38-2020-A`) so the comparison isolates the code difference. All QC metrics are identical:
-
-| Metric | v2.2.0 | v2.2.1 |
-|---|---:|---:|
-| Estimated cells | 442 | 442 |
-| Median genes/cell | 1,066 | 1,066 |
-| Median CpG/cell | 905 | 905 |
-| GEX reads | 29,336,138 | 29,336,138 |
-| Methylation read pairs | 998,544 | 998,544 |
-| Valid barcodes | 85.84% | 85.84% |
-| C→T conversion | 99.80% | 99.80% |
-| CpG methylation rate | 80.74% | 80.74% |
-| Reads mapped confidently | 79.83% | 79.83% |
-
-This is expected: the QC metrics are computed upstream of the MCDS merge, so the merge fix does not change them.
-
-### 6.6 Per-bin correlation (v2.2.0 vs v2.2.1, 33 production samples)
-
-Pearson correlation of per-cell coverage (cov) / methylation count (mc) / methylation rate between v2.2.0 and v2.2.1, averaged over 33 production samples per bin:
-
-| Bin | r_cov | r_mc | r_meth |
-|---|---:|---:|---:|
-| chrom1M | 0.881 | 0.882 | 1.000 |
-| chrom500k | 0.890 | 0.891 | 1.000 |
-| chrom100k | 0.9999 | 1.000 | 0.963 |
-| chrom50k | 1.000 | 1.000 | 0.977 |
-| **chrom20k** | **1.000** | **1.000** | **0.999** |
-| chrom10k | 1.000 | 1.000 | 0.999 |
-
-chrom1M/500k show the ~9%/8% loss (r_cov/r_mc ≈ 0.88), while chrom20k (the default clustering bin) is fully consistent (r ≈ 1.0).
-
 ---
 
 ## 7. Recommendation for Users
