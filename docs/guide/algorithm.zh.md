@@ -3,7 +3,7 @@
 ## 流程详情
 
 ### 转录组处理工作流
-转录组数据使用 [SeekSoulTools](https://github.com/seekgene/SeekSoulMethyl/tree/nf_rna_methy/dependence/seeksoultools) 进行分析。详细步骤请参阅官方[算法概述](http://seeksoul.seekgene.com/en/v1.3.0/2.tutorial/1.rna/4.description.html)。下游甲基化文库使用的细胞由转录组文库的细胞 barcode 确定。
+转录组数据使用 [SeekSoulTools](https://github.com/seekgene/SeekSoulMethyl/tree/nf_rna_methy/dependence/seeksoultools) 进行分析。详细步骤请参阅官方[算法概述](https://seeksoul.online/cloudplatform-doc/en/document/Software/3_SeekSoul_Tools/1_v1.3.0a/3_Use_guide/1_rna/4_Algorithm.html)。下游甲基化文库使用的细胞由转录组文库的细胞 barcode 确定。
 
 ### 甲基化处理工作流
 #### 步骤 1：预处理与 Barcode 解析
